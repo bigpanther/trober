@@ -10,10 +10,6 @@ The first thing you need to do is open up the "database.yml" file and edit it to
 
 You will also need to make sure that **you** start/install the database of your choice. Buffalo **won't** install and start it for you.
 
-```bash
-docker run -d --name jober_postgres -v jober_dbdata:/var/lib/postgresql/data -p 5432:5432 postgres:12
-```
-
 ### Create Your Databases
 
 Ok, so you've edited the "database.yml" file and started your database, now Buffalo can create the databases in that file for you:

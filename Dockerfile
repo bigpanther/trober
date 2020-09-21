@@ -22,7 +22,7 @@ RUN go mod download
 ADD . .
 RUN buffalo build --static -o /bin/app
 
-FROM alpine
+FROM ubuntu:20.04
 RUN apk add --no-cache bash
 RUN apk add --no-cache ca-certificates
 

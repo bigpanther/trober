@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"jober/actions"
+	"trober/actions"
 )
 
 // main is the starting point for your Buffalo application.

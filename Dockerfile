@@ -5,13 +5,9 @@ FROM gobuffalo/buffalo:v0.16.15 as builder
 ENV GO111MODULE on
 ENV GOPROXY http://proxy.golang.org
 
-RUN mkdir -p /src/jober
-WORKDIR /src/jober
+RUN mkdir -p /src/hsm
+WORKDIR /src/hsm
 
-# this will cache the npm install step, unless package.json changes
-ADD package.json .
-ADD yarn.lock .
-RUN yarn install --no-progress
 # Copy the Go Modules manifests
 COPY go.mod go.mod
 COPY go.sum go.sum

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/gobuffalo/packr/v2"
-	"github.com/gobuffalo/suite/v3"
+	"github.com/gobuffalo/suite"
 )
 
 type ActionSuite struct {

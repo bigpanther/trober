@@ -4,15 +4,17 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/envy"
 	forcessl "github.com/gobuffalo/mw-forcessl"
+	i18n "github.com/gobuffalo/mw-i18n"
 	paramlogger "github.com/gobuffalo/mw-paramlogger"
+	"github.com/gobuffalo/packr/v2"
 	"github.com/unrolled/secure"
 
-	"jober/models"
+	"trober/models"
 
 	"github.com/gobuffalo/buffalo-pop/v2/pop/popmw"
-	csrf "github.com/gobuffalo/mw-csrf"
-	i18n "github.com/gobuffalo/mw-i18n"
-	"github.com/gobuffalo/packr/v2"
+	contenttype "github.com/gobuffalo/mw-contenttype"
+	"github.com/gobuffalo/x/sessions"
+	"github.com/rs/cors"
 )
 
 // ENV is used to help switch settings based on where the
@@ -37,8 +39,12 @@ var T *i18n.Translator
 func App() *buffalo.App {
 	if app == nil {
 		app = buffalo.New(buffalo.Options{
-			Env:         ENV,
-			SessionName: "_jober_session",
+			Env:          ENV,
+			SessionStore: sessions.Null{},
+			PreWares: []buffalo.PreWare{
+				cors.Default().Handler,
+			},
+			SessionName: "_trober_session",
 		})
 
 		// Automatically redirect to SSL
@@ -47,39 +53,15 @@ func App() *buffalo.App {
 		// Log request parameters (filters apply).
 		app.Use(paramlogger.ParameterLogger)
 
-		// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
-		// Remove to disable this.
-		app.Use(csrf.New)
+		// Set the request content type to JSON
+		app.Use(contenttype.Set("application/json"))
 
 		// Wraps each request in a transaction.
 		//  c.Value("tx").(*pop.Connection)
 		// Remove to disable this.
 		app.Use(popmw.Transaction(models.DB))
 
-		// Setup and use translations:
-		app.Use(translations())
-
 		app.GET("/", HomeHandler)
-
-		//AuthMiddlewares
-		app.Use(SetCurrentUser)
-		app.Use(Authorize)
-
-		//Routes for Auth
-		auth := app.Group("/auth")
-		auth.GET("/", AuthLanding)
-		auth.GET("/new", AuthNew)
-		auth.POST("/", AuthCreate)
-		auth.DELETE("/", AuthDestroy)
-		auth.Middleware.Skip(Authorize, AuthLanding, AuthNew, AuthCreate)
-
-		//Routes for User registration
-		users := app.Group("/users")
-		users.GET("/new", UsersNew)
-		users.POST("/", UsersCreate)
-		users.Middleware.Remove(Authorize)
-
-		app.ServeFiles("/", assetsBox) // serve files from the public directory
 	}
 
 	return app

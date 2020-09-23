@@ -1,0 +1,28 @@
+create_table("orders") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("created_by", "uuid", {})
+	t.Column("tenant_id", "uuid", {})
+	t.Column("customer_id", "uuid", {})
+	t.Column("serial_number", "string", {})
+	t.Column("status", "string", {})
+	t.Timestamps()
+}
+
+add_foreign_key("orders", "created_by",  {"users": ["id"]}, {
+    "name": "fk_orders_created_by",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})
+add_foreign_key("orders", "tenant_id",  {"tenants": ["id"]}, {
+    "name": "fk_orders_tenant_id",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})
+
+add_foreign_key("orders", "customer_id",  {"customers": ["id"]}, {
+    "name": "fk_orders_customer_id",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})
+
+add_index("orders", ["tenant_id", "serial_number"])

@@ -1,0 +1,5 @@
+drop_foreign_key("orders", "fk_orders_tenant_id", {"if_exists": true})
+drop_foreign_key("orders", "fk_orders_customer_id", {"if_exists": true})
+drop_foreign_key("orders", "fk_orders_created_by", {"if_exists": true})
+drop_index("orders", "orders_tenant_id_serial_number_idx")
+drop_table("orders")

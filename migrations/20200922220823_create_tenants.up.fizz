@@ -1,0 +1,7 @@
+create_table("tenants") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("created_by", "uuid", {"null": true})
+	t.Column("name", "string", {"size": 50})
+	t.Column("type", "string", {"size": 15})
+	t.Timestamps()
+}

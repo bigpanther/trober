@@ -1,15 +1,17 @@
 package actions
 
 import (
+	"trober/models"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/envy"
 	forcessl "github.com/gobuffalo/mw-forcessl"
 	i18n "github.com/gobuffalo/mw-i18n"
 	paramlogger "github.com/gobuffalo/mw-paramlogger"
 	"github.com/gobuffalo/packr/v2"
+	"github.com/gobuffalo/pop/v5"
+	"github.com/gofrs/uuid"
 	"github.com/unrolled/secure"
-
-	"trober/models"
 
 	"github.com/gobuffalo/buffalo-pop/v2/pop/popmw"
 	contenttype "github.com/gobuffalo/mw-contenttype"
@@ -52,7 +54,6 @@ func App() *buffalo.App {
 
 		// Log request parameters (filters apply).
 		app.Use(paramlogger.ParameterLogger)
-
 		// Set the request content type to JSON
 		app.Use(contenttype.Set("application/json"))
 
@@ -60,8 +61,17 @@ func App() *buffalo.App {
 		//  c.Value("tx").(*pop.Connection)
 		// Remove to disable this.
 		app.Use(popmw.Transaction(models.DB))
+		app.Use(SetCurrentUser)
 
 		app.GET("/", HomeHandler)
+		app.Resource("/tenants", TenantsResource{})
+		app.Resource("/users", UsersResource{})
+		app.Resource("/customers", CustomersResource{})
+		app.Resource("/terminals", TerminalsResource{})
+		app.Resource("/yards", YardsResource{})
+		app.Resource("/carriers", CarriersResource{})
+		app.Resource("/containers", ContainersResource{})
+		app.Resource("/orders", OrdersResource{})
 	}
 
 	return app
@@ -89,4 +99,44 @@ func forceSSL() buffalo.MiddlewareFunc {
 		SSLRedirect:     ENV == "production",
 		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
 	})
+}
+
+func restrictedScope(c buffalo.Context) pop.ScopeFunc {
+	return func(q *pop.Query) *pop.Query {
+		u := loggedInUser(c)
+		if u.Role == "SuperAdmin" {
+			return q
+		}
+		return q.Where("tennat_id = ?", u.TenantID)
+	}
+}
+
+const current_user_key = "current_user"
+
+// SetCurrentUser attempts to find a user based on the current_user_id
+// in the session. If one is found it is set on the context.
+func SetCurrentUser(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		userId := c.Request().Header.Get("X-TEST-USER-ID")
+		if userId == "" {
+			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Missing credentials"}))
+		}
+		uid, err := uuid.FromString(userId)
+		if err != nil {
+			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Invalid credentials"}))
+		}
+		u := &models.User{}
+		tx := c.Value("tx").(*pop.Connection)
+		err = tx.Find(u, uid)
+		if err != nil {
+			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: err.Error()}))
+		}
+		c.Set(current_user_key, u)
+
+		return next(c)
+	}
+}
+
+func loggedInUser(c buffalo.Context) *models.User {
+	return c.Value(current_user_key).(*models.User)
 }

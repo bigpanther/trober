@@ -1,0 +1,2 @@
+drop_foreign_key("tenants", "tenant_id", {"if_exists": true})
+drop_table("tenants")

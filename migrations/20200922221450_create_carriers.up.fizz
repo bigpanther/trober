@@ -1,0 +1,20 @@
+create_table("carriers") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("created_by", "uuid", {})
+	t.Column("name", "string", {"size": 50, "null": true})
+	t.Column("type", "string", {"size": 15})
+	t.Column("eta", "timestamp", {})
+	t.Column("tenant_id", "uuid", {})
+	t.Timestamps()
+}
+
+add_foreign_key("carriers", "created_by",  {"users": ["id"]}, {
+    "name": "fk_carriers_created_by",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})
+add_foreign_key("carriers", "tenant_id",  {"tenants": ["id"]}, {
+    "name": "fk_carriers_tenant_id",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})

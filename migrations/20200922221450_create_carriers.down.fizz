@@ -1,0 +1,3 @@
+drop_foreign_key("carriers", "fk_carriers_tenant_id", {"if_exists": true})
+drop_foreign_key("carriers", "fk_carriers_created_by", {"if_exists": true})
+drop_table("carriers")

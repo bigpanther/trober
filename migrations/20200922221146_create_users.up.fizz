@@ -1,0 +1,30 @@
+create_table("users") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("created_by", "uuid", {"null": true})
+	t.Column("name", "string", {"size": 50})
+	t.Column("username", "string", {"size": 50})
+	t.Column("role", "string", {"size": 15})
+	t.Column("tenant_id", "uuid", {})
+	t.Column("customer_id", "uuid", {"null": true})
+	t.Timestamps()
+}
+
+add_foreign_key("users", "created_by",  {"users": ["id"]}, {
+    "name": "fk_users_created_by",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})
+add_foreign_key("users", "tenant_id",  {"tenants": ["id"]}, {
+    "name": "fk_users_tenant_id",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})
+
+add_foreign_key("tenants", "created_by",  {"users": ["id"]}, {
+    "name": "fk_tenants_created_by",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})
+
+
+add_index("users", ["tenant_id", "username"], {"unique": true})

@@ -1,0 +1,6 @@
+drop_foreign_key("users", "fk_tenants_created_by", {"if_exists": true})
+drop_foreign_key("users", "fk_users_customer_id", {"if_exists": true})
+drop_foreign_key("users", "fk_users_created_by", {"if_exists": true})
+drop_foreign_key("tenants", "fk_users_tenant_id", {"if_exists": true})
+drop_index("users", "users_tenant_id_username_idx")
+drop_table("users")

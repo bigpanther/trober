@@ -1,0 +1,3 @@
+drop_foreign_key("terminals", "fk_terminals_created_by", {"if_exists": true})
+drop_foreign_key("terminals", "fk_terminals_tenant_id", {"if_exists": true})
+drop_table("terminals")

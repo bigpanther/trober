@@ -1,0 +1,3 @@
+drop_foreign_key("yards", "fk_yards_tenant_id", {"if_exists": true})
+drop_foreign_key("yards", "fk_yards_created_by", {"if_exists": true})
+drop_table("yards")

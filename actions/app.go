@@ -118,6 +118,8 @@ const current_user_key = "current_user"
 func SetCurrentUser(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		userId := c.Request().Header.Get("X-TEST-USER-ID")
+		bearer := c.Request().Header.Get("Authorization")
+		c.Logger().Debugf("Auth %s", bearer)
 		if userId == "" {
 			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Missing credentials"}))
 		}

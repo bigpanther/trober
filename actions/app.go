@@ -1,8 +1,14 @@
 package actions
 
 import (
+	"context"
+	"fmt"
+	"log"
+	"os"
 	"trober/models"
 
+	firebase "firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/auth"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/envy"
 	forcessl "github.com/gobuffalo/mw-forcessl"
@@ -12,6 +18,7 @@ import (
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gofrs/uuid"
 	"github.com/unrolled/secure"
+	"google.golang.org/api/option"
 
 	"github.com/gobuffalo/buffalo-pop/v2/pop/popmw"
 	contenttype "github.com/gobuffalo/mw-contenttype"
@@ -111,19 +118,48 @@ func restrictedScope(c buffalo.Context) pop.ScopeFunc {
 	}
 }
 
+var client *auth.Client
+
+func firebaseClient() (*auth.Client, error) {
+	if client != nil {
+		return client, nil
+	}
+	opt := option.WithCredentialsFile(os.Getenv("FIREBASE_SA_CRED_FILE"))
+	ctx := context.Background()
+	app, err := firebase.NewApp(ctx, nil, opt)
+	if err != nil {
+		client = nil
+		return nil, err
+	}
+	client, err = app.Auth(ctx)
+	if err != nil {
+		client = nil
+		return nil, err
+	}
+	return client, err
+}
+
 const current_user_key = "current_user"
 
 // SetCurrentUser attempts to find a user based on the current_user_id
 // in the session. If one is found it is set on the context.
 func SetCurrentUser(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
-		userId := c.Request().Header.Get("X-TEST-USER-ID")
-		bearer := c.Request().Header.Get("Authorization")
-		c.Logger().Debugf("Auth %s", bearer)
+		userId := c.Request().Header.Get("X-TOKEN")
 		if userId == "" {
 			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Missing credentials"}))
 		}
-		uid, err := uuid.FromString(userId)
+		client, err := firebaseClient()
+		if err != nil {
+			log.Fatalf("error getting firebase client: %v\n", err)
+		}
+		token, err := client.VerifyIDToken(c.Request().Context(), userId)
+		if err != nil {
+			log.Printf("error validating token: %v\n", err)
+			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Credential validation failed"}))
+		}
+		fmt.Println(token)
+		uid, err := uuid.FromString(token.Subject)
 		if err != nil {
 			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Invalid credentials"}))
 		}

@@ -45,7 +45,7 @@ func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: u.Name, Name: "Name"},
 		&validators.StringIsPresent{Field: u.Username, Name: "Username"},
-		&validators.StringIsPresent{Field: u.Role, Name: "Type"},
+		&validators.StringIsPresent{Field: u.Role, Name: "Role"},
 	), nil
 }
 

@@ -2,7 +2,6 @@ package actions
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"trober/models"
@@ -139,42 +138,56 @@ func firebaseClient() (*auth.Client, error) {
 	return client, err
 }
 
-const current_user_key = "current_user"
+const CurrentUserKey = "current_user"
 
 // SetCurrentUser attempts to find a user based on the current_user_id
 // in the session. If one is found it is set on the context.
 func SetCurrentUser(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
-		userId := c.Request().Header.Get("X-TOKEN")
-		if userId == "" {
+		userID := c.Request().Header.Get("X-TOKEN")
+		if userID == "" {
 			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Missing credentials"}))
 		}
 		client, err := firebaseClient()
 		if err != nil {
 			log.Fatalf("error getting firebase client: %v\n", err)
 		}
-		token, err := client.VerifyIDToken(c.Request().Context(), userId)
+		token, err := client.VerifyIDToken(c.Request().Context(), userID)
 		if err != nil {
 			log.Printf("error validating token: %v\n", err)
 			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Credential validation failed"}))
 		}
-		fmt.Println(token)
-		uid, err := uuid.FromString(token.Subject)
-		if err != nil {
-			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Invalid credentials"}))
-		}
+		// uid, err := uuid.FromString(token.Subject)
+		// if err != nil {
+		// 	return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Invalid credentials"}))
+		// }
 		u := &models.User{}
 		tx := c.Value("tx").(*pop.Connection)
-		err = tx.Find(u, uid)
+		err = tx.Where("username = ?", token.Subject).First(u)
 		if err != nil {
 			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: err.Error()}))
 		}
-		c.Set(current_user_key, u)
+		if u.ID == uuid.Nil {
+			remoteUser, err := client.GetUser(c.Request().Context(), token.Subject)
+			if err != nil {
+				log.Printf("error fetching user details: %v\n", err)
+				return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: err.Error()}))
+			}
+			u.Name = remoteUser.DisplayName
+			u.Role = "None"
+			u.Username = remoteUser.UID
+			err = tx.Save(u)
+			if err != nil {
+				log.Printf("error creating user on login: %v\n", err)
+				return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: err.Error()}))
+			}
+		}
+		c.Set(CurrentUserKey, u)
 
 		return next(c)
 	}
 }
 
 func loggedInUser(c buffalo.Context) *models.User {
-	return c.Value(current_user_key).(*models.User)
+	return c.Value(CurrentUserKey).(*models.User)
 }

@@ -3,7 +3,7 @@ module trober
 go 1.15
 
 require (
-	firebase.google.com/go/v4 v4.0.0 // indirect
+	firebase.google.com/go/v4 v4.0.0
 	github.com/gobuffalo/buffalo v0.15.5
 	github.com/gobuffalo/buffalo-pop/v2 v2.2.0
 	github.com/gobuffalo/envy v1.9.0
@@ -21,4 +21,5 @@ require (
 	github.com/markbates/grift v1.5.0
 	github.com/rs/cors v1.7.0
 	github.com/unrolled/secure v0.0.0-20190103195806-76e6d4e9b90c
+	google.golang.org/api v0.17.0
 )

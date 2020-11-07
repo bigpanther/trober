@@ -4,7 +4,8 @@ import (
 	"context"
 	"log"
 	"os"
-	"github.com/shipanther/trober/models"
+
+	"encoding/base64"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
@@ -16,6 +17,7 @@ import (
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gofrs/uuid"
+	"github.com/shipanther/trober/models"
 	"github.com/unrolled/secure"
 	"google.golang.org/api/option"
 
@@ -123,7 +125,12 @@ func firebaseClient() (*auth.Client, error) {
 	if client != nil {
 		return client, nil
 	}
-	opt := option.WithCredentialsFile(os.Getenv("FIREBASE_SA_CRED_FILE"))
+	var credsJsonEncoded = os.Getenv("FIREBASE_SERVICE_ACCOUNT_JSON_ENCODED")
+	credJson, err := base64.StdEncoding.DecodeString(credsJsonEncoded)
+	if err != nil {
+		return nil, err
+	}
+	opt := option.WithCredentialsJSON(credJson)
 	ctx := context.Background()
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {

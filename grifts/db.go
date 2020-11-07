@@ -20,7 +20,7 @@ var _ = grift.Namespace("db", func() {
 		}
 		u := &models.User{
 			Name:     "HSM",
-			Username: "maan.harry@gmail.com",
+			Username: "kMkcbnTrkoZsEpbB9n94Rk6c2kL2",
 			TenantID: t.ID,
 			Role:     "SuperAdmin",
 		}

@@ -14,7 +14,7 @@ COPY go.sum go.sum
 RUN go mod download
 
 ADD . .
-RUN buffalo build --static -o /bin/trober
+RUN buffalo build -o /bin/trober
 
 FROM alpine
 RUN apk add --no-cache bash ca-certificates

@@ -138,10 +138,10 @@ func firebaseClient() (*auth.Client, error) {
 	return client, err
 }
 
-const CurrentUserKey = "current_user"
+const currentUserKey = "current_user"
 
-// SetCurrentUser attempts to find a user based on the current_user_id
-// in the session. If one is found it is set on the context.
+// SetCurrentUser attempts to find a user based on the firebase token in the request headers
+// If one is found it is set on the context.
 func SetCurrentUser(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		userID := c.Request().Header.Get("X-TOKEN")
@@ -182,12 +182,12 @@ func SetCurrentUser(next buffalo.Handler) buffalo.Handler {
 				return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: err.Error()}))
 			}
 		}
-		c.Set(CurrentUserKey, u)
+		c.Set(currentUserKey, u)
 
 		return next(c)
 	}
 }
 
 func loggedInUser(c buffalo.Context) *models.User {
-	return c.Value(CurrentUserKey).(*models.User)
+	return c.Value(currentUserKey).(*models.User)
 }

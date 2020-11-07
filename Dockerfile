@@ -5,7 +5,7 @@ ENV GOPROXY http://proxy.golang.org
 
 RUN mkdir -p /src/trober
 WORKDIR /src/trober
-
+ENV CGO_ENABLED=0
 # Copy the Go Modules manifests
 COPY go.mod go.mod
 COPY go.sum go.sum

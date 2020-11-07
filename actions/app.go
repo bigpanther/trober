@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
-	"trober/models"
+	"github.com/shipanther/trober/models"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"

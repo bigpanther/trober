@@ -1,7 +1,7 @@
 package grifts
 
 import (
-	"trober/actions"
+	"github.com/shipanther/trober/actions"
 
 	"github.com/gobuffalo/buffalo"
 )

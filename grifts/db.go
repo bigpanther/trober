@@ -1,7 +1,7 @@
 package grifts
 
 import (
-	"trober/models"
+	"github.com/shipanther/trober/models"
 
 	"github.com/markbates/grift/grift"
 )

@@ -6,7 +6,7 @@ on:
       - main
 jobs:
   build-linux:
-    name: Build
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,3 +19,9 @@ jobs:
           wget https://github.com/gobuffalo/buffalo/releases/download/v0.16.16/buffalo_0.16.16_Linux_x86_64.tar.gz
           tar -xvzf buffalo_0.16.16_Linux_x86_64.tar.gz
           ./buffalo test
+  test-linux:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: docker build . -t test

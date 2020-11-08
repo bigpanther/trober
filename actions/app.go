@@ -17,6 +17,7 @@ import (
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gofrs/uuid"
+	"github.com/pkg/errors"
 	"github.com/shipanther/trober/models"
 	"github.com/unrolled/secure"
 	"google.golang.org/api/option"
@@ -154,32 +155,26 @@ func setCurrentUser(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		userID := c.Request().Header.Get("X-TOKEN")
 		if userID == "" {
-			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Missing credentials"}))
+			return c.Render(403, r.JSON(models.NewCustomError("Access denied. Missing credentials", "403", nil)))
 		}
 		client, err := firebaseClient()
 		if err != nil {
-			log.Fatalf("error getting firebase client: %v\n", err)
+			return c.Render(500, r.JSON(models.NewCustomError("error getting downstream client", "500", err)))
 		}
 		token, err := client.VerifyIDToken(c.Request().Context(), userID)
 		if err != nil {
-			log.Printf("error validating token: %v\n", err)
-			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Credential validation failed"}))
+			return c.Render(403, r.JSON(models.NewCustomError("Access denied. Credential validation failed", "403", err)))
 		}
-		// uid, err := uuid.FromString(token.Subject)
-		// if err != nil {
-		// 	return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: "Access denied. Invalid credentials"}))
-		// }
 		u := &models.User{}
 		tx := c.Value("tx").(*pop.Connection)
 		err = tx.Where("username = ?", token.Subject).First(u)
 		if err != nil {
-			return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: err.Error()}))
+			return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
 		}
 		if u.ID == uuid.Nil {
 			remoteUser, err := client.GetUser(c.Request().Context(), token.Subject)
 			if err != nil {
-				log.Printf("error fetching user details: %v\n", err)
-				return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: err.Error()}))
+				return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "error fetching user details"))))
 			}
 			u.Name = remoteUser.DisplayName
 			u.Role = "None"
@@ -187,7 +182,7 @@ func setCurrentUser(next buffalo.Handler) buffalo.Handler {
 			err = tx.Save(u)
 			if err != nil {
 				log.Printf("error creating user on login: %v\n", err)
-				return c.Render(403, r.JSON(models.CustomError{Code: "403", Message: err.Error()}))
+				return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
 			}
 		}
 		c.Set(currentUserKey, u)

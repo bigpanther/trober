@@ -5,7 +5,7 @@ go 1.15
 require (
 	firebase.google.com/go/v4 v4.0.0
 	github.com/gobuffalo/buffalo v0.15.5
-	github.com/gobuffalo/buffalo-pop/v2 v2.2.0
+	github.com/gobuffalo/buffalo-pop/v2 v2.3.0
 	github.com/gobuffalo/envy v1.9.0
 	github.com/gobuffalo/mw-contenttype v0.0.0-20190129203934-2554e742333b
 	github.com/gobuffalo/mw-forcessl v0.0.0-20180802152810-73921ae7a130
@@ -13,7 +13,7 @@ require (
 	github.com/gobuffalo/mw-paramlogger v0.0.0-20190129202837-395da1998525
 	github.com/gobuffalo/nulls v0.2.0
 	github.com/gobuffalo/packr/v2 v2.8.0
-	github.com/gobuffalo/pop/v5 v5.2.4
+	github.com/gobuffalo/pop/v5 v5.3.0
 	github.com/gobuffalo/suite/v3 v3.0.0
 	github.com/gobuffalo/validate/v3 v3.1.0
 	github.com/gobuffalo/x v0.0.0-20190224155809-6bb134105960

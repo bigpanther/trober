@@ -114,7 +114,7 @@ func forceSSL() buffalo.MiddlewareFunc {
 func restrictedScope(c buffalo.Context) pop.ScopeFunc {
 	return func(q *pop.Query) *pop.Query {
 		u := loggedInUser(c)
-		if u.Role == "SuperAdmin" {
+		if u.IsSuperAdmin() {
 			return q
 		}
 		return q.Where("tennat_id = ?", u.TenantID)

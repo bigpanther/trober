@@ -60,3 +60,11 @@ func (u *User) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
 func (u *User) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
+
+func (u *User) IsSuperAdmin() bool {
+	return u.Role == "SuperAdmin"
+}
+
+func (u *User) IsNotActive() bool {
+	return u.Role == "None" || u.TenantID == uuid.Nil
+}

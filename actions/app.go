@@ -69,9 +69,10 @@ func App() *buffalo.App {
 		//  c.Value("tx").(*pop.Connection)
 		// Remove to disable this.
 		app.Use(popmw.Transaction(models.DB))
-		app.Use(SetCurrentUser)
+		app.Use(setCurrentUser)
 
 		app.GET("/", HomeHandler)
+		app.Middleware.Skip(setCurrentUser, HomeHandler)
 		app.Resource("/tenants", TenantsResource{})
 		app.Resource("/users", UsersResource{})
 		app.Resource("/customers", CustomersResource{})
@@ -147,9 +148,9 @@ func firebaseClient() (*auth.Client, error) {
 
 const currentUserKey = "current_user"
 
-// SetCurrentUser attempts to find a user based on the firebase token in the request headers
+// setCurrentUser attempts to find a user based on the firebase token in the request headers
 // If one is found it is set on the context.
-func SetCurrentUser(next buffalo.Handler) buffalo.Handler {
+func setCurrentUser(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		userID := c.Request().Header.Get("X-TOKEN")
 		if userID == "" {

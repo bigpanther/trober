@@ -6,7 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// CustomError
+// CustomError serializes error messages
 type CustomError struct {
 	ID      uuid.UUID `json:"id"`
 	Message string    `json:"message"`

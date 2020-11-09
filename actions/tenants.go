@@ -67,8 +67,8 @@ func (v TenantsResource) List(c buffalo.Context) error {
 // Show gets the data for one Tenant. This function is mapped to
 // the path GET /tenants/{tenant_id}
 func (v TenantsResource) Show(c buffalo.Context) error {
-	tenant_id := c.Param("tenant_id")
-	if loggedInUser(c).IsNotActive() || loggedInUser(c).TenantID.String() != tenant_id {
+	tenantID := c.Param("tenant_id")
+	if loggedInUser(c).IsNotActive() || loggedInUser(c).TenantID.String() != tenantID {
 		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errors.New("tenant listing operation not allowed for user"))))
 	}
 	// Get the DB connection from the context
@@ -81,7 +81,7 @@ func (v TenantsResource) Show(c buffalo.Context) error {
 	tenant := &models.Tenant{}
 
 	// To find the Tenant the parameter tenant_id is used.
-	if err := tx.Find(tenant, tenant_id); err != nil {
+	if err := tx.Find(tenant, tenantID); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

@@ -32,6 +32,8 @@ import (
 // application is being run. Default is "development".
 var ENV = envy.Get("GO_ENV", "development")
 var app *buffalo.App
+
+// T is the translator
 var T *i18n.Translator
 
 // App is where all routes and middleware for buffalo
@@ -127,12 +129,12 @@ func firebaseClient() (*auth.Client, error) {
 	if client != nil {
 		return client, nil
 	}
-	var credsJsonEncoded = os.Getenv("FIREBASE_SERVICE_ACCOUNT_JSON_ENCODED")
-	credJson, err := base64.StdEncoding.DecodeString(credsJsonEncoded)
+	var credsJSONEncoded = os.Getenv("FIREBASE_SERVICE_ACCOUNT_JSON_ENCODED")
+	credJSON, err := base64.StdEncoding.DecodeString(credsJSONEncoded)
 	if err != nil {
 		return nil, err
 	}
-	opt := option.WithCredentialsJSON(credJson)
+	opt := option.WithCredentialsJSON(credJSON)
 	ctx := context.Background()
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {

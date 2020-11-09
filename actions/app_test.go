@@ -8,11 +8,11 @@ import (
 )
 
 func TestTokenVerify(t *testing.T) {
-	return
+	t.Skip()
 	//os.Setenv("FIREBASE_SA_CRED_FILE", "Path to firebase key")
 	// cat filename | base64
-	var encodedJson = ""
-	os.Setenv("FIREBASE_SERVICE_ACCOUNT_JSON_ENCODED", encodedJson)
+	var encodedJSON = ""
+	os.Setenv("FIREBASE_SERVICE_ACCOUNT_JSON_ENCODED", encodedJSON)
 	client, err := firebaseClient()
 	if err != nil {
 		t.Fatalf("error getting firebase client: %v\n", err)

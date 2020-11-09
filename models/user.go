@@ -61,10 +61,12 @@ func (u *User) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
 
+// IsSuperAdmin checks if a user can work across tenants
 func (u *User) IsSuperAdmin() bool {
 	return u.Role == "SuperAdmin"
 }
 
+// IsNotActive Mostly for newly created users who have not been assigned a tenant
 func (u *User) IsNotActive() bool {
 	return u.Role == "None" || u.TenantID == uuid.Nil
 }

@@ -25,6 +25,7 @@ require (
 	github.com/spf13/cobra v1.0.0 // indirect
 	github.com/unrolled/secure v0.0.0-20190103195806-76e6d4e9b90c
 	golang.org/x/exp v0.0.0-20200513190911-00229845015e // indirect
+	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/tools v0.0.0-20200612220849-54c614fe050c // indirect
 	google.golang.org/api v0.17.0
 )

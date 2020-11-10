@@ -40,4 +40,4 @@ jobs:
           }
           EOF
           cd trober_sdk; pub publish -f
-          rm ~/.pub-cache
+          rm -rf ~/.pub-cache

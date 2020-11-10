@@ -12,5 +12,6 @@ import 'package:openapi_generator_annotations/openapi_generator_annotations.dart
     apiPackage: 'trober_sdk',
     generatorName: Generator.DART2_API,
     alwaysRun: true,
+    fetchDependencies: false,
     outputDirectory: 'trober_sdk')
 class Trober extends OpenapiGeneratorConfig {}

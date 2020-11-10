@@ -31,8 +31,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: cedx/setup-dart@v2
       - uses: actions/setup-java@v1
+        with:
+          java-version: "13"
       - name: Gen and verify sdk
         run: |
           export API_VERSION=${GITHUB_REF##*/}
           cd sdk; rm -rf trober_sdk; dart pub get; dart pub run build_runner clean; dart pub run build_runner build --delete-conflicting-outputs; dart pub run cider --project-root=trober_sdk version $API_VERSION; dart format .; cp LICENSE trober_sdk/LICENSE; echo "The trober API" > trober_sdk/README.md; echo "See https://github.com/bigpanther/trober/releases/tag/v$(API_VERSION)" > trober_sdk/CHANGELOG.md
-          pub publish --dry-run
+          cd trober_sdk; pub publish --dry-run

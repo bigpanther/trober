@@ -1,0 +1,13 @@
+name: trober_sdk_gen
+version: 0.1.0
+description: >-
+  The trober sdk generator
+
+
+environment:
+  sdk: ">=2.10.0 <3.0.0"
+dependencies:
+  openapi_generator: ^1.1.0
+  build_runner:
+  openapi_generator_annotations: ^1.0.8
+  cider: ^0.0.5

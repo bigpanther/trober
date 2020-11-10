@@ -1,0 +1,14 @@
+name: ci
+on:
+  push:
+    branches:
+      - "!*"
+    tags:
+      - "a*.*.*"
+jobs:
+  publish-sdk-check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo $GITHUB_REF
+          env

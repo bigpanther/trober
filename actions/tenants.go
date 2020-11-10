@@ -2,7 +2,6 @@ package actions
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
@@ -37,7 +36,7 @@ func (v TenantsResource) List(c buffalo.Context) error {
 	}
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
-		return fmt.Errorf("no transaction found")
+		return models.ErrNotFound
 	}
 
 	tenants := &models.Tenants{}
@@ -74,7 +73,7 @@ func (v TenantsResource) Show(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
-		return fmt.Errorf("no transaction found")
+		return models.ErrNotFound
 	}
 
 	// Allocate an empty Tenant
@@ -113,7 +112,7 @@ func (v TenantsResource) Create(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
-		return fmt.Errorf("no transaction found")
+		return models.ErrNotFound
 	}
 
 	// Validate the data from the html form
@@ -161,7 +160,7 @@ func (v TenantsResource) Update(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
-		return fmt.Errorf("no transaction found")
+		return models.ErrNotFound
 	}
 
 	// Allocate an empty Tenant
@@ -220,7 +219,7 @@ func (v TenantsResource) Destroy(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
-		return fmt.Errorf("no transaction found")
+		return models.ErrNotFound
 	}
 
 	// Allocate an empty Tenant

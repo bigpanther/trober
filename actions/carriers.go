@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
@@ -33,7 +32,7 @@ func (v CarriersResource) List(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
-		return fmt.Errorf("no transaction found")
+		return models.ErrNotFound
 	}
 
 	carriers := &models.Carriers{}
@@ -66,7 +65,7 @@ func (v CarriersResource) Show(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
-		return fmt.Errorf("no transaction found")
+		return models.ErrNotFound
 	}
 
 	// Allocate an empty Carrier
@@ -102,7 +101,7 @@ func (v CarriersResource) Create(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
-		return fmt.Errorf("no transaction found")
+		return models.ErrNotFound
 	}
 
 	// Validate the data from the html form
@@ -147,7 +146,7 @@ func (v CarriersResource) Update(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
-		return fmt.Errorf("no transaction found")
+		return models.ErrNotFound
 	}
 
 	// Allocate an empty Carrier
@@ -203,7 +202,7 @@ func (v CarriersResource) Destroy(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
-		return fmt.Errorf("no transaction found")
+		return models.ErrNotFound
 	}
 
 	// Allocate an empty Carrier

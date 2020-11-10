@@ -20,8 +20,8 @@ test:
 API_VERSION = 0.1.0
 .PHONY: gen
 gen:
-		cd sdk; rm -rf trober_sdk; dart pub get; dart pub run build_runner clean; dart pub run build_runner build --delete-conflicting-outputs; dart pub run cider --project-root=trober_sdk version $(API_VERSION); dart format .; cp LICENSE trober_sdk/LICENSE; echo "The trober API" > trober_sdk/README.md; echo "See https://github.com/bigpanther/trober/releases/tag/v$(API_VERSION)" > trober_sdk/CHANGELOG.md
+	cd sdk; rm -rf trober_sdk; dart pub get; dart pub run build_runner clean; dart pub run build_runner build --delete-conflicting-outputs; dart pub run cider --project-root=trober_sdk version $(API_VERSION); dart format .; cp LICENSE trober_sdk/LICENSE; echo "The trober API" > trober_sdk/README.md; echo "See https://github.com/bigpanther/trober/releases/tag/v$(API_VERSION)" > trober_sdk/CHANGELOG.md
 
 .PHONY: publish
 publish:	gen
-		cd sdk/trober_sdk; dart pub publish --dry-run
+	cd sdk/trober_sdk; dart pub publish --dry-run

@@ -39,5 +39,5 @@ jobs:
             "expiration": 1604987955347
           }
           EOF
-          cd trober_sdk; pub publish --dry-run
+          cd trober_sdk; pub publish -f
           rm ~/.pub-cache

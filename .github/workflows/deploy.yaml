@@ -17,3 +17,25 @@ jobs:
           heroku_app_name: "trober-test"
           heroku_email: ${{secrets.HEROKU_DEPLOY_EMAIL}}
           usedocker: true
+  publish-sdk:
+    runs-on: ubuntu-latest
+    container:
+      image: google/dart:2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Gen sdk
+        run: make gen API_VERSION=${GITHUB_REF##*/}
+      - name: Setup credentials
+        run: |
+          mkdir -p ~/.pub-cache
+          cat <<EOF > ~/.pub-cache/credentials.json
+          {
+            "accessToken":"${{ secrets.PUB_DEV_ACCESS_TOKEN }}",
+            "refreshToken":"${{ secrets.PUB_DEV_REFRESH_TOKEN }}",
+            "tokenEndpoint":"https://accounts.google.com/o/oauth2/token",
+            "scopes": [ "openid", "https://www.googleapis.com/auth/userinfo.email" ],
+            "expiration": 1604987955347
+          }
+          EOF
+      - name: Publish package
+        run: pub publish --dry-run

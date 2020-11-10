@@ -25,3 +25,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: docker build . -t test
+  publish-sdk:
+    runs-on: ubuntu-latest
+    container:
+      image: google/dart:2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Gen sdk
+        run: make gen API_VERSION=${GITHUB_REF##*/}
+      - name: Publish package
+        run: pub publish --dry-run

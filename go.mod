@@ -13,7 +13,7 @@ require (
 	github.com/gobuffalo/mw-paramlogger v0.0.0-20190129202837-395da1998525
 	github.com/gobuffalo/nulls v0.2.0
 	github.com/gobuffalo/packr/v2 v2.8.0
-	github.com/gobuffalo/pop/v5 v5.3.0
+	github.com/gobuffalo/pop/v5 v5.3.1
 	github.com/gobuffalo/suite/v3 v3.0.0
 	github.com/gobuffalo/validate/v3 v3.1.0
 	github.com/gobuffalo/x v0.0.0-20190224155809-6bb134105960

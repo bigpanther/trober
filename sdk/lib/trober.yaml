@@ -1236,6 +1236,7 @@ components:
         - BackOffice
         - Driver
         - Customer
+        - None
     ContainerStatus:
       type: string
       enum:

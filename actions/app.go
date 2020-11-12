@@ -2,6 +2,7 @@ package actions
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"os"
 
@@ -170,7 +171,7 @@ func setCurrentUser(next buffalo.Handler) buffalo.Handler {
 		u := &models.User{}
 		tx := c.Value("tx").(*pop.Connection)
 		err = tx.Where("username = ?", token.Subject).First(u)
-		if err != nil && err != models.ErrNotFound {
+		if err != nil && errors.Cause(err) != sql.ErrNoRows {
 			return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
 		}
 		if u.ID == uuid.Nil {

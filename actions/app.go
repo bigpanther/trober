@@ -183,10 +183,11 @@ func setCurrentUser(next buffalo.Handler) buffalo.Handler {
 			u.Role = "None"
 			u.Username = remoteUser.UID
 			t := &models.Tenant{}
-			err = tx.Where("name = ? and type = ?", "system", "system").First(t)
+			err = tx.Where("name = ?", "system").Where("type = ?", "System").First(t)
 			if err != nil {
 				return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "Failed to find user tenant"))))
 			}
+			u.TenantID = t.ID
 			err = tx.Save(u)
 			if err != nil {
 				log.Printf("error creating user on login: %v\n", err)

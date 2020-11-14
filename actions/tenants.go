@@ -67,7 +67,7 @@ func (v TenantsResource) List(c buffalo.Context) error {
 // the path GET /tenants/{tenant_id}
 func (v TenantsResource) Show(c buffalo.Context) error {
 	tenantID := c.Param("tenant_id")
-	if loggedInUser(c).IsNotActive() || loggedInUser(c).TenantID.String() != tenantID {
+	if !loggedInUser(c).IsSuperAdmin() && (loggedInUser(c).IsNotActive() || loggedInUser(c).TenantID.String() != tenantID) {
 		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errors.New("tenant listing operation not allowed for user"))))
 	}
 	// Get the DB connection from the context

@@ -42,7 +42,7 @@ func (v ContainersResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Containers from the DB
-	if err := q.All(containers); err != nil {
+	if err := q.Scope(restrictedScope(c)).All((containers); err != nil {
 		return err
 	}
 
@@ -72,7 +72,7 @@ func (v ContainersResource) Show(c buffalo.Context) error {
 	container := &models.Container{}
 
 	// To find the Container the parameter container_id is used.
-	if err := tx.Find(container, c.Param("container_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -152,7 +152,7 @@ func (v ContainersResource) Update(c buffalo.Context) error {
 	// Allocate an empty Container
 	container := &models.Container{}
 
-	if err := tx.Find(container, c.Param("container_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -209,7 +209,7 @@ func (v ContainersResource) Destroy(c buffalo.Context) error {
 	container := &models.Container{}
 
 	// To find the Container the parameter container_id is used.
-	if err := tx.Find(container, c.Param("container_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

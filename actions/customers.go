@@ -42,7 +42,7 @@ func (v CustomersResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Customers from the DB
-	if err := q.All(customers); err != nil {
+	if err := q.Scope(restrictedScope(c)).All(customers); err != nil {
 		return err
 	}
 
@@ -72,7 +72,7 @@ func (v CustomersResource) Show(c buffalo.Context) error {
 	customer := &models.Customer{}
 
 	// To find the Customer the parameter customer_id is used.
-	if err := tx.Find(customer, c.Param("customer_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(customer, c.Param("customer_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -152,7 +152,7 @@ func (v CustomersResource) Update(c buffalo.Context) error {
 	// Allocate an empty Customer
 	customer := &models.Customer{}
 
-	if err := tx.Find(customer, c.Param("customer_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(customer, c.Param("customer_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -209,7 +209,7 @@ func (v CustomersResource) Destroy(c buffalo.Context) error {
 	customer := &models.Customer{}
 
 	// To find the Customer the parameter customer_id is used.
-	if err := tx.Find(customer, c.Param("customer_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(customer, c.Param("customer_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

@@ -46,7 +46,7 @@ func (v TenantsResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Tenants from the DB
-	if err := q.All(tenants); err != nil {
+	if err := q.Scope(restrictedScope(c)).All(tenants); err != nil {
 		return err
 	}
 
@@ -80,7 +80,7 @@ func (v TenantsResource) Show(c buffalo.Context) error {
 	tenant := &models.Tenant{}
 
 	// To find the Tenant the parameter tenant_id is used.
-	if err := tx.Find(tenant, tenantID); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(tenant, tenantID); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -166,7 +166,7 @@ func (v TenantsResource) Update(c buffalo.Context) error {
 	// Allocate an empty Tenant
 	tenant := &models.Tenant{}
 
-	if err := tx.Find(tenant, c.Param("tenant_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(tenant, c.Param("tenant_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -226,7 +226,7 @@ func (v TenantsResource) Destroy(c buffalo.Context) error {
 	tenant := &models.Tenant{}
 
 	// To find the Tenant the parameter tenant_id is used.
-	if err := tx.Find(tenant, c.Param("tenant_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(tenant, c.Param("tenant_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

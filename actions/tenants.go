@@ -3,8 +3,10 @@ package actions
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gobuffalo/x/responder"
 	"github.com/shipanther/trober/models"
@@ -108,6 +110,9 @@ func (v TenantsResource) Create(c buffalo.Context) error {
 	if err := c.Bind(tenant); err != nil {
 		return err
 	}
+	tenant.CreatedBy = nulls.NewUUID(loggedInUser(c).ID)
+	tenant.CreatedAt = time.Now().UTC()
+	tenant.UpdatedAt = time.Now().UTC()
 
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)

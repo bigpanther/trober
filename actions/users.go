@@ -42,7 +42,7 @@ func (v UsersResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Users from the DB
-	if err := q.All(users); err != nil {
+	if err := q.Scope(restrictedScope(c)).All(users); err != nil {
 		return err
 	}
 
@@ -72,7 +72,7 @@ func (v UsersResource) Show(c buffalo.Context) error {
 	user := &models.User{}
 
 	// To find the User the parameter user_id is used.
-	if err := tx.Find(user, c.Param("user_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -152,7 +152,7 @@ func (v UsersResource) Update(c buffalo.Context) error {
 	// Allocate an empty User
 	user := &models.User{}
 
-	if err := tx.Find(user, c.Param("user_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -209,7 +209,7 @@ func (v UsersResource) Destroy(c buffalo.Context) error {
 	user := &models.User{}
 
 	// To find the User the parameter user_id is used.
-	if err := tx.Find(user, c.Param("user_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

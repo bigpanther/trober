@@ -70,3 +70,8 @@ func (u *User) IsSuperAdmin() bool {
 func (u *User) IsNotActive() bool {
 	return u.Role == "None" || u.TenantID == uuid.Nil
 }
+
+// AtleastBackOffice checks if a user has at least Back Office access
+func (u *User) AtleastBackOffice() bool {
+	return u.Role == "SuperAdmin" || u.Role == "Admin" || u.Role == "BackOffice"
+}

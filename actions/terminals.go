@@ -42,7 +42,7 @@ func (v TerminalsResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Terminals from the DB
-	if err := q.All(terminals); err != nil {
+	if err := q.Scope(restrictedScope(c)).All(terminals); err != nil {
 		return err
 	}
 
@@ -72,7 +72,7 @@ func (v TerminalsResource) Show(c buffalo.Context) error {
 	terminal := &models.Terminal{}
 
 	// To find the Terminal the parameter terminal_id is used.
-	if err := tx.Find(terminal, c.Param("terminal_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(terminal, c.Param("terminal_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -152,7 +152,7 @@ func (v TerminalsResource) Update(c buffalo.Context) error {
 	// Allocate an empty Terminal
 	terminal := &models.Terminal{}
 
-	if err := tx.Find(terminal, c.Param("terminal_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(terminal, c.Param("terminal_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -209,7 +209,7 @@ func (v TerminalsResource) Destroy(c buffalo.Context) error {
 	terminal := &models.Terminal{}
 
 	// To find the Terminal the parameter terminal_id is used.
-	if err := tx.Find(terminal, c.Param("terminal_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(terminal, c.Param("terminal_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

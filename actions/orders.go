@@ -42,7 +42,7 @@ func (v OrdersResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Orders from the DB
-	if err := q.All(orders); err != nil {
+	if err := q.Scope(restrictedScope(c)).All(orders); err != nil {
 		return err
 	}
 
@@ -72,7 +72,7 @@ func (v OrdersResource) Show(c buffalo.Context) error {
 	order := &models.Order{}
 
 	// To find the Order the parameter order_id is used.
-	if err := tx.Find(order, c.Param("order_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(order, c.Param("order_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -152,7 +152,7 @@ func (v OrdersResource) Update(c buffalo.Context) error {
 	// Allocate an empty Order
 	order := &models.Order{}
 
-	if err := tx.Find(order, c.Param("order_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(order, c.Param("order_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -209,7 +209,7 @@ func (v OrdersResource) Destroy(c buffalo.Context) error {
 	order := &models.Order{}
 
 	// To find the Order the parameter order_id is used.
-	if err := tx.Find(order, c.Param("order_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(order, c.Param("order_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

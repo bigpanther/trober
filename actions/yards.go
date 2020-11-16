@@ -42,7 +42,7 @@ func (v YardsResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Yards from the DB
-	if err := q.All(yards); err != nil {
+	if err := q.Scope(restrictedScope(c)).All(yards); err != nil {
 		return err
 	}
 
@@ -72,7 +72,7 @@ func (v YardsResource) Show(c buffalo.Context) error {
 	yard := &models.Yard{}
 
 	// To find the Yard the parameter yard_id is used.
-	if err := tx.Find(yard, c.Param("yard_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(yard, c.Param("yard_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -152,7 +152,7 @@ func (v YardsResource) Update(c buffalo.Context) error {
 	// Allocate an empty Yard
 	yard := &models.Yard{}
 
-	if err := tx.Find(yard, c.Param("yard_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(yard, c.Param("yard_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -209,7 +209,7 @@ func (v YardsResource) Destroy(c buffalo.Context) error {
 	yard := &models.Yard{}
 
 	// To find the Yard the parameter yard_id is used.
-	if err := tx.Find(yard, c.Param("yard_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(yard, c.Param("yard_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

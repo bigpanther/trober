@@ -42,7 +42,7 @@ func (v ContainersResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Containers from the DB
-	if err := q.Scope(restrictedScope(c)).All((containers); err != nil {
+	if err := q.Scope(restrictedScope(c)).All(containers); err != nil {
 		return err
 	}
 

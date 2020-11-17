@@ -163,7 +163,7 @@ func restrictedScope(c buffalo.Context) pop.ScopeFunc {
 		if u.IsSuperAdmin() {
 			return q
 		}
-		return q.Where("tennat_id = ?", u.TenantID)
+		return q.Where("tenant_id = ?", u.TenantID)
 	}
 }
 

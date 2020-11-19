@@ -12,5 +12,9 @@ var (
 )
 
 func HomeHandler(c buffalo.Context) error {
-	return c.Render(http.StatusOK, r.JSON(map[string]string{"message": "Welcome to Trober!"}))
+	return c.Render(http.StatusOK, r.JSON(map[string]string{
+		"message": "Welcome to Trober!",
+		"version": version,
+		"commit":  commit,
+	}))
 }

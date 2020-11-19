@@ -2,10 +2,12 @@ package actions
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gobuffalo/x/responder"
+	"github.com/gofrs/uuid"
 	"github.com/shipanther/trober/models"
 )
 
@@ -103,7 +105,13 @@ func (v ContainersResource) Create(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.Role != "SuperAdmin" || container.TenantID == uuid.Nil {
+		container.TenantID = loggedInUser.TenantID
+	}
+	container.CreatedBy = loggedInUser.ID
+	container.CreatedAt = time.Now().UTC()
+	container.UpdatedAt = time.Now().UTC()
 	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(container)
 	if err != nil {
@@ -160,6 +168,7 @@ func (v ContainersResource) Update(c buffalo.Context) error {
 	if err := c.Bind(container); err != nil {
 		return err
 	}
+	container.UpdatedAt = time.Now().UTC()
 
 	verrs, err := tx.ValidateAndUpdate(container)
 	if err != nil {

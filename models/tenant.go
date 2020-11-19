@@ -42,6 +42,9 @@ func (t *Tenant) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: t.Name, Name: "Name"},
 		&validators.StringIsPresent{Field: t.Type, Name: "Type"},
+		&validators.FuncValidator{Fn: func() bool {
+			return t.Type == tenantTypeSystem || t.Type == tenantTypeTest || t.Type == tenantTypeProduction
+		}, Field: t.Type, Name: "Type"},
 	), nil
 }
 
@@ -56,3 +59,9 @@ func (t *Tenant) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
 func (t *Tenant) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
+
+const (
+	tenantTypeSystem     = "System"
+	tenantTypeTest       = "Test"
+	tenantTypeProduction = "Production"
+)

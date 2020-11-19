@@ -1,0 +1,23 @@
+[[scenario]]
+name = "Tenant bootstrap"
+
+  [[scenario.table]]
+    name = "tenants"
+    [[scenario.table.row]]
+      id = "<%= uuidNamed("systemTenant") %>"
+      name = "Big Panther Technologies Inc."
+      type = "system"
+      created_at = "<%= now() %>"
+      updated_at = "<%= now() %>"
+
+  [[scenario.table]]
+    name = "users"
+
+    [[scenario.table.row]]
+      id = "<%= uuid() %>"
+      name = "Nicoleta Maan"
+      role = "SuperAdmin"
+      Username = "nicoleta"
+      tenant_id = "<%= uuidNamed("systemTenant") %>"
+      created_at = "<%= now() %>"
+      updated_at = "<%= now() %>"

@@ -20,7 +20,6 @@ type Container struct {
 	TenantID        uuid.UUID    `json:"tenant_id" db:"tenant_id"`
 	CarrierID       nulls.UUID   `json:"carrier_id" db:"carrier_id"`
 	TerminalID      nulls.UUID   `json:"terminal_id" db:"terminal_id"`
-	YardID          nulls.UUID   `json:"yard_id" db:"yard_id"`
 	OrderID         nulls.UUID   `json:"order_id" db:"order_id"`
 	SerialNumber    nulls.String `json:"serial_number" db:"serial_number"`
 	Origin          nulls.String `json:"origin" db:"origin"`

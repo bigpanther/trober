@@ -1,0 +1,3 @@
+drop_foreign_key("containers", "fk_containers_yard_id", {"if_exists": true})
+drop_column("containers", "yard_id")
+drop_table("yards")

@@ -1133,9 +1133,6 @@ components:
         terminal_id:
           type: string
           format: uuid
-        yard_id:
-          type: string
-          format: uuid
         order_id:
           type: string
           format: uuid
@@ -1220,6 +1217,8 @@ components:
       enum:
         - Rail
         - Port
+        - Warehouse
+        - Yard
         - Custom
     CarrierType:
       type: string

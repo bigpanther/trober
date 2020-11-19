@@ -11,12 +11,18 @@ jobs:
     name: release
     steps:
       - uses: actions/checkout@v2
+      - run: |
+          export TROBER_VERSION=${GITHUB_REF}
+          export TROBER_COMMIT=${GITHUB_SHA}
       - uses: akhileshns/heroku-deploy@v3.6.8
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "trober-test"
           heroku_email: ${{secrets.HEROKU_DEPLOY_EMAIL}}
           usedocker: true
+          docker_build_args: |
+            TROBER_VERSION
+            TROBER_COMMIT
   publish-sdk:
     runs-on: ubuntu-latest
     steps:

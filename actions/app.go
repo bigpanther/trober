@@ -78,8 +78,8 @@ func App() *buffalo.App {
 		app.Use(popmw.Transaction(models.DB))
 		app.Use(setCurrentUser)
 
-		app.GET("/", HomeHandler)
-		app.Middleware.Skip(setCurrentUser, HomeHandler)
+		app.GET("/", homeHandler)
+		app.Middleware.Skip(setCurrentUser, homeHandler)
 		var tenantGroup = app.Group("/tenants")
 		tenantGroup.GET("/", TenantsResource{}.List)
 		tenantGroup.GET("/{tenant_id}", TenantsResource{}.Show)

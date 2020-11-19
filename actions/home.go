@@ -12,7 +12,7 @@ var (
 	commit  = os.Getenv("TROBER_COMMIT")
 )
 
-func HomeHandler(c buffalo.Context) error {
+func homeHandler(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.JSON(map[string]string{
 		"message": "Welcome to Trober!",
 		"version": version,

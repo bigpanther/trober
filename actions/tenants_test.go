@@ -5,13 +5,8 @@ import (
 )
 
 func (as *ActionSuite) Test_TenantsResource_List() {
-	as.LoadFixture("Tenant bootstrap")
-	var user = &models.User{}
-	err := as.DB.Where("username=?", "nicoleta").First(user)
-	as.NoError(err)
-	as.NotZero(user.ID)
-	req := as.JSON("/tenants")
-	req.Headers[xToken] = user.Username
+	user := as.getLoggedInUser("nicoleta")
+	req := as.setupRequest(user, "/tenants")
 	res := req.Get()
 	as.Equal(200, res.Code)
 	var tenants = &models.Tenants{}

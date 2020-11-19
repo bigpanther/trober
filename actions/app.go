@@ -124,6 +124,9 @@ func App() *buffalo.App {
 		orderGroup.POST("/", OrdersResource{}.Create)
 		orderGroup.PATCH("/{order_id}", OrdersResource{}.Update)
 		orderGroup.DELETE("/{order_id}", OrdersResource{}.Destroy)
+		var selfGroup = app.Group("/self")
+		selfGroup.GET("/", selfGet)
+		selfGroup.GET("/tenant", selfGetTenant)
 
 	}
 

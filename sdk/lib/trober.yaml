@@ -886,6 +886,7 @@ paths:
       description: >-
         Get details of the logged in user
 
+
       responses:
         "200":
           description: OK
@@ -904,6 +905,7 @@ paths:
       summary: Get tenant details of the logged in user
       description: >-
         Get tenant details of the logged in user
+
 
       responses:
         "200":
@@ -1273,6 +1275,7 @@ components:
         - BackOffice
         - Driver
         - Customer
+        - None
     ContainerStatus:
       type: string
       enum:

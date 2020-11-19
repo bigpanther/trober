@@ -179,7 +179,7 @@ func (v TenantsResource) Update(c buffalo.Context) error {
 	if err := c.Bind(tenant); err != nil {
 		return err
 	}
-
+	tenant.UpdatedAt = time.Now().UTC()
 	verrs, err := tx.ValidateAndUpdate(tenant)
 	if err != nil {
 		return err

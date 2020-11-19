@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 
@@ -33,6 +34,8 @@ import (
 // application is being run. Default is "development".
 var ENV = envy.Get("GO_ENV", "development")
 var app *buffalo.App
+
+const xToken = "X-TOKEN"
 
 // T is the translator
 var T *i18n.Translator
@@ -199,48 +202,68 @@ const currentUserKey = "current_user"
 // If one is found it is set on the context.
 func setCurrentUser(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
-		userID := c.Request().Header.Get("X-TOKEN")
-		if userID == "" {
-			return c.Render(403, r.JSON(models.NewCustomError("Access denied. Missing credentials", "403", nil)))
-		}
-		client, err := firebaseClient()
-		if err != nil {
-			return c.Render(500, r.JSON(models.NewCustomError("error getting downstream client", "500", err)))
-		}
-		token, err := client.VerifyIDToken(c.Request().Context(), userID)
-		if err != nil {
-			return c.Render(403, r.JSON(models.NewCustomError("Access denied. Credential validation failed", "403", err)))
-		}
-		u := &models.User{}
-		tx := c.Value("tx").(*pop.Connection)
-		err = tx.Where("username = ?", token.Subject).First(u)
-		if err != nil && errors.Cause(err) != sql.ErrNoRows {
-			return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
-		}
-		if u.ID == uuid.Nil {
-			remoteUser, err := client.GetUser(c.Request().Context(), token.Subject)
+		var user *models.User
+		var err error
+		if ENV == "production" {
+			user, err = getCurrentUserFromToken(c)
+		} else {
+			user = &models.User{}
+			tx := c.Value("tx").(*pop.Connection)
+			var username = c.Request().Header.Get(xToken)
+			fmt.Println(username)
+			err = tx.Where("username = ?", username).First(user)
 			if err != nil {
-				return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "error fetching user details"))))
-			}
-			u.Name = remoteUser.DisplayName
-			u.Role = "None"
-			u.Username = remoteUser.UID
-			t := &models.Tenant{}
-			err = tx.Where("name = ?", "system").Where("type = ?", "System").First(t)
-			if err != nil {
-				return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "Failed to find user tenant"))))
-			}
-			u.TenantID = t.ID
-			err = tx.Save(u)
-			if err != nil {
-				log.Printf("error creating user on login: %v\n", err)
 				return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
 			}
 		}
-		c.Set(currentUserKey, u)
-
+		if err != nil {
+			return err
+		}
+		c.Set(currentUserKey, user)
 		return next(c)
 	}
+}
+
+func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
+	userID := c.Request().Header.Get(xToken)
+	if userID == "" {
+		return nil, c.Render(403, r.JSON(models.NewCustomError("Access denied. Missing credentials", "403", nil)))
+	}
+	client, err := firebaseClient()
+	if err != nil {
+		return nil, c.Render(500, r.JSON(models.NewCustomError("error getting downstream client", "500", err)))
+	}
+	token, err := client.VerifyIDToken(c.Request().Context(), userID)
+	if err != nil {
+		return nil, c.Render(403, r.JSON(models.NewCustomError("Access denied. Credential validation failed", "403", err)))
+	}
+	u := &models.User{}
+	tx := c.Value("tx").(*pop.Connection)
+	err = tx.Where("username = ?", token.Subject).First(u)
+	if err != nil && errors.Cause(err) != sql.ErrNoRows {
+		return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
+	}
+	if u.ID == uuid.Nil {
+		remoteUser, err := client.GetUser(c.Request().Context(), token.Subject)
+		if err != nil {
+			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "error fetching user details"))))
+		}
+		u.Name = remoteUser.DisplayName
+		u.Role = "None"
+		u.Username = remoteUser.UID
+		t := &models.Tenant{}
+		err = tx.Where("name = ?", "system").Where("type = ?", "System").First(t)
+		if err != nil {
+			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "Failed to find user tenant"))))
+		}
+		u.TenantID = t.ID
+		err = tx.Save(u)
+		if err != nil {
+			log.Printf("error creating user on login: %v\n", err)
+			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
+		}
+	}
+	return u, nil
 }
 
 func loggedInUser(c buffalo.Context) *models.User {

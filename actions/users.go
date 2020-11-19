@@ -1,11 +1,15 @@
 package actions
 
 import (
+	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gobuffalo/x/responder"
+	"github.com/gofrs/uuid"
 	"github.com/shipanther/trober/models"
 )
 
@@ -97,13 +101,22 @@ func (v UsersResource) Create(c buffalo.Context) error {
 	if err := c.Bind(user); err != nil {
 		return err
 	}
-
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.Role != "SuperAdmin" && user.Role == "SuperAdmin" {
+		return c.Render(400, r.JSON(models.NewCustomError("Bad Request", "400", errors.New("User Role value is not valid"))))
+	}
 
+	if loggedInUser.Role != "SuperAdmin" || user.TenantID == uuid.Nil {
+		user.TenantID = loggedInUser.TenantID
+	}
+	user.CreatedBy = nulls.NewUUID(loggedInUser.ID)
+	user.CreatedAt = time.Now().UTC()
+	user.UpdatedAt = time.Now().UTC()
 	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(user)
 	if err != nil {
@@ -160,6 +173,7 @@ func (v UsersResource) Update(c buffalo.Context) error {
 	if err := c.Bind(user); err != nil {
 		return err
 	}
+	user.UpdatedAt = time.Now().UTC()
 
 	verrs, err := tx.ValidateAndUpdate(user)
 	if err != nil {

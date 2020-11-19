@@ -2,10 +2,12 @@ package actions
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gobuffalo/x/responder"
+	"github.com/gofrs/uuid"
 	"github.com/shipanther/trober/models"
 )
 
@@ -103,7 +105,13 @@ func (v TerminalsResource) Create(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.Role != "SuperAdmin" || terminal.TenantID == uuid.Nil {
+		terminal.TenantID = loggedInUser.TenantID
+	}
+	terminal.CreatedBy = loggedInUser.ID
+	terminal.CreatedAt = time.Now().UTC()
+	terminal.UpdatedAt = time.Now().UTC()
 	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(terminal)
 	if err != nil {
@@ -160,6 +168,7 @@ func (v TerminalsResource) Update(c buffalo.Context) error {
 	if err := c.Bind(terminal); err != nil {
 		return err
 	}
+	terminal.UpdatedAt = time.Now().UTC()
 
 	verrs, err := tx.ValidateAndUpdate(terminal)
 	if err != nil {

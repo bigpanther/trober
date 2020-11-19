@@ -2,10 +2,12 @@ package actions
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gobuffalo/x/responder"
+	"github.com/gofrs/uuid"
 	"github.com/shipanther/trober/models"
 )
 
@@ -104,6 +106,13 @@ func (v CarriersResource) Create(c buffalo.Context) error {
 		return models.ErrNotFound
 	}
 
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.Role != "SuperAdmin" || carrier.TenantID == uuid.Nil {
+		carrier.TenantID = loggedInUser.TenantID
+	}
+	carrier.CreatedBy = loggedInUser.ID
+	carrier.CreatedAt = time.Now().UTC()
+	carrier.UpdatedAt = time.Now().UTC()
 	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(carrier)
 	if err != nil {
@@ -160,6 +169,7 @@ func (v CarriersResource) Update(c buffalo.Context) error {
 	if err := c.Bind(carrier); err != nil {
 		return err
 	}
+	carrier.UpdatedAt = time.Now().UTC()
 
 	verrs, err := tx.ValidateAndUpdate(carrier)
 	if err != nil {

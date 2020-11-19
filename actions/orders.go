@@ -2,6 +2,7 @@ package actions
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
@@ -103,6 +104,9 @@ func (v OrdersResource) Create(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
+	order.CreatedBy = loggedInUser(c).ID
+	order.CreatedAt = time.Now().UTC()
+	order.UpdatedAt = time.Now().UTC()
 
 	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(order)
@@ -160,6 +164,7 @@ func (v OrdersResource) Update(c buffalo.Context) error {
 	if err := c.Bind(order); err != nil {
 		return err
 	}
+	order.UpdatedAt = time.Now().UTC()
 
 	verrs, err := tx.ValidateAndUpdate(order)
 	if err != nil {

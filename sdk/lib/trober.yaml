@@ -2,9 +2,9 @@ openapi: 3.0.3
 servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/harsimranmaan/jober/0.1.0
+    url: https://virtserver.swaggerhub.com/harsimranmaan/jober/1.0.0
 info:
-  version: "0.1.0"
+  version: "1.0.0"
   title: Trober API
   description: >-
     The trober API
@@ -880,6 +880,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /self:
+    get:
+      summary: Get details of the logged in user
+      description: >-
+        Get details of the logged in user
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /self/tenant:
+    get:
+      summary: Get tenant details of the logged in user
+      description: >-
+        Get tenant details of the logged in user
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tenant"
+        default:
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /health:
     get:
       summary: Get server health
@@ -1235,7 +1273,6 @@ components:
         - BackOffice
         - Driver
         - Customer
-        - None
     ContainerStatus:
       type: string
       enum:

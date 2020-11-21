@@ -82,7 +82,7 @@ func (v TenantsResource) Show(c buffalo.Context) error {
 	tenant := &models.Tenant{}
 
 	// To find the Tenant the parameter tenant_id is used.
-	if err := tx.Scope(restrictedScope(c)).Find(tenant, tenantID); err != nil {
+	if err := tx.Find(tenant, tenantID); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

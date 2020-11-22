@@ -13,17 +13,17 @@ import (
 
 // User is used by pop to map your users database table to your go code.
 type User struct {
-	ID         uuid.UUID  `json:"id" db:"id"`
-	CreatedAt  time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt  time.Time  `json:"updated_at" db:"updated_at"`
-	CreatedBy  nulls.UUID `json:"created_by" db:"created_by"`
-	Name       string     `json:"name" db:"name"`
-	Username   string     `json:"username" db:"username"`
-	Email      string     `json:"email" db:"email"`
-	DeviceID   string     `json:"device_id" db:"device_id"`
-	Role       string     `json:"role" db:"role"`
-	TenantID   uuid.UUID  `json:"tenant_id" db:"tenant_id"`
-	CustomerID nulls.UUID `json:"customer_id" db:"customer_id"`
+	ID         uuid.UUID    `json:"id" db:"id"`
+	CreatedAt  time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt  time.Time    `json:"updated_at" db:"updated_at"`
+	CreatedBy  nulls.UUID   `json:"created_by" db:"created_by"`
+	Name       string       `json:"name" db:"name"`
+	Username   string       `json:"username" db:"username"`
+	Email      string       `json:"email" db:"email"`
+	DeviceID   nulls.String `json:"device_id" db:"device_id"`
+	Role       string       `json:"role" db:"role"`
+	TenantID   uuid.UUID    `json:"tenant_id" db:"tenant_id"`
+	CustomerID nulls.UUID   `json:"customer_id" db:"customer_id"`
 }
 
 // String is not required by pop and may be deleted

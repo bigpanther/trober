@@ -58,7 +58,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   "/tenants/{id}":
-    patch:
+    put:
       parameters:
         - name: id
           in: path
@@ -162,7 +162,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   "/containers/{id}":
-    patch:
+    put:
       parameters:
         - name: id
           in: path
@@ -266,7 +266,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   "/terminals/{id}":
-    patch:
+    put:
       parameters:
         - name: id
           in: path
@@ -370,7 +370,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   "/orders/{id}":
-    patch:
+    put:
       parameters:
         - name: id
           in: path
@@ -474,7 +474,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   "/carriers/{id}":
-    patch:
+    put:
       parameters:
         - name: id
           in: path
@@ -578,7 +578,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   "/customers/{id}":
-    patch:
+    put:
       parameters:
         - name: id
           in: path
@@ -694,7 +694,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   "/users/{id}":
-    patch:
+    put:
       parameters:
         - name: id
           in: path

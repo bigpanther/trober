@@ -6,7 +6,6 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
-	"github.com/gobuffalo/x/responder"
 	"github.com/gofrs/uuid"
 	"github.com/shipanther/trober/models"
 )
@@ -48,17 +47,8 @@ func (v TerminalsResource) List(c buffalo.Context) error {
 		return err
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// Add the paginator to the context so it can be used in the template.
-		c.Set("pagination", q.Paginator)
+	return c.Render(200, r.JSON(terminals))
 
-		c.Set("terminals", terminals)
-		return c.Render(http.StatusOK, r.HTML("/terminals/index.plush.html"))
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(terminals))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(terminals))
-	}).Respond(c)
 }
 
 // Show gets the data for one Terminal. This function is mapped to
@@ -78,15 +68,8 @@ func (v TerminalsResource) Show(c buffalo.Context) error {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		c.Set("terminal", terminal)
+	return c.Render(200, r.JSON(terminal))
 
-		return c.Render(http.StatusOK, r.HTML("/terminals/show.plush.html"))
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(terminal))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(terminal))
-	}).Respond(c)
 }
 
 // Create adds a Terminal to the DB. This function is mapped to the
@@ -119,33 +102,13 @@ func (v TerminalsResource) Create(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-		return responder.Wants("html", func(c buffalo.Context) error {
-			// Make the errors available inside the html template
-			c.Set("errors", verrs)
 
-			// Render again the new.html template that the user can
-			// correct the input.
-			c.Set("terminal", terminal)
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("/terminals/new.plush.html"))
-		}).Wants("json", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-		}).Wants("xml", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.XML(verrs))
-		}).Respond(c)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "terminal.created.success"))
+	return c.Render(http.StatusCreated, r.JSON(terminal))
 
-		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/terminals/%v", terminal.ID)
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.JSON(terminal))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.XML(terminal))
-	}).Respond(c)
 }
 
 // Update changes a Terminal in the DB. This function is mapped to
@@ -176,33 +139,13 @@ func (v TerminalsResource) Update(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-		return responder.Wants("html", func(c buffalo.Context) error {
-			// Make the errors available inside the html template
-			c.Set("errors", verrs)
 
-			// Render again the edit.html template that the user can
-			// correct the input.
-			c.Set("terminal", terminal)
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("/terminals/edit.plush.html"))
-		}).Wants("json", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-		}).Wants("xml", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.XML(verrs))
-		}).Respond(c)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "terminal.updated.success"))
+	return c.Render(http.StatusOK, r.JSON(terminal))
 
-		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/terminals/%v", terminal.ID)
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(terminal))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(terminal))
-	}).Respond(c)
 }
 
 // Destroy deletes a Terminal from the DB. This function is mapped
@@ -226,15 +169,6 @@ func (v TerminalsResource) Destroy(c buffalo.Context) error {
 		return err
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a flash message
-		c.Flash().Add("success", T.Translate(c, "terminal.destroyed.success"))
+	return c.Render(http.StatusOK, r.JSON(terminal))
 
-		// Redirect to the index page
-		return c.Redirect(http.StatusSeeOther, "/terminals")
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(terminal))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(terminal))
-	}).Respond(c)
 }

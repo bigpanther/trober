@@ -8,7 +8,6 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v5"
-	"github.com/gobuffalo/x/responder"
 	"github.com/shipanther/trober/models"
 )
 
@@ -52,17 +51,8 @@ func (v TenantsResource) List(c buffalo.Context) error {
 		return err
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// Add the paginator to the context so it can be used in the template.
-		c.Set("pagination", q.Paginator)
+	return c.Render(200, r.JSON(tenants))
 
-		c.Set("tenants", tenants)
-		return c.Render(http.StatusOK, r.HTML("/tenants/index.plush.html"))
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(tenants))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(tenants))
-	}).Respond(c)
 }
 
 // Show gets the data for one Tenant. This function is mapped to
@@ -86,15 +76,8 @@ func (v TenantsResource) Show(c buffalo.Context) error {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		c.Set("tenant", tenant)
+	return c.Render(200, r.JSON(tenant))
 
-		return c.Render(http.StatusOK, r.HTML("/tenants/show.plush.html"))
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(tenant))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(tenant))
-	}).Respond(c)
 }
 
 // Create adds a Tenant to the DB. This function is mapped to the
@@ -127,33 +110,13 @@ func (v TenantsResource) Create(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-		return responder.Wants("html", func(c buffalo.Context) error {
-			// Make the errors available inside the html template
-			c.Set("errors", verrs)
 
-			// Render again the new.html template that the user can
-			// correct the input.
-			c.Set("tenant", tenant)
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("/tenants/new.plush.html"))
-		}).Wants("json", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-		}).Wants("xml", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.XML(verrs))
-		}).Respond(c)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "tenant.created.success"))
+	return c.Render(http.StatusCreated, r.JSON(tenant))
 
-		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/tenants/%v", tenant.ID)
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.JSON(tenant))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.XML(tenant))
-	}).Respond(c)
 }
 
 // Update changes a Tenant in the DB. This function is mapped to
@@ -186,33 +149,13 @@ func (v TenantsResource) Update(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-		return responder.Wants("html", func(c buffalo.Context) error {
-			// Make the errors available inside the html template
-			c.Set("errors", verrs)
 
-			// Render again the edit.html template that the user can
-			// correct the input.
-			c.Set("tenant", tenant)
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("/tenants/edit.plush.html"))
-		}).Wants("json", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-		}).Wants("xml", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.XML(verrs))
-		}).Respond(c)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "tenant.updated.success"))
+	return c.Render(http.StatusOK, r.JSON(tenant))
 
-		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/tenants/%v", tenant.ID)
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(tenant))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(tenant))
-	}).Respond(c)
 }
 
 // Destroy deletes a Tenant from the DB. This function is mapped
@@ -239,15 +182,6 @@ func (v TenantsResource) Destroy(c buffalo.Context) error {
 		return err
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a flash message
-		c.Flash().Add("success", T.Translate(c, "tenant.destroyed.success"))
+	return c.Render(http.StatusOK, r.JSON(tenant))
 
-		// Redirect to the index page
-		return c.Redirect(http.StatusSeeOther, "/tenants")
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(tenant))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(tenant))
-	}).Respond(c)
 }

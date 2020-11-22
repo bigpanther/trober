@@ -6,7 +6,6 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
-	"github.com/gobuffalo/x/responder"
 	"github.com/gofrs/uuid"
 	"github.com/shipanther/trober/models"
 )
@@ -48,17 +47,8 @@ func (v CarriersResource) List(c buffalo.Context) error {
 		return err
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// Add the paginator to the context so it can be used in the template.
-		c.Set("pagination", q.Paginator)
+	return c.Render(200, r.JSON(carriers))
 
-		c.Set("carriers", carriers)
-		return c.Render(http.StatusOK, r.HTML("/carriers/index.plush.html"))
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(carriers))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(carriers))
-	}).Respond(c)
 }
 
 // Show gets the data for one Carrier. This function is mapped to
@@ -78,15 +68,8 @@ func (v CarriersResource) Show(c buffalo.Context) error {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		c.Set("carrier", carrier)
+	return c.Render(200, r.JSON(carrier))
 
-		return c.Render(http.StatusOK, r.HTML("/carriers/show.plush.html"))
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(carrier))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(carrier))
-	}).Respond(c)
 }
 
 // Create adds a Carrier to the DB. This function is mapped to the
@@ -120,33 +103,12 @@ func (v CarriersResource) Create(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-		return responder.Wants("html", func(c buffalo.Context) error {
-			// Make the errors available inside the html template
-			c.Set("errors", verrs)
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
-			// Render again the new.html template that the user can
-			// correct the input.
-			c.Set("carrier", carrier)
-
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("/carriers/new.plush.html"))
-		}).Wants("json", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-		}).Wants("xml", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.XML(verrs))
-		}).Respond(c)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "carrier.created.success"))
+	return c.Render(http.StatusCreated, r.JSON(carrier))
 
-		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/carriers/%v", carrier.ID)
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.JSON(carrier))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.XML(carrier))
-	}).Respond(c)
 }
 
 // Update changes a Carrier in the DB. This function is mapped to
@@ -177,33 +139,13 @@ func (v CarriersResource) Update(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-		return responder.Wants("html", func(c buffalo.Context) error {
-			// Make the errors available inside the html template
-			c.Set("errors", verrs)
 
-			// Render again the edit.html template that the user can
-			// correct the input.
-			c.Set("carrier", carrier)
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("/carriers/edit.plush.html"))
-		}).Wants("json", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-		}).Wants("xml", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.XML(verrs))
-		}).Respond(c)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "carrier.updated.success"))
+	return c.Render(http.StatusOK, r.JSON(carrier))
 
-		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/carriers/%v", carrier.ID)
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(carrier))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(carrier))
-	}).Respond(c)
 }
 
 // Destroy deletes a Carrier from the DB. This function is mapped
@@ -227,15 +169,6 @@ func (v CarriersResource) Destroy(c buffalo.Context) error {
 		return err
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a flash message
-		c.Flash().Add("success", T.Translate(c, "carrier.destroyed.success"))
+	return c.Render(http.StatusOK, r.JSON(carrier))
 
-		// Redirect to the index page
-		return c.Redirect(http.StatusSeeOther, "/carriers")
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(carrier))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(carrier))
-	}).Respond(c)
 }

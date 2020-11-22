@@ -8,7 +8,6 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v5"
-	"github.com/gobuffalo/x/responder"
 	"github.com/gofrs/uuid"
 	"github.com/shipanther/trober/models"
 )
@@ -50,17 +49,8 @@ func (v UsersResource) List(c buffalo.Context) error {
 		return err
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// Add the paginator to the context so it can be used in the template.
-		c.Set("pagination", q.Paginator)
+	return c.Render(200, r.JSON(users))
 
-		c.Set("users", users)
-		return c.Render(http.StatusOK, r.HTML("/users/index.plush.html"))
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(users))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(users))
-	}).Respond(c)
 }
 
 // Show gets the data for one User. This function is mapped to
@@ -80,15 +70,8 @@ func (v UsersResource) Show(c buffalo.Context) error {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		c.Set("user", user)
+	return c.Render(200, r.JSON(user))
 
-		return c.Render(http.StatusOK, r.HTML("/users/show.plush.html"))
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(user))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(user))
-	}).Respond(c)
 }
 
 // Create adds a User to the DB. This function is mapped to the
@@ -124,33 +107,13 @@ func (v UsersResource) Create(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-		return responder.Wants("html", func(c buffalo.Context) error {
-			// Make the errors available inside the html template
-			c.Set("errors", verrs)
 
-			// Render again the new.html template that the user can
-			// correct the input.
-			c.Set("user", user)
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("/users/new.plush.html"))
-		}).Wants("json", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-		}).Wants("xml", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.XML(verrs))
-		}).Respond(c)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "user.created.success"))
+	return c.Render(http.StatusCreated, r.JSON(user))
 
-		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/users/%v", user.ID)
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.JSON(user))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.XML(user))
-	}).Respond(c)
 }
 
 // Update changes a User in the DB. This function is mapped to
@@ -181,33 +144,13 @@ func (v UsersResource) Update(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-		return responder.Wants("html", func(c buffalo.Context) error {
-			// Make the errors available inside the html template
-			c.Set("errors", verrs)
 
-			// Render again the edit.html template that the user can
-			// correct the input.
-			c.Set("user", user)
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("/users/edit.plush.html"))
-		}).Wants("json", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-		}).Wants("xml", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.XML(verrs))
-		}).Respond(c)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "user.updated.success"))
+	return c.Render(http.StatusOK, r.JSON(user))
 
-		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/users/%v", user.ID)
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(user))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(user))
-	}).Respond(c)
 }
 
 // Destroy deletes a User from the DB. This function is mapped
@@ -231,15 +174,6 @@ func (v UsersResource) Destroy(c buffalo.Context) error {
 		return err
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a flash message
-		c.Flash().Add("success", T.Translate(c, "user.destroyed.success"))
+	return c.Render(http.StatusOK, r.JSON(user))
 
-		// Redirect to the index page
-		return c.Redirect(http.StatusSeeOther, "/users")
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(user))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(user))
-	}).Respond(c)
 }

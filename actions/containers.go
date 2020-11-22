@@ -6,7 +6,6 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
-	"github.com/gobuffalo/x/responder"
 	"github.com/gofrs/uuid"
 	"github.com/shipanther/trober/models"
 )
@@ -48,17 +47,8 @@ func (v ContainersResource) List(c buffalo.Context) error {
 		return err
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// Add the paginator to the context so it can be used in the template.
-		c.Set("pagination", q.Paginator)
+	return c.Render(200, r.JSON(containers))
 
-		c.Set("containers", containers)
-		return c.Render(http.StatusOK, r.HTML("/containers/index.plush.html"))
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(containers))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(containers))
-	}).Respond(c)
 }
 
 // Show gets the data for one Container. This function is mapped to
@@ -78,15 +68,8 @@ func (v ContainersResource) Show(c buffalo.Context) error {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		c.Set("container", container)
+	return c.Render(200, r.JSON(container))
 
-		return c.Render(http.StatusOK, r.HTML("/containers/show.plush.html"))
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(200, r.JSON(container))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(200, r.XML(container))
-	}).Respond(c)
 }
 
 // Create adds a Container to the DB. This function is mapped to the
@@ -119,33 +102,12 @@ func (v ContainersResource) Create(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-		return responder.Wants("html", func(c buffalo.Context) error {
-			// Make the errors available inside the html template
-			c.Set("errors", verrs)
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
-			// Render again the new.html template that the user can
-			// correct the input.
-			c.Set("container", container)
-
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("/containers/new.plush.html"))
-		}).Wants("json", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-		}).Wants("xml", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.XML(verrs))
-		}).Respond(c)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "container.created.success"))
+	return c.Render(http.StatusCreated, r.JSON(container))
 
-		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/containers/%v", container.ID)
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.JSON(container))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusCreated, r.XML(container))
-	}).Respond(c)
 }
 
 // Update changes a Container in the DB. This function is mapped to
@@ -176,33 +138,13 @@ func (v ContainersResource) Update(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-		return responder.Wants("html", func(c buffalo.Context) error {
-			// Make the errors available inside the html template
-			c.Set("errors", verrs)
 
-			// Render again the edit.html template that the user can
-			// correct the input.
-			c.Set("container", container)
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
-			return c.Render(http.StatusUnprocessableEntity, r.HTML("/containers/edit.plush.html"))
-		}).Wants("json", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-		}).Wants("xml", func(c buffalo.Context) error {
-			return c.Render(http.StatusUnprocessableEntity, r.XML(verrs))
-		}).Respond(c)
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a success message
-		c.Flash().Add("success", T.Translate(c, "container.updated.success"))
+	return c.Render(http.StatusOK, r.JSON(container))
 
-		// and redirect to the show page
-		return c.Redirect(http.StatusSeeOther, "/containers/%v", container.ID)
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(container))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(container))
-	}).Respond(c)
 }
 
 // Destroy deletes a Container from the DB. This function is mapped
@@ -226,15 +168,5 @@ func (v ContainersResource) Destroy(c buffalo.Context) error {
 		return err
 	}
 
-	return responder.Wants("html", func(c buffalo.Context) error {
-		// If there are no errors set a flash message
-		c.Flash().Add("success", T.Translate(c, "container.destroyed.success"))
-
-		// Redirect to the index page
-		return c.Redirect(http.StatusSeeOther, "/containers")
-	}).Wants("json", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.JSON(container))
-	}).Wants("xml", func(c buffalo.Context) error {
-		return c.Render(http.StatusOK, r.XML(container))
-	}).Respond(c)
+	return c.Render(http.StatusOK, r.JSON(container))
 }

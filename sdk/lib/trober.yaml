@@ -898,6 +898,14 @@ components:
           type: string
           minLength: 3
           maxLength: 50
+        email:
+          type: string
+          minLength: 3
+          maxLength: 50
+        device_id:
+          type: string
+          minLength: 3
+          maxLength: 50
         role:
           $ref: "#/components/schemas/UserRole"
       description: A user in the system

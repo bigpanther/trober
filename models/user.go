@@ -19,6 +19,8 @@ type User struct {
 	CreatedBy  nulls.UUID `json:"created_by" db:"created_by"`
 	Name       string     `json:"name" db:"name"`
 	Username   string     `json:"username" db:"username"`
+	Email      string     `json:"email" db:"email"`
+	DeviceID   string     `json:"device_id" db:"device_id"`
 	Role       string     `json:"role" db:"role"`
 	TenantID   uuid.UUID  `json:"tenant_id" db:"tenant_id"`
 	CustomerID nulls.UUID `json:"customer_id" db:"customer_id"`
@@ -46,6 +48,7 @@ func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 		&validators.StringIsPresent{Field: u.Name, Name: "Name"},
 		&validators.StringIsPresent{Field: u.Username, Name: "Username"},
 		&validators.StringIsPresent{Field: u.Role, Name: "Role"},
+		&validators.EmailIsPresent{Name: "Email", Field: u.Email, Message: "Email format not valid"},
 	), nil
 }
 

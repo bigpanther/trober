@@ -1,0 +1,2 @@
+drop_column("users", "device_id")
+drop_column("users", "email")

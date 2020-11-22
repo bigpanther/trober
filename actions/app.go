@@ -248,15 +248,20 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 		u.Name = remoteUser.DisplayName
 		u.Role = "None"
 		u.Username = remoteUser.UID
+		u.Email = remoteUser.Email
 		t := &models.Tenant{}
 		err = tx.Where("name = ?", "system").Where("type = ?", "System").First(t)
 		if err != nil {
 			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "Failed to find user tenant"))))
 		}
 		u.TenantID = t.ID
-		err = tx.Save(u)
-		if err != nil {
+		valErrors, err := tx.ValidateAndCreate(u)
+		if err != nil || valErrors.HasAny() {
 			log.Printf("error creating user on login: %v\n", err)
+			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
+		}
+		if valErrors.HasAny() {
+			log.Printf("error creating user on login: %s\n", valErrors.String())
 			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
 		}
 	}

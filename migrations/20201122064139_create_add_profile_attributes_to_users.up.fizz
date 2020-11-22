@@ -1,2 +1,2 @@
-add_column("users", "email", "string", {"size": 50})
+add_column("users", "email", "string", {"size": 50, "null": true})
 add_column("users", "device_id", "string", {"size": 50, "null": true})

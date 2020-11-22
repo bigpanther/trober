@@ -256,7 +256,7 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 		}
 		u.TenantID = t.ID
 		valErrors, err := tx.ValidateAndCreate(u)
-		if err != nil || valErrors.HasAny() {
+		if err != nil {
 			log.Printf("error creating user on login: %v\n", err)
 			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
 		}

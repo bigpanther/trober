@@ -11,6 +11,7 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
+	"firebase.google.com/go/v4/messaging"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/envy"
 	forcessl "github.com/gobuffalo/mw-forcessl"
@@ -167,9 +168,14 @@ func restrictedScope(c buffalo.Context) pop.ScopeFunc {
 	}
 }
 
-var client *auth.Client
+type firebaseSdkClient struct {
+	authClient      *auth.Client
+	messagingClient *messaging.Client
+}
 
-func firebaseClient() (*auth.Client, error) {
+var client *firebaseSdkClient
+
+func firebaseClient() (*firebaseSdkClient, error) {
 	if client != nil {
 		return client, nil
 	}
@@ -185,7 +191,12 @@ func firebaseClient() (*auth.Client, error) {
 		client = nil
 		return nil, err
 	}
-	client, err = app.Auth(ctx)
+	client.authClient, err = app.Auth(ctx)
+	if err != nil {
+		client = nil
+		return nil, err
+	}
+	client.messagingClient, err = app.Messaging(ctx)
 	if err != nil {
 		client = nil
 		return nil, err
@@ -230,7 +241,7 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 	if err != nil {
 		return nil, c.Render(500, r.JSON(models.NewCustomError("error getting downstream client", "500", err)))
 	}
-	token, err := client.VerifyIDToken(c.Request().Context(), userID)
+	token, err := client.authClient.VerifyIDToken(c.Request().Context(), userID)
 	if err != nil {
 		return nil, c.Render(403, r.JSON(models.NewCustomError("Access denied. Credential validation failed", "403", err)))
 	}
@@ -241,7 +252,7 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 		return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
 	}
 	if u.ID == uuid.Nil {
-		remoteUser, err := client.GetUser(c.Request().Context(), token.Subject)
+		remoteUser, err := client.authClient.GetUser(c.Request().Context(), token.Subject)
 		if err != nil {
 			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "error fetching user details"))))
 		}
@@ -264,6 +275,7 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 			log.Printf("error creating user on login: %s\n", valErrors.String())
 			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
 		}
+
 	}
 	return u, nil
 }

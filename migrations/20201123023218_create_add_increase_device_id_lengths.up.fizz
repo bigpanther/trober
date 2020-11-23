@@ -1,0 +1,1 @@
+change_column("users", "device_id", "string", {"size": 255, "null": true})

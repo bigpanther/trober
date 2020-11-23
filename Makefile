@@ -34,3 +34,7 @@ pg:
 .PHONY: migrate
 migrate:
 	buffalo pop migrate
+
+.PHONY: seed
+seed:
+	buffalo task db:seed

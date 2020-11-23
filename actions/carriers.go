@@ -90,7 +90,7 @@ func (v CarriersResource) Create(c buffalo.Context) error {
 	}
 
 	var loggedInUser = loggedInUser(c)
-	if loggedInUser.Role != "SuperAdmin" || carrier.TenantID == uuid.Nil {
+	if !loggedInUser.IsSuperAdmin() || carrier.TenantID == uuid.Nil {
 		carrier.TenantID = loggedInUser.TenantID
 	}
 	carrier.CreatedBy = loggedInUser.ID

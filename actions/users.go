@@ -90,11 +90,11 @@ func (v UsersResource) Create(c buffalo.Context) error {
 		return models.ErrNotFound
 	}
 	var loggedInUser = loggedInUser(c)
-	if loggedInUser.Role != "SuperAdmin" && user.Role == "SuperAdmin" {
+	if !loggedInUser.IsSuperAdmin() && user.IsSuperAdmin() {
 		return c.Render(400, r.JSON(models.NewCustomError("Bad Request", "400", errors.New("User Role value is not valid"))))
 	}
 
-	if loggedInUser.Role != "SuperAdmin" || user.TenantID == uuid.Nil {
+	if !loggedInUser.IsSuperAdmin() || user.TenantID == uuid.Nil {
 		user.TenantID = loggedInUser.TenantID
 	}
 	user.CreatedBy = nulls.NewUUID(loggedInUser.ID)
@@ -131,14 +131,22 @@ func (v UsersResource) Update(c buffalo.Context) error {
 	if err := tx.Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-
+	//var originalRole = user.Role
 	// Bind User to the html form elements
 	if err := c.Bind(user); err != nil {
 		return err
 	}
+	var loggedInUser = loggedInUser(c)
 	user.UpdatedAt = time.Now().UTC()
-
-	verrs, err := tx.ValidateAndUpdate(user)
+	var excludedColumns = []string{"id", "created_at", "created_by"}
+	if !loggedInUser.IsSuperAdmin() {
+		excludedColumns = append(excludedColumns, "tenant_id")
+	}
+	if user.ID == loggedInUser.ID {
+		// Cannot change self role
+		excludedColumns = append(excludedColumns, "role")
+	}
+	verrs, err := tx.ValidateAndUpdate(user, excludedColumns...)
 	if err != nil {
 		return err
 	}

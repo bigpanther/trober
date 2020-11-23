@@ -89,7 +89,7 @@ func (v TerminalsResource) Create(c buffalo.Context) error {
 		return models.ErrNotFound
 	}
 	var loggedInUser = loggedInUser(c)
-	if loggedInUser.Role != "SuperAdmin" || terminal.TenantID == uuid.Nil {
+	if !loggedInUser.IsSuperAdmin() || terminal.TenantID == uuid.Nil {
 		terminal.TenantID = loggedInUser.TenantID
 	}
 	terminal.CreatedBy = loggedInUser.ID

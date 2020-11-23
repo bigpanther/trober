@@ -64,7 +64,7 @@ func (u *User) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
 
-// IsSuperAdmin checks if a user can work across tenants
+// IsSuperAdmin() checks if a user can work across tenants
 func (u *User) IsSuperAdmin() bool {
 	return u.Role == "SuperAdmin"
 }

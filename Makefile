@@ -26,3 +26,11 @@ gen:
 .PHONY: publish
 publish:	gen
 	cd sdk/trober_sdk; dart pub publish --dry-run
+
+.PHONY: pg
+pg:
+	psql -h localhost -U postgres
+
+.PHONY: migrate
+migrate:
+	buffalo pop migrate

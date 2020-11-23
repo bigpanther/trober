@@ -186,6 +186,7 @@ func firebaseClient() (*firebaseSdkClient, error) {
 	}
 	opt := option.WithCredentialsJSON(credJSON)
 	ctx := context.Background()
+	client = &firebaseSdkClient{}
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
 		client = nil

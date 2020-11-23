@@ -89,7 +89,7 @@ func (v ContainersResource) Create(c buffalo.Context) error {
 		return models.ErrNotFound
 	}
 	var loggedInUser = loggedInUser(c)
-	if loggedInUser.Role != "SuperAdmin" || container.TenantID == uuid.Nil {
+	if !loggedInUser.IsSuperAdmin() || container.TenantID == uuid.Nil {
 		container.TenantID = loggedInUser.TenantID
 	}
 	container.CreatedBy = loggedInUser.ID

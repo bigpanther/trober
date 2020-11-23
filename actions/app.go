@@ -271,32 +271,41 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 			log.Printf("error creating user on login: %v\n", err)
 			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
 		}
+		adminUser := &models.User{}
+		_ = tx.Where("tenant_id = ?", t.ID).First(adminUser)
 		if valErrors.HasAny() {
 			log.Printf("error creating user on login: %s\n", valErrors.String())
+			if adminUser != nil {
+				sendMessage(adminUser, u, "New user validation failed")
+			}
 			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
 		}
-		adminUser := &models.User{}
-		err = tx.Where("tenant_id = ?", t.ID).First(adminUser)
-		if adminUser.DeviceID.String != "" {
-			message := &messaging.Message{
-				Data: map[string]string{
-					"email": u.Email,
-					"name":  u.Name,
-				},
-				Notification: &messaging.Notification{
-					Title: "New user created",
-					Body:  fmt.Sprintf("%s just logged in", u.Name),
-				},
-				Token: adminUser.DeviceID.String,
-			}
-			_, err := client.messagingClient.Send(app.Context, message)
-			if err != nil {
-				log.Println("error sending message", err)
-			}
-		}
 
+		if adminUser != nil {
+			sendMessage(adminUser, u, "New user created")
+		}
 	}
 	return u, nil
+}
+
+func sendMessage(adminUser *models.User, newUser *models.User, msg string) {
+	if adminUser.DeviceID.String != "" {
+		message := &messaging.Message{
+			Data: map[string]string{
+				"email": newUser.Email,
+				"name":  newUser.Name,
+			},
+			Notification: &messaging.Notification{
+				Title: msg,
+				Body:  fmt.Sprintf("%s just logged in", newUser.Name),
+			},
+			Token: adminUser.DeviceID.String,
+		}
+		_, err := client.messagingClient.Send(app.Context, message)
+		if err != nil {
+			log.Println("error sending message", err)
+		}
+	}
 }
 
 func loggedInUser(c buffalo.Context) *models.User {

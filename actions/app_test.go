@@ -19,11 +19,11 @@ func TestTokenVerify(t *testing.T) {
 	}
 	ctx := context.Background()
 	var tokenToVerify = "..---"
-	token, err := client.VerifyIDToken(ctx, tokenToVerify)
+	token, err := client.authClient.VerifyIDToken(ctx, tokenToVerify)
 	if err != nil {
 		t.Fatalf("error validating token: %v\n", err)
 	}
-	user, err := client.GetUser(ctx, token.Subject)
+	user, err := client.authClient.GetUser(ctx, token.Subject)
 	if err != nil {
 		t.Fatalf("error getting user: %v\n", err)
 	}

@@ -1,0 +1,6 @@
+drop_foreign_key("containers", "fk_containers_carrier_id", {"if_exists": true})
+drop_column("containers", "carrier_id")
+drop_table("carriers")
+drop_column("containers", "gps_url")
+add_column("containers", "type", "string", {"size": 15, null:true})
+add_column("containers", "eta", "timestamp", {null:true})

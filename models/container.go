@@ -18,7 +18,7 @@ type Container struct {
 	UpdatedAt       time.Time    `json:"updated_at" db:"updated_at"`
 	CreatedBy       uuid.UUID    `json:"created_by" db:"created_by"`
 	TenantID        uuid.UUID    `json:"tenant_id" db:"tenant_id"`
-	CarrierID       nulls.UUID   `json:"carrier_id" db:"carrier_id"`
+	CarrierType     nulls.UUID   `json:"carrier_type" db:"carrier_type"`
 	TerminalID      nulls.UUID   `json:"terminal_id" db:"terminal_id"`
 	OrderID         nulls.UUID   `json:"order_id" db:"order_id"`
 	SerialNumber    nulls.String `json:"serial_number" db:"serial_number"`
@@ -30,7 +30,7 @@ type Container struct {
 	Type            nulls.String `json:"type" db:"type"`
 	Status          nulls.String `json:"status" db:"status"`
 	DriverID        nulls.UUID   `json:"driver_id" db:"driver_id"`
-	GpsURL          nulls.String `json:"gps_url" db:"gps_url"`
+	Eta             nulls.Time   `json:"eta" db:"eta"`
 }
 
 // String is not required by pop and may be deleted
@@ -53,14 +53,7 @@ func (c Containers) String() string {
 func (c *Container) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: c.SerialNumber.String, Name: "SerialNumber"},
-		&validators.StringIsPresent{Field: c.Origin.String, Name: "Origin"},
-		&validators.StringIsPresent{Field: c.Destination.String, Name: "Destination"},
-		&validators.TimeIsPresent{Field: c.Lfd.Time, Name: "Lfd"},
-		&validators.TimeIsPresent{Field: c.ReservationTime.Time, Name: "ReservationTime"},
-		&validators.StringIsPresent{Field: c.Size.String, Name: "Size"},
-		&validators.StringIsPresent{Field: c.Type.String, Name: "Type"},
 		&validators.StringIsPresent{Field: c.Status.String, Name: "Status"},
-		&validators.StringIsPresent{Field: c.GpsURL.String, Name: "GpsURL"},
 	), nil
 }
 

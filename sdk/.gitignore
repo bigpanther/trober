@@ -1,3 +1,4 @@
 trober_sdk
 .dart_tool
 .packages
+migrations/schema.sql

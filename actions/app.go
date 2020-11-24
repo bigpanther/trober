@@ -251,6 +251,7 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 	if err != nil {
 		return nil, c.Render(403, r.JSON(models.NewCustomError("Access denied. Credential validation failed", "403", err)))
 	}
+
 	u := &models.User{}
 	tx := c.Value("tx").(*pop.Connection)
 	err = tx.Where("username = ?", token.Subject).First(u)
@@ -261,6 +262,9 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 		remoteUser, err := client.authClient.GetUser(c.Request().Context(), token.Subject)
 		if err != nil {
 			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "error fetching user details"))))
+		}
+		if !remoteUser.EmailVerified {
+			return nil, c.Render(403, r.JSON(models.NewCustomError("Access denied. Email not verified", "403", err)))
 		}
 		u.Name = remoteUser.DisplayName
 		u.Role = "None"

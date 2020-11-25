@@ -18,7 +18,7 @@ type Container struct {
 	UpdatedAt       time.Time    `json:"updated_at" db:"updated_at"`
 	CreatedBy       uuid.UUID    `json:"created_by" db:"created_by"`
 	TenantID        uuid.UUID    `json:"tenant_id" db:"tenant_id"`
-	CarrierType     nulls.UUID   `json:"carrier_type" db:"carrier_type"`
+	CarrierID       nulls.UUID   `json:"carrier_id" db:"carrier_id"`
 	TerminalID      nulls.UUID   `json:"terminal_id" db:"terminal_id"`
 	OrderID         nulls.UUID   `json:"order_id" db:"order_id"`
 	SerialNumber    nulls.String `json:"serial_number" db:"serial_number"`
@@ -30,7 +30,6 @@ type Container struct {
 	Type            nulls.String `json:"type" db:"type"`
 	Status          nulls.String `json:"status" db:"status"`
 	DriverID        nulls.UUID   `json:"driver_id" db:"driver_id"`
-	Eta             nulls.Time   `json:"eta" db:"eta"`
 }
 
 // String is not required by pop and may be deleted

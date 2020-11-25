@@ -161,10 +161,15 @@ func forceSSL() buffalo.MiddlewareFunc {
 func restrictedScope(c buffalo.Context) pop.ScopeFunc {
 	return func(q *pop.Query) *pop.Query {
 		u := loggedInUser(c)
-		if u.IsSuperAdmin() {
-			return q
+
+		if !u.IsSuperAdmin() {
+			return q.Where("tenant_id = ?", u.TenantID)
 		}
-		return q.Where("tenant_id = ?", u.TenantID)
+		tenant_id = c.Request().URL.Query().Get("tenant_id")
+		if tenant_id != "" {
+			return q.Where("tenant_id = ?", tenant_id)
+		}
+		return q
 	}
 }
 

@@ -165,9 +165,9 @@ func restrictedScope(c buffalo.Context) pop.ScopeFunc {
 		if !u.IsSuperAdmin() {
 			return q.Where("tenant_id = ?", u.TenantID)
 		}
-		tenant_id = c.Request().URL.Query().Get("tenant_id")
-		if tenant_id != "" {
-			return q.Where("tenant_id = ?", tenant_id)
+		tenantID := c.Request().URL.Query().Get("tenant_id")
+		if tenantID != "" {
+			return q.Where("tenant_id = ?", tenantID)
 		}
 		return q
 	}

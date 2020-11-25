@@ -6,7 +6,7 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://trober-test.herokuapp.com
 info:
-  version: "0.1.0"
+  version: "0.1.1"
   title: Trober API
   description: >-
     The trober API
@@ -425,6 +425,110 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Order"
+        default:
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /carriers:
+    get:
+      summary: List all Carriers
+      description: >-
+        List all Carriers
+
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Carriers"
+        default:
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create a new Carrier
+      description: >-
+        Create a new Carrier
+
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Carrier"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Carrier"
+        default:
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  "/carriers/{id}":
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the carrier
+          schema:
+            type: string
+            format: uuid
+      summary: Update an existing carrier
+      description: >-
+        Update an existing carrier
+
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Carrier"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Carrier"
+        default:
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the carrier
+          schema:
+            type: string
+            format: uuid
+      summary: Get carrier details
+      description: >-
+        Get carrier details
+
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Carrier"
         default:
           description: error
           content:
@@ -872,6 +976,44 @@ components:
         type:
           $ref: "#/components/schemas/TerminalType"
       description: A terminal that used for logistics
+    Carriers:
+      type: array
+      items:
+        $ref: "#/components/schemas/Carrier"
+      description: A list of Carriers
+    Carrier:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_by:
+          type: string
+          format: uuid
+          readOnly: true
+        tenant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+        eta:
+          type: string
+          format: date-time
+          readOnly: true
+        type:
+          $ref: "#/components/schemas/CarrierType"
+      description: A carrier that ships the containers
     Containers:
       type: array
       items:
@@ -899,12 +1041,9 @@ components:
         tenant_id:
           type: string
           format: uuid
-        eta:
+        carrier_id:
           type: string
-          format: date-time
-          readOnly: true
-        carrier_type:
-          $ref: "#/components/schemas/CarrierType"
+          format: uuid
         terminal_id:
           type: string
           format: uuid
@@ -913,7 +1052,7 @@ components:
           format: uuid
         serial_number:
           type: string
-          minLength: 7
+          minLength: 5
           maxLength: 11
         origin:
           type: string
@@ -971,7 +1110,7 @@ components:
           format: uuid
         serial_number:
           type: string
-          minLength: 5
+          minLength: 7
           maxLength: 25
         status:
           $ref: "#/components/schemas/OrderStatus"

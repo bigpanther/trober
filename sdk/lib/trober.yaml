@@ -2,11 +2,11 @@ openapi: 3.0.3
 servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/harsimranmaan/jober/1.0.0
+    url: https://virtserver.swaggerhub.com/harsimranmaan/jober/0.1.2
   - description: SwaggerHub API Auto Mocking
     url: https://trober-test.herokuapp.com
 info:
-  version: "0.1.1"
+  version: "0.1.2"
   title: Trober API
   description: >-
     The trober API
@@ -125,6 +125,14 @@ paths:
       description: >-
         List all Containers
 
+      parameters:
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
 
       responses:
         "200":
@@ -205,6 +213,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
       summary: Get container details
       description: >-
         Get container details
@@ -229,6 +244,14 @@ paths:
       description: >-
         List all Terminals
 
+      parameters:
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
 
       responses:
         "200":
@@ -309,6 +332,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
       summary: Get terminal details
       description: >-
         Get terminal details
@@ -333,6 +363,14 @@ paths:
       description: >-
         List all Orders
 
+      parameters:
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
 
       responses:
         "200":
@@ -413,6 +451,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
       summary: Get order details
       description: >-
         Get order details
@@ -438,6 +483,14 @@ paths:
         List all Carriers
 
 
+      parameters:
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           description: OK
@@ -517,6 +570,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
       summary: Get carrier details
       description: >-
         Get carrier details
@@ -542,6 +602,14 @@ paths:
         List all Customers
 
 
+      parameters:
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           description: OK
@@ -621,6 +689,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
       summary: Get customer details
       description: >-
         Get customer details
@@ -646,8 +721,15 @@ paths:
       description: >-
         List all users
 
-
       parameters:
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
+
         - name: name
           in: query
           description: The name of the user
@@ -734,6 +816,13 @@ paths:
           in: path
           required: true
           description: The id of the user
+          schema:
+            type: string
+            format: uuid
+        - name: tenant_id
+          in: query
+          required: false
+          description: The id of the tenant
           schema:
             type: string
             format: uuid

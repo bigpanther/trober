@@ -19,7 +19,7 @@ type Carrier struct {
 	CreatedBy uuid.UUID    `json:"created_by" db:"created_by"`
 	Name      nulls.String `json:"name" db:"name"`
 	Type      string       `json:"type" db:"type"`
-	Eta       time.Time    `json:"eta" db:"eta"`
+	Eta       nulls.Time   `json:"eta" db:"eta"`
 	TenantID  uuid.UUID    `json:"tenant_id" db:"tenant_id"`
 }
 

@@ -44,7 +44,6 @@ func (c *Carrier) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: c.Name.String, Name: "Name"},
 		&validators.StringIsPresent{Field: c.Type, Name: "Type"},
-		&validators.TimeIsPresent{Field: c.Eta.Time, Name: "Eta"},
 	), nil
 }
 

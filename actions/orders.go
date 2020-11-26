@@ -6,6 +6,7 @@ import (
 
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
+	"github.com/gofrs/uuid"
 	"github.com/shipanther/trober/models"
 )
 
@@ -87,7 +88,11 @@ func (v OrdersResource) Create(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-	order.CreatedBy = loggedInUser(c).ID
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.IsSuperAdmin() || order.TenantID == uuid.Nil {
+		order.TenantID = loggedInUser.TenantID
+	}
+	order.CreatedBy = loggedInUser.ID
 	order.CreatedAt = time.Now().UTC()
 	order.UpdatedAt = time.Now().UTC()
 

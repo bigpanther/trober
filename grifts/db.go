@@ -19,10 +19,11 @@ var _ = grift.Namespace("db", func() {
 			return err
 		}
 		u := &models.User{
-			Name:     "HSM",
-			Username: "kMkcbnTrkoZsEpbB9n94Rk6c2kL2",
+			Name:     "Big Panther",
+			Username: "oaxWWvwxFOM0odE8tJqqdZEYdxG3",
 			TenantID: t.ID,
 			Role:     "SuperAdmin",
+			Email:    "info@bigpanther.ca",
 		}
 		return models.DB.Create(u)
 	})

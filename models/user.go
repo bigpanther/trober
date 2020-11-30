@@ -64,9 +64,19 @@ func (u *User) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
 
-// IsSuperAdmin() checks if a user can work across tenants
+// IsSuperAdmin checks if a user can work across tenants
 func (u *User) IsSuperAdmin() bool {
 	return u.Role == "SuperAdmin"
+}
+
+// IsDriver checks if a user is a driver
+func (u *User) IsDriver() bool {
+	return u.Role == "Driver"
+}
+
+// IsCustomer checks if a user is a customer
+func (u *User) IsCustomer() bool {
+	return u.Role == "Customer"
 }
 
 // IsNotActive Mostly for newly created users who have not been assigned a tenant

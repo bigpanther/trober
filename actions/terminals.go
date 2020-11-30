@@ -75,6 +75,10 @@ func (v TerminalsResource) Show(c buffalo.Context) error {
 // Create adds a Terminal to the DB. This function is mapped to the
 // path POST /terminals
 func (v TerminalsResource) Create(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.AtleastBackOffice() {
+		return models.ErrNotFound
+	}
 	// Allocate an empty Terminal
 	terminal := &models.Terminal{}
 
@@ -88,7 +92,7 @@ func (v TerminalsResource) Create(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-	var loggedInUser = loggedInUser(c)
+
 	if !loggedInUser.IsSuperAdmin() || terminal.TenantID == uuid.Nil {
 		terminal.TenantID = loggedInUser.TenantID
 	}
@@ -114,6 +118,10 @@ func (v TerminalsResource) Create(c buffalo.Context) error {
 // Update changes a Terminal in the DB. This function is mapped to
 // the path PUT /terminals/{terminal_id}
 func (v TerminalsResource) Update(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.AtleastBackOffice() {
+		return models.ErrNotFound
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {

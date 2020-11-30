@@ -19,6 +19,8 @@ ADD . .
 RUN buffalo build -o /bin/trober
 
 FROM alpine
+ARG TROBER_VERSION
+ARG TROBER_COMMIT
 RUN apk add --no-cache bash ca-certificates
 
 WORKDIR /bin/

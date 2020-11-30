@@ -41,6 +41,10 @@ func (v ContainersResource) List(c buffalo.Context) error {
 	// Paginate results. Params "page" and "per_page" control pagination.
 	// Default values are "page=1" and "per_page=20".
 	q := tx.PaginateFromParams(c.Params())
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.IsDriver() {
+		q = q.Where("driver_id = ?", loggedInUser.ID)
+	}
 
 	// Retrieve all Containers from the DB
 	if err := q.Scope(restrictedScope(c)).All(containers); err != nil {

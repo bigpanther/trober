@@ -75,6 +75,11 @@ func (v CarriersResource) Show(c buffalo.Context) error {
 // Create adds a Carrier to the DB. This function is mapped to the
 // path POST /carriers
 func (v CarriersResource) Create(c buffalo.Context) error {
+
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.AtleastBackOffice() {
+		return models.ErrNotFound
+	}
 	// Allocate an empty Carrier
 	carrier := &models.Carrier{}
 
@@ -89,7 +94,6 @@ func (v CarriersResource) Create(c buffalo.Context) error {
 		return models.ErrNotFound
 	}
 
-	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsSuperAdmin() || carrier.TenantID == uuid.Nil {
 		carrier.TenantID = loggedInUser.TenantID
 	}
@@ -114,6 +118,10 @@ func (v CarriersResource) Create(c buffalo.Context) error {
 // Update changes a Carrier in the DB. This function is mapped to
 // the path PUT /carriers/{carrier_id}
 func (v CarriersResource) Update(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.AtleastBackOffice() {
+		return models.ErrNotFound
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {

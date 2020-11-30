@@ -75,6 +75,8 @@ func (v OrdersResource) Show(c buffalo.Context) error {
 // Create adds a Order to the DB. This function is mapped to the
 // path POST /orders
 func (v OrdersResource) Create(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+
 	// Allocate an empty Order
 	order := &models.Order{}
 
@@ -88,7 +90,7 @@ func (v OrdersResource) Create(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-	var loggedInUser = loggedInUser(c)
+
 	if !loggedInUser.IsSuperAdmin() || order.TenantID == uuid.Nil {
 		order.TenantID = loggedInUser.TenantID
 	}

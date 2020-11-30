@@ -75,6 +75,10 @@ func (v CustomersResource) Show(c buffalo.Context) error {
 // Create adds a Customer to the DB. This function is mapped to the
 // path POST /customers
 func (v CustomersResource) Create(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.AtleastBackOffice() {
+		return models.ErrNotFound
+	}
 	// Allocate an empty Customer
 	customer := &models.Customer{}
 
@@ -88,7 +92,7 @@ func (v CustomersResource) Create(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-	var loggedInUser = loggedInUser(c)
+
 	if !loggedInUser.IsSuperAdmin() || customer.TenantID == uuid.Nil {
 		customer.TenantID = loggedInUser.TenantID
 	}

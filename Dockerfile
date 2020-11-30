@@ -1,3 +1,5 @@
+ARG TROBER_VERSION=dev
+ARG TROBER_COMMIT=dev
 FROM gobuffalo/buffalo:v0.16.16 as builder
 
 ENV GO111MODULE on
@@ -24,8 +26,8 @@ WORKDIR /bin/
 COPY --from=builder /bin/trober .
 
 ENV GO_ENV=production
-ENV TROBER_VERSION=dev
-ENV TROBER_COMMIT=dev
+ENV TROBER_VERSION=${TROBER_VERSION}
+ENV TROBER_COMMIT=${TROBER_COMMIT}
 # Bind the app to 0.0.0.0 so it can be seen from outside the container
 ENV ADDR=0.0.0.0
 

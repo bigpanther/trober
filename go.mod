@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	firebase.google.com/go/v4 v4.1.0
+	github.com/getkin/kin-openapi v0.32.0 // indirect
 	github.com/gobuffalo/buffalo v0.16.16
 	github.com/gobuffalo/buffalo-pop/v2 v2.3.0
 	github.com/gobuffalo/envy v1.9.0

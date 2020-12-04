@@ -118,6 +118,7 @@ func App() *buffalo.App {
 		containerGroup.GET("/{container_id}", ContainersResource{}.Show)
 		containerGroup.POST("/", ContainersResource{}.Create)
 		containerGroup.PUT("/{container_id}", ContainersResource{}.Update)
+		containerGroup.PATCH("/{container_id}/assign/{status}", ContainersResource{}.UpdateStatus)
 		containerGroup.DELETE("/{container_id}", ContainersResource{}.Destroy)
 		var orderGroup = app.Group("/orders")
 		orderGroup.GET("/", OrdersResource{}.List)

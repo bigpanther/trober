@@ -89,3 +89,16 @@ const (
 	containerStatusUnloaded   = "Unloaded"
 	containerStatusAbandoned  = "Abandoned"
 )
+
+// IsValidContainerStatus validates the status
+func IsValidContainerStatus(status string) bool {
+	return containerStatusUnassigned == status ||
+		containerStatusInTransit == status ||
+		containerStatusArrived == status ||
+		containerStatusAssigned == status ||
+		containerStatusAccepted == status ||
+		containerStatusRejected == status ||
+		containerStatusLoaded == status ||
+		containerStatusUnloaded == status ||
+		containerStatusAbandoned == status
+}

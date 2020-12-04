@@ -43,7 +43,7 @@ func (t *Tenant) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: t.Name, Name: "Name"},
 		&validators.StringIsPresent{Field: t.Type, Name: "Type"},
-		&validators.StringIsPresent{Field: t.Code, Name: "Code"},
+		&validators.StringIsPresent{Field: t.Code.String, Name: "Code"},
 		&validators.FuncValidator{Fn: func() bool {
 			return t.Type == tenantTypeSystem || t.Type == tenantTypeTest || t.Type == tenantTypeProduction
 		}, Field: t.Type, Name: "Type"},

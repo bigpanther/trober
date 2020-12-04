@@ -2,11 +2,12 @@ package models
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"time"
 )
 
 // Terminal is used by pop to map your terminals database table to your go code.
@@ -18,6 +19,7 @@ type Terminal struct {
 	Name      string    `json:"name" db:"name"`
 	Type      string    `json:"type" db:"type"`
 	TenantID  uuid.UUID `json:"tenant_id" db:"tenant_id"`
+	Tenant    Tenant    `belongs_to:"tenant"`
 }
 
 // String is not required by pop and may be deleted

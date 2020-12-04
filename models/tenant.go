@@ -13,13 +13,19 @@ import (
 
 // Tenant is used by pop to map your tenants database table to your go code.
 type Tenant struct {
-	ID        uuid.UUID    `json:"id" db:"id"`
-	CreatedAt time.Time    `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time    `json:"updated_at" db:"updated_at"`
-	CreatedBy nulls.UUID   `json:"created_by" db:"created_by"`
-	Name      string       `json:"name" db:"name"`
-	Type      string       `json:"type" db:"type"`
-	Code      nulls.String `json:"code" db:"code"`
+	ID         uuid.UUID    `json:"id" db:"id"`
+	CreatedAt  time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt  time.Time    `json:"updated_at" db:"updated_at"`
+	CreatedBy  nulls.UUID   `json:"created_by" db:"created_by"`
+	Name       string       `json:"name" db:"name"`
+	Type       string       `json:"type" db:"type"`
+	Code       nulls.String `json:"code" db:"code"`
+	Users      Users        `has_many:"users"`
+	Carriers   Carriers     `has_many:"carriers"`
+	Containers Containers   `has_many:"containers"`
+	Terminals  Terminals    `has_many:"terminals"`
+	Orders     Orders       `has_many:"orders"`
+	Customers  Customers    `has_many:"customers"`
 }
 
 // String is not required by pop and may be deleted

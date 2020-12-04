@@ -24,6 +24,7 @@ type User struct {
 	Role       string       `json:"role" db:"role"`
 	TenantID   uuid.UUID    `json:"tenant_id" db:"tenant_id"`
 	CustomerID nulls.UUID   `json:"customer_id" db:"customer_id"`
+	Tenant     Tenant       `belongs_to:"tenant"`
 }
 
 // String is not required by pop and may be deleted

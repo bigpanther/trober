@@ -67,3 +67,25 @@ func (c *Container) ValidateCreate(tx *pop.Connection) (*validate.Errors, error)
 func (c *Container) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
+
+// IsAssigned checks if a container is assigned to a driver
+func (c *Container) IsAssigned() bool {
+	return c.Status.String == containerStatusAssigned && c.DriverID.UUID != uuid.Nil
+}
+
+// IsRejected checks if a container is assigned to a driver
+func (c *Container) IsRejected() bool {
+	return c.Status.String == containerStatusRejected
+}
+
+const (
+	containerStatusUnassigned = "Unassigned"
+	containerStatusInTransit  = "InTransit"
+	containerStatusArrived    = "Arrived"
+	containerStatusAssigned   = "Assigned"
+	containerStatusAccepted   = "Accepted"
+	containerStatusRejected   = "Rejected"
+	containerStatusLoaded     = "Loaded"
+	containerStatusUnloaded   = "Unloaded"
+	containerStatusAbandoned  = "Abandoned"
+)

@@ -129,6 +129,8 @@ func App() *buffalo.App {
 		selfGroup.GET("/", selfGet)
 		selfGroup.GET("/tenant", selfGetTenant)
 
+		app.Worker.Register("sendNotifications", sendNotifications)
+		app.Worker.Register("testWorker", testWorker)
 	}
 
 	return app

@@ -107,7 +107,6 @@ func (v ContainersResource) Create(c buffalo.Context) error {
 
 	if verrs.HasAny() {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-
 	}
 
 	return c.Render(http.StatusCreated, r.JSON(container))

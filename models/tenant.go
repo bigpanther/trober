@@ -19,6 +19,7 @@ type Tenant struct {
 	CreatedBy nulls.UUID `json:"created_by" db:"created_by"`
 	Name      string     `json:"name" db:"name"`
 	Type      string     `json:"type" db:"type"`
+	Code      string     `json:"code" db:"code"`
 }
 
 // String is not required by pop and may be deleted
@@ -42,6 +43,7 @@ func (t *Tenant) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: t.Name, Name: "Name"},
 		&validators.StringIsPresent{Field: t.Type, Name: "Type"},
+		&validators.StringIsPresent{Field: t.Code, Name: "Code"},
 		&validators.FuncValidator{Fn: func() bool {
 			return t.Type == tenantTypeSystem || t.Type == tenantTypeTest || t.Type == tenantTypeProduction
 		}, Field: t.Type, Name: "Type"},

@@ -4,6 +4,8 @@ go 1.15
 
 require (
 	firebase.google.com/go/v4 v4.1.0
+	github.com/Masterminds/goutils v1.1.0 // indirect
+	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
 	github.com/getkin/kin-openapi v0.32.0 // indirect
 	github.com/gobuffalo/buffalo v0.16.16
 	github.com/gobuffalo/buffalo-pop/v2 v2.3.0
@@ -20,7 +22,11 @@ require (
 	github.com/gobuffalo/validate/v3 v3.3.0
 	github.com/gobuffalo/x v0.1.0
 	github.com/gofrs/uuid v3.3.0+incompatible
+	github.com/google/uuid v1.1.2 // indirect
+	github.com/huandu/xstrings v1.3.2 // indirect
+	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/markbates/grift v1.5.0
+	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rogpeppe/go-internal v1.6.0 // indirect
 	github.com/rs/cors v1.7.0

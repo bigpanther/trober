@@ -10,8 +10,8 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// {{.}} is used by pop to map your customers database table to your go code.
-type {{.}} struct {
+// {{.Key}} is used by pop to map your {{.PluralKey | ToLower}} database table to your go code.
+type {{.Key}} struct {
 	ID        uuid.UUID `json:"id" db:"id"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
@@ -21,23 +21,23 @@ type {{.}} struct {
 }
 
 // String is not required by pop and may be deleted
-func (c {{.}} ) String() string {
+func (c {{.Key}} ) String() string {
 	jc, _ := json.Marshal(c)
 	return string(jc)
 }
 
-// Customers is not required by pop and may be deleted
-type Customers []{{.}}
+// {{.PluralKey}} is not required by pop and may be deleted
+type {{.PluralKey}} []{{.Key}}
 
 // String is not required by pop and may be deleted
-func (c Customers) String() string {
+func (c {{.PluralKey}}) String() string {
 	jc, _ := json.Marshal(c)
 	return string(jc)
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 // This method is not required and may be deleted.
-func (c *{{.}} ) Validate(tx *pop.Connection) (*validate.Errors, error) {
+func (c *{{.Key}} ) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: c.Name, Name: "Name"},
 	), nil
@@ -45,12 +45,12 @@ func (c *{{.}} ) Validate(tx *pop.Connection) (*validate.Errors, error) {
 
 // ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.
 // This method is not required and may be deleted.
-func (c *{{.}} ) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
+func (c *{{.Key}} ) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
 
 // ValidateUpdate gets run every time you call "pop.ValidateAndUpdate" method.
 // This method is not required and may be deleted.
-func (c *{{.}} ) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
+func (c *{{.Key}} ) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }

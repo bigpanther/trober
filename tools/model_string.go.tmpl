@@ -1,0 +1,21 @@
+package models
+type {{.Key}} string
+const(
+	{{- $key:=.Key -}}
+	{{range .Schema.Enum}}
+	// {{$key}}{{.}} represents {{.}} {{$key}}
+	{{$key}}{{.}} {{$key}} = "{{.}}"
+	{{- end}}
+/*
+	allowed{{$key}} = []{{$key}}{
+		{{- range .Schema.Enum}}
+		{{$key}}{{.}},
+	{{- end}}
+	} */
+)
+
+
+func IsValid{{.Key}}(s string) bool{
+	{{range $index, $element := .Schema.Enum -}}
+	{{if eq $index 0}}return{{else}} ||{{end}} {{$key}}{{$element}} == s{{- end}}
+}

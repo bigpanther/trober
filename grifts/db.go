@@ -1,6 +1,7 @@
 package grifts
 
 import (
+	"github.com/gobuffalo/nulls"
 	"github.com/shipanther/trober/models"
 
 	"github.com/markbates/grift/grift"
@@ -13,7 +14,7 @@ var _ = grift.Namespace("db", func() {
 		t := &models.Tenant{
 			Name: "system",
 			Type: "System",
-			Code: "6mapg",
+			Code: nulls.NewString("6mapg"),
 		}
 		err := models.DB.Create(t)
 		if err != nil {

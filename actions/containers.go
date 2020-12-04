@@ -1,10 +1,13 @@
 package actions
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/buffalo/worker"
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gofrs/uuid"
 	"github.com/shipanther/trober/models"
@@ -133,6 +136,77 @@ func (v ContainersResource) Update(c buffalo.Context) error {
 	if err := c.Bind(container); err != nil {
 		return err
 	}
+	container.UpdatedAt = time.Now().UTC()
+
+	verrs, err := tx.ValidateAndUpdate(container)
+	if err != nil {
+		return err
+	}
+
+	if verrs.HasAny() {
+
+		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
+
+	}
+	if (container.Status.String == "Assigned" && container.DriverID != nulls.UUID{}) {
+		u := &models.User{}
+		_ = tx.Where("id = ?", container.DriverID.UUID).First(u)
+		if u.DeviceID.String != "" {
+			app.Worker.Perform(worker.Job{
+				Queue:   "default",
+				Handler: "sendNotifications",
+				Args: worker.Args{
+					"to":            []string{u.DeviceID.String},
+					"message.title": "You have been assigned a pickup",
+					"message.body":  container.SerialNumber,
+					"message.data": map[string]string{
+						"container_id": container.ID.String(),
+					},
+				},
+			})
+		}
+	}
+
+	return c.Render(http.StatusOK, r.JSON(container))
+
+}
+
+// UpdateStatus of a container
+func (v ContainersResource) UpdateStatus(c buffalo.Context) error {
+	// Get the DB connection from the context
+	tx, ok := c.Value("tx").(*pop.Connection)
+	if !ok {
+		return models.ErrNotFound
+	}
+
+	// Allocate an empty Container
+	container := &models.Container{}
+
+	if err := tx.Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {
+		return c.Error(http.StatusNotFound, err)
+	}
+	status := c.Param("status")
+	if models.IsValidContainerStatus(status) {
+		return c.Error(http.StatusBadRequest, errors.New("invalid status"))
+	}
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.AtleastBackOffice() {
+		var driverID nulls.UUID
+
+		// Bind driver to the html form elements
+		if err := c.Bind(&driverID); err != nil {
+			return err
+		}
+		container.DriverID = driverID
+		container.Status.String = status
+	}
+	if loggedInUser.IsDriver() {
+		if container.IsAssigned() {
+			container.Status.String = status
+		}
+		//notify backoffice
+	}
+
 	container.UpdatedAt = time.Now().UTC()
 
 	verrs, err := tx.ValidateAndUpdate(container)

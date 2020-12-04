@@ -66,25 +66,39 @@ func (u *User) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 
 // IsSuperAdmin checks if a user can work across tenants
 func (u *User) IsSuperAdmin() bool {
-	return u.Role == "SuperAdmin"
+	return u.Role == userRoleSuperAdmin
 }
 
 // IsDriver checks if a user is a driver
 func (u *User) IsDriver() bool {
-	return u.Role == "Driver"
+	return u.Role == userRoleDriver
 }
 
 // IsCustomer checks if a user is a customer
 func (u *User) IsCustomer() bool {
-	return u.Role == "Customer"
+	return u.Role == userRoleCustomer
 }
 
 // IsNotActive Mostly for newly created users who have not been assigned a tenant
 func (u *User) IsNotActive() bool {
-	return u.Role == "None" || u.TenantID == uuid.Nil
+	return u.Role == userRoleNone || u.TenantID == uuid.Nil
 }
 
 // AtleastBackOffice checks if a user has at least Back Office access
 func (u *User) AtleastBackOffice() bool {
-	return u.Role == "SuperAdmin" || u.Role == "Admin" || u.Role == "BackOffice"
+	return u.Role == userRoleSuperAdmin || u.Role == userRoleAdmin || u.Role == userRoleBackOffice
 }
+
+// AtleastTenantBackOffice checks if a user has at least Back Office access
+func (u *User) AtleastTenantBackOffice() bool {
+	return u.Role == userRoleAdmin || u.Role == userRoleBackOffice
+}
+
+const (
+	userRoleSuperAdmin = "SuperAdmin"
+	userRoleAdmin      = "Admin"
+	userRoleBackOffice = "BackOffice"
+	userRoleCustomer   = "Customer"
+	userRoleDriver     = "Driver"
+	userRoleNone       = "None"
+)

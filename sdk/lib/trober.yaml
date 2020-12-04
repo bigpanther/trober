@@ -125,6 +125,7 @@ paths:
       description: >-
         List all Containers
 
+
       parameters:
         - name: tenant_id
           in: query
@@ -244,6 +245,7 @@ paths:
       description: >-
         List all Terminals
 
+
       parameters:
         - name: tenant_id
           in: query
@@ -362,6 +364,7 @@ paths:
       summary: List all Orders
       description: >-
         List all Orders
+
 
       parameters:
         - name: tenant_id
@@ -720,6 +723,7 @@ paths:
       summary: List all users
       description: >-
         List all users
+
 
       parameters:
         - name: tenant_id
@@ -1239,9 +1243,9 @@ components:
       enum:
         - Unassigned
         - InTransit
-        - ArrivedAtTerminal
-        - AssignedForTransport
-        - ReadyForTransport
+        - Arrived
+        - Assigned
+        - Accepted
         - Rejected
         - Loaded
         - Unloaded

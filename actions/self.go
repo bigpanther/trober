@@ -4,19 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/shipanther/trober/models"
 )
 
 func selfGet(c buffalo.Context) error {
-	app.Worker.Perform(worker.Job{
-		Queue:   "default",
-		Handler: "testWorker",
-		Args: worker.Args{
-			"user_id": 123,
-		},
-	})
 	return c.Render(200, r.JSON(loggedInUser(c)))
 }
 

@@ -2,6 +2,7 @@ package actions
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -148,7 +149,7 @@ func (v ContainersResource) Update(c buffalo.Context) error {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
 	}
-	if (container.Status.String == "Assigned" && container.DriverID != nulls.UUID{}) {
+	if container.Status.String == "Assigned" && container.DriverID != nulls.UUID {
 		u := &models.User{}
 		_ = tx.Where("id = ?", container.DriverID.UUID).First(u)
 		if u.DeviceID.String != "" {
@@ -157,10 +158,11 @@ func (v ContainersResource) Update(c buffalo.Context) error {
 				Handler: "sendNotifications",
 				Args: worker.Args{
 					"to":            []string{u.DeviceID.String},
-					"message.title": "You have been assigned a pickup",
-					"message.body":  container.SerialNumber,
+					"message.title": fmt.Sprintf("You have been assigned a pickup - %s", container.SerialNumber.String),
+					"message.body":  container.SerialNumber.String,
 					"message.data": map[string]string{
-						"container_id": container.ID.String(),
+						"container.id":           container.ID.String(),
+						"container.serialNumber": container.SerialNumber.String,
 					},
 				},
 			})
@@ -202,6 +204,7 @@ func (v ContainersResource) UpdateStatus(c buffalo.Context) error {
 	}
 	if loggedInUser.IsDriver() {
 		if container.IsAssigned() {
+
 			container.Status.String = status
 		}
 		//notify backoffice

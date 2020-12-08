@@ -64,9 +64,10 @@ func (v UsersResource) Show(c buffalo.Context) error {
 
 	// Allocate an empty User
 	user := &models.User{}
+	var populatedFields = []string{"Customer"}
 
 	// To find the User the parameter user_id is used.
-	if err := tx.Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
+	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

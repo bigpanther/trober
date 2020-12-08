@@ -31,10 +31,10 @@ type Container struct {
 	Status          nulls.String `json:"status" db:"status"`
 	DriverID        nulls.UUID   `json:"driver_id" db:"driver_id"`
 	Tenant          *Tenant      `belongs_to:"tenant" json:"-"`
-	Terminal        *Terminal    `belongs_to:"terminal"  json:",omitempty"`
-	Carrier         *Carrier     `belongs_to:"carrier" json:",omitempty"`
-	Order           *Order       `belongs_to:"order" json:",omitempty"`
-	Driver          *User        `belongs_to:"user" json:",omitempty"`
+	Terminal        *Terminal    `belongs_to:"terminal"  json:"terminal,omitempty"`
+	Carrier         *Carrier     `belongs_to:"carrier" json:"carrier,omitempty"`
+	Order           *Order       `belongs_to:"order" json:"order,omitempty"`
+	Driver          *User        `belongs_to:"user" json:"driver,omitempty"`
 }
 
 // String is not required by pop and may be deleted

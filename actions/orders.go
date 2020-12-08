@@ -41,7 +41,10 @@ func (v OrdersResource) List(c buffalo.Context) error {
 	// Paginate results. Params "page" and "per_page" control pagination.
 	// Default values are "page=1" and "per_page=20".
 	q := tx.PaginateFromParams(c.Params())
-
+	customerID := c.Param("customer_id")
+	if customerID != "" {
+		q = q.Where("customer_id = ?", customerID)
+	}
 	// Retrieve all Orders from the DB
 	if err := q.Scope(restrictedScope(c)).All(orders); err != nil {
 		return err
@@ -62,9 +65,10 @@ func (v OrdersResource) Show(c buffalo.Context) error {
 
 	// Allocate an empty Order
 	order := &models.Order{}
+	var populatedFields = []string{"Customer"}
 
 	// To find the Order the parameter order_id is used.
-	if err := tx.Scope(restrictedScope(c)).Find(order, c.Param("order_id")); err != nil {
+	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(order, c.Param("order_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

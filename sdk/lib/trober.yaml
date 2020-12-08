@@ -2,7 +2,7 @@ openapi: 3.0.3
 servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/harsimranmaan/jober/0.1.2
+    url: https://virtserver.swaggerhub.com/harsimranmaan/jober/0.1.4
   - description: SwaggerHub API Auto Mocking
     url: https://trober-test.herokuapp.com
 info:
@@ -131,6 +131,27 @@ paths:
           in: query
           required: false
           description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
+        - name: order_id
+          in: query
+          required: false
+          description: The id of the order
+          schema:
+            type: string
+            format: uuid
+        - name: carrier_id
+          in: query
+          required: false
+          description: The id of the carrier
+          schema:
+            type: string
+            format: uuid
+        - name: driver_id
+          in: query
+          required: false
+          description: The id of the driver
           schema:
             type: string
             format: uuid
@@ -415,6 +436,13 @@ paths:
           in: query
           required: false
           description: The id of the tenant
+          schema:
+            type: string
+            format: uuid
+        - name: customer_id
+          in: query
+          required: false
+          description: The id of the customer
           schema:
             type: string
             format: uuid
@@ -1079,6 +1107,8 @@ components:
           type: string
           minLength: 3
           maxLength: 50
+        orders:
+          $ref: "#/components/schemas/Orders"
     Terminals:
       type: array
       items:
@@ -1150,6 +1180,8 @@ components:
           readOnly: true
         type:
           $ref: "#/components/schemas/CarrierType"
+        containers:
+          $ref: "#/components/schemas/Containers"
       description: A carrier that ships the containers
     Containers:
       type: array
@@ -1261,6 +1293,8 @@ components:
           $ref: "#/components/schemas/OrderStatus"
         customer:
           $ref: "#/components/schemas/Customer"
+        containers:
+          $ref: "#/components/schemas/Containers"
       description: A container that is being shipped
     TenantType:
       type: string

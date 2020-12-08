@@ -20,8 +20,8 @@ type Order struct {
 	CustomerID   uuid.UUID `json:"customer_id" db:"customer_id"`
 	SerialNumber string    `json:"serial_number" db:"serial_number"`
 	Status       string    `json:"status" db:"status"`
-	Tenant       Tenant    `belongs_to:"tenant"`
-	Customer     Customer  `belongs_to:"customer"`
+	Tenant       *Tenant   `belongs_to:"tenant" json:",omitempty"`
+	Customer     *Customer `belongs_to:"customer" json:",omitempty"`
 }
 
 // String is not required by pop and may be deleted

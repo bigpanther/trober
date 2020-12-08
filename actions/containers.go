@@ -70,9 +70,13 @@ func (v ContainersResource) Show(c buffalo.Context) error {
 
 	// Allocate an empty Container
 	container := &models.Container{}
+	var populatedFields = []string{"Order", "Driver", "Terminal", "Order", "Carrier"}
+	if loggedInUser(c).IsSuperAdmin() {
+		populatedFields = append(populatedFields, "Tenant")
+	}
 
 	// To find the Container the parameter container_id is used.
-	if err := tx.Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {
+	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -149,7 +153,7 @@ func (v ContainersResource) Update(c buffalo.Context) error {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 
 	}
-	if container.Status.String == "Assigned" && container.DriverID != nulls.UUID {
+	if (container.Status.String == "Assigned" && container.DriverID != nulls.UUID{}) {
 		u := &models.User{}
 		_ = tx.Where("id = ?", container.DriverID.UUID).First(u)
 		if u.DeviceID.String != "" {
@@ -204,7 +208,6 @@ func (v ContainersResource) UpdateStatus(c buffalo.Context) error {
 	}
 	if loggedInUser.IsDriver() {
 		if container.IsAssigned() {
-
 			container.Status.String = status
 		}
 		//notify backoffice

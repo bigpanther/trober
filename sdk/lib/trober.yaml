@@ -6,7 +6,7 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://trober-test.herokuapp.com
 info:
-  version: "0.1.3"
+  version: "0.1.4"
   title: Trober API
   description: >-
     The trober API
@@ -1214,6 +1214,14 @@ components:
         driver_id:
           type: string
           format: uuid
+        driver:
+          $ref: "#/components/schemas/User"
+        order:
+          $ref: "#/components/schemas/Order"
+        terminal:
+          $ref: "#/components/schemas/Terminal"
+        carrier:
+          $ref: "#/components/schemas/Carrier"
       description: A container that is being shipped
     Orders:
       type: array
@@ -1251,6 +1259,8 @@ components:
           maxLength: 25
         status:
           $ref: "#/components/schemas/OrderStatus"
+        customer:
+          $ref: "#/components/schemas/Customer"
       description: A container that is being shipped
     TenantType:
       type: string

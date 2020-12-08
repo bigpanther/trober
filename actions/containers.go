@@ -45,9 +45,22 @@ func (v ContainersResource) List(c buffalo.Context) error {
 	// Paginate results. Params "page" and "per_page" control pagination.
 	// Default values are "page=1" and "per_page=20".
 	q := tx.PaginateFromParams(c.Params())
+	orderID := c.Param("order_id")
+	if orderID != "" {
+		q = q.Where("order_id = ?", orderID)
+	}
+	carrierID := c.Param("carrier_id")
+	if carrierID != "" {
+		q = q.Where("carrier_id = ?", carrierID)
+	}
+	driverID := c.Param("driver_id")
+
 	var loggedInUser = loggedInUser(c)
 	if loggedInUser.IsDriver() {
-		q = q.Where("driver_id = ?", loggedInUser.ID)
+		driverID = loggedInUser.ID.String()
+	}
+	if carrierID != "" {
+		q = q.Where("driver_id = ?", driverID)
 	}
 
 	// Retrieve all Containers from the DB
@@ -70,7 +83,7 @@ func (v ContainersResource) Show(c buffalo.Context) error {
 
 	// Allocate an empty Container
 	container := &models.Container{}
-	var populatedFields = []string{"Order", "Driver", "Terminal", "Order", "Carrier"}
+	var populatedFields = []string{"Order", "Driver", "Terminal", "Carrier"}
 
 	// To find the Container the parameter container_id is used.
 	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {

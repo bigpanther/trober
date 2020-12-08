@@ -21,7 +21,7 @@ type Carrier struct {
 	Type      string       `json:"type" db:"type"`
 	Eta       nulls.Time   `json:"eta" db:"eta"`
 	TenantID  uuid.UUID    `json:"tenant_id" db:"tenant_id"`
-	Tenant    *Tenant      `belongs_to:"tenant" json:",omitempty"`
+	Tenant    *Tenant      `belongs_to:"tenant" json:"-"`
 }
 
 // String is not required by pop and may be deleted

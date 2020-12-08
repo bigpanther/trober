@@ -20,7 +20,7 @@ type Order struct {
 	CustomerID   uuid.UUID `json:"customer_id" db:"customer_id"`
 	SerialNumber string    `json:"serial_number" db:"serial_number"`
 	Status       string    `json:"status" db:"status"`
-	Tenant       *Tenant   `belongs_to:"tenant" json:",omitempty"`
+	Tenant       *Tenant   `belongs_to:"tenant" json:"-"`
 	Customer     *Customer `belongs_to:"customer" json:",omitempty"`
 }
 

@@ -71,9 +71,6 @@ func (v ContainersResource) Show(c buffalo.Context) error {
 	// Allocate an empty Container
 	container := &models.Container{}
 	var populatedFields = []string{"Order", "Driver", "Terminal", "Order", "Carrier"}
-	if loggedInUser(c).IsSuperAdmin() {
-		populatedFields = append(populatedFields, "Tenant")
-	}
 
 	// To find the Container the parameter container_id is used.
 	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {

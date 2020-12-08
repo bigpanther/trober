@@ -16,6 +16,7 @@ check-format:
 
 .PHONY: test
 test:
+	buffalo task db:demo_create db:demo_drop
 	buffalo test
 API_VERSION = 0.1.0
 .PHONY: gen

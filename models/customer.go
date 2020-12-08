@@ -18,7 +18,7 @@ type Customer struct {
 	CreatedBy uuid.UUID `json:"created_by" db:"created_by"`
 	Name      string    `json:"name" db:"name"`
 	TenantID  uuid.UUID `json:"tenant_id" db:"tenant_id"`
-	Tenant    *Tenant   `belongs_to:"tenant" json:",omitempty"`
+	Tenant    *Tenant   `belongs_to:"tenant" json:"-"`
 }
 
 // String is not required by pop and may be deleted

@@ -64,7 +64,9 @@ func App() *buffalo.App {
 			},
 			SessionName: "_trober_session",
 		})
-
+		app.ErrorHandlers[0] = func(status int, err error, c buffalo.Context) error {
+			return c.Render(status, r.JSON(models.NewCustomError(err.Error(), fmt.Sprintf("%d", status), err)))
+		}
 		// Automatically redirect to SSL
 		app.Use(forceSSL())
 

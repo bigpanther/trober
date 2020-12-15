@@ -2,14 +2,13 @@ package actions
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/gobuffalo/buffalo"
 )
 
 var (
-	version = os.Getenv("TROBER_VERSION")
-	commit  = os.Getenv("TROBER_COMMIT")
+	version = "dev"
+	commit  = "dev"
 )
 
 func homeHandler(c buffalo.Context) error {

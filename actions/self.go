@@ -3,9 +3,9 @@ package actions
 import (
 	"net/http"
 
+	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v5"
-	"github.com/shipanther/trober/models"
 )
 
 func selfGet(c buffalo.Context) error {

@@ -1,7 +1,7 @@
 package actions
 
 import (
-	"github.com/shipanther/trober/models"
+	"github.com/bigpanther/trober/models"
 )
 
 func (as *ActionSuite) Test_TenantsResource_List() {

@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/shipanther/trober/actions"
+	"github.com/bigpanther/trober/actions"
 )
 
 // main is the starting point for your Buffalo application.

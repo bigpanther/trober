@@ -1,8 +1,8 @@
 package actions
 
 import (
+	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/httptest"
-	"github.com/shipanther/trober/models"
 )
 
 func (as *ActionSuite) Test_SefGet() {

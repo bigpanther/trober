@@ -3,8 +3,8 @@ package grifts
 import (
 	"time"
 
+	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/nulls"
-	"github.com/shipanther/trober/models"
 
 	"github.com/markbates/grift/grift"
 )

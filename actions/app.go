@@ -60,9 +60,8 @@ func App() *buffalo.App {
 			Env:          ENV,
 			SessionStore: sessions.Null{},
 			PreWares: []buffalo.PreWare{
-				cors.Default().Handler,
+				cors.AllowAll().Handler,
 			},
-			SessionName: "_trober_session",
 		})
 		app.ErrorHandlers[0] = func(status int, err error, c buffalo.Context) error {
 			return c.Render(status, r.JSON(models.NewCustomError(err.Error(), fmt.Sprintf("%d", status), err)))
@@ -95,8 +94,6 @@ func App() *buffalo.App {
 		userGroup.POST("/", UsersResource{}.Create)
 		userGroup.PUT("/{user_id}", UsersResource{}.Update)
 		userGroup.DELETE("/{user_id}", UsersResource{}.Destroy)
-		//app.Resource("/tenants", TenantsResource{})
-		//app.Resource("/users", UsersResource{})
 		var customerGroup = app.Group("/customers")
 		customerGroup.GET("/", CustomersResource{}.List)
 		customerGroup.GET("/{customer_id}", CustomersResource{}.Show)
@@ -229,7 +226,6 @@ func setCurrentUser(next buffalo.Handler) buffalo.Handler {
 			user = &models.User{}
 			tx := c.Value("tx").(*pop.Connection)
 			var username = c.Request().Header.Get(xToken)
-			fmt.Println(username)
 			err = tx.Where("username = ?", username).First(user)
 			if err != nil {
 				return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))

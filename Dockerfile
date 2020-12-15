@@ -1,7 +1,8 @@
 ARG TROBER_VERSION=dev
 ARG TROBER_COMMIT=dev
 FROM gobuffalo/buffalo:v0.16.16 as builder
-
+ARG TROBER_VERSION
+ARG TROBER_COMMIT
 ENV GO111MODULE on
 ENV GOPROXY http://proxy.golang.org
 
@@ -16,11 +17,9 @@ COPY go.sum go.sum
 RUN go mod download
 
 ADD . .
-RUN buffalo build -o /bin/trober
+RUN buffalo build -o /bin/trober --ldflags="-X github.com/bigpanther/trober/actions.version=${TROBER_VERSION} -X github.com/bigpanther/trober/actions.commit=${TROBER_COMMIT}"
 
 FROM alpine
-ARG TROBER_VERSION
-ARG TROBER_COMMIT
 RUN apk add --no-cache bash ca-certificates
 
 WORKDIR /bin/
@@ -28,8 +27,6 @@ WORKDIR /bin/
 COPY --from=builder /bin/trober .
 
 ENV GO_ENV=production
-ENV TROBER_VERSION=${TROBER_VERSION}
-ENV TROBER_COMMIT=${TROBER_COMMIT}
 # Bind the app to 0.0.0.0 so it can be seen from outside the container
 ENV ADDR=0.0.0.0
 

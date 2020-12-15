@@ -1,4 +1,4 @@
-module github.com/shipanther/trober
+module github.com/bigpanther/trober
 
 go 1.15
 

@@ -11,7 +11,7 @@ jobs:
     name: release
     steps:
       - uses: actions/checkout@v2
-      - uses: akhileshns/heroku-deploy@v3.6.8
+      - uses: akhileshns/heroku-deploy@v3.7.8
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "trober-test"
@@ -23,7 +23,7 @@ jobs:
           env:
             TROBER_VERSION: ${GITHUB_REF}
             TROBER_COMMIT: ${GITHUB_SHA}
-      - uses: akhileshns/heroku-deploy@v3.6.8
+      - uses: akhileshns/heroku-deploy@v3.7.8
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "trober"
@@ -33,8 +33,8 @@ jobs:
             TROBER_VERSION
             TROBER_COMMIT
           env:
-            TROBER_VERSION: $TROBER_VERSION
-            TROBER_COMMIT: $TROBER_COMMIT
+            TROBER_VERSION: ${GITHUB_REF}
+            TROBER_COMMIT: ${GITHUB_SHA}
   publish-sdk:
     runs-on: ubuntu-latest
     steps:

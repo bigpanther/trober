@@ -11,6 +11,7 @@ jobs:
     name: release
     steps:
       - uses: actions/checkout@v2
+      - run: export API_VERSION=${GITHUB_REF##*/}
       - uses: akhileshns/heroku-deploy@v3.7.8
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
@@ -21,7 +22,7 @@ jobs:
             TROBER_VERSION
             TROBER_COMMIT
         env:
-          TROBER_VERSION: ${GITHUB_REF}
+          TROBER_VERSION: ${API_VERSION}
           TROBER_COMMIT: ${GITHUB_SHA}
       - uses: akhileshns/heroku-deploy@v3.7.8
         with:
@@ -33,7 +34,7 @@ jobs:
             TROBER_VERSION
             TROBER_COMMIT
         env:
-          TROBER_VERSION: ${GITHUB_REF}
+          TROBER_VERSION: ${API_VERSION}
           TROBER_COMMIT: ${GITHUB_SHA}
   publish-sdk:
     runs-on: ubuntu-latest

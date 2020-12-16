@@ -20,9 +20,9 @@ jobs:
           docker_build_args: |
             TROBER_VERSION
             TROBER_COMMIT
-          env:
-            TROBER_VERSION: ${GITHUB_REF}
-            TROBER_COMMIT: ${GITHUB_SHA}
+        env:
+          TROBER_VERSION: ${GITHUB_REF}
+          TROBER_COMMIT: ${GITHUB_SHA}
       - uses: akhileshns/heroku-deploy@v3.7.8
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
@@ -32,9 +32,9 @@ jobs:
           docker_build_args: |
             TROBER_VERSION
             TROBER_COMMIT
-          env:
-            TROBER_VERSION: ${GITHUB_REF}
-            TROBER_COMMIT: ${GITHUB_SHA}
+        env:
+          TROBER_VERSION: ${GITHUB_REF}
+          TROBER_COMMIT: ${GITHUB_SHA}
   publish-sdk:
     runs-on: ubuntu-latest
     steps:

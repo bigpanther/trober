@@ -59,7 +59,7 @@ func (v ContainersResource) List(c buffalo.Context) error {
 	if loggedInUser.IsDriver() {
 		driverID = loggedInUser.ID.String()
 	}
-	if carrierID != "" {
+	if driverID != "" {
 		q = q.Where("driver_id = ?", driverID)
 	}
 

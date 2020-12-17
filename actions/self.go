@@ -19,7 +19,7 @@ func selfGetTenant(c buffalo.Context) error {
 	}
 	tenant := &models.Tenant{}
 
-	if err := tx.Scope(restrictedScope(c)).Find(tenant, loggedInUser(c).TenantID); err != nil {
+	if err := tx.Find(tenant, loggedInUser(c).TenantID); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 	return c.Render(200, r.JSON(tenant))

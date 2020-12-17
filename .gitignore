@@ -24,3 +24,4 @@ jhw.*
 dist/
 generated/
 .vendor/
+coverage.txt

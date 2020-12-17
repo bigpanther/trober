@@ -28,12 +28,14 @@ type TenantsResource struct {
 	buffalo.Resource
 }
 
+var errNotFound = errors.New("Not found")
+
 // List gets all Tenants. This function is mapped to the path
 // GET /tenants
 func (v TenantsResource) List(c buffalo.Context) error {
 	// Get the DB connection from the context
 	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errors.New("tenant listing operation not allowed for user"))))
+		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errNotFound)))
 	}
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -60,7 +62,7 @@ func (v TenantsResource) List(c buffalo.Context) error {
 func (v TenantsResource) Show(c buffalo.Context) error {
 	tenantID := c.Param("tenant_id")
 	if !loggedInUser(c).IsSuperAdmin() && (loggedInUser(c).IsNotActive() || loggedInUser(c).TenantID.String() != tenantID) {
-		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errors.New("tenant listing operation not allowed for user"))))
+		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
@@ -84,7 +86,7 @@ func (v TenantsResource) Show(c buffalo.Context) error {
 // path POST /tenants
 func (v TenantsResource) Create(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errors.New("tenant listing operation not allowed for user"))))
+		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errNotFound)))
 	}
 	// Allocate an empty Tenant
 	tenant := &models.Tenant{}
@@ -123,7 +125,7 @@ func (v TenantsResource) Create(c buffalo.Context) error {
 // the path PUT /tenants/{tenant_id}
 func (v TenantsResource) Update(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errors.New("tenant listing operation not allowed for user"))))
+		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)

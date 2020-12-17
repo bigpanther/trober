@@ -71,7 +71,7 @@ ALTER TABLE public.containers OWNER TO postgres;
 
 CREATE TABLE public.customers (
     id uuid NOT NULL,
-    created_by uuid NOT NULL,
+    created_by uuid,
     name character varying(50) NOT NULL,
     tenant_id uuid NOT NULL,
     created_at timestamp without time zone NOT NULL,
@@ -158,7 +158,7 @@ CREATE TABLE public.users (
     customer_id uuid,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    email character varying(50),
+    email character varying(50) NOT NULL,
     device_id character varying(255)
 );
 

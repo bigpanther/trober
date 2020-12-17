@@ -1,0 +1,2 @@
+change_column("users", "email", "string", {"size": 50})
+change_column("customers", "created_by", "uuid", {"null": true})

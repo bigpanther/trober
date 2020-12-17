@@ -96,13 +96,13 @@ func (u *User) IsNotActive() bool {
 	return u.Role == userRoleNone || u.TenantID == uuid.Nil
 }
 
-// AtleastBackOffice checks if a user has at least Back Office access
-func (u *User) AtleastBackOffice() bool {
+// IsAtleastBackOffice checks if a user has at least Back Office access
+func (u *User) IsAtleastBackOffice() bool {
 	return u.Role == userRoleSuperAdmin || u.Role == userRoleAdmin || u.Role == userRoleBackOffice
 }
 
-// AtleastTenantBackOffice checks if a user has at least Back Office access
-func (u *User) AtleastTenantBackOffice() bool {
+// IsAtleastTenantBackOffice checks if a user has at least Back Office access
+func (u *User) IsAtleastTenantBackOffice() bool {
 	return u.Role == userRoleAdmin || u.Role == userRoleBackOffice
 }
 

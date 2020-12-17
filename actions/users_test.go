@@ -107,5 +107,51 @@ func (as *ActionSuite) Test_UsersResource_Update() {
 }
 
 func (as *ActionSuite) Test_UsersResource_Destroy() {
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"klopp", http.StatusOK},
+		{"firmino", http.StatusOK},
+		{"mane", http.StatusOK},
+		{"salah", http.StatusNotFound},
+		{"nike", http.StatusNotFound},
+		{"coutinho", http.StatusNotFound},
+		{"richarlson", http.StatusNotFound},
+		{"rodriguez", http.StatusNotFound},
+		{"lewin", http.StatusNotFound},
+		{"allan", http.StatusNotFound},
+		{"adidas", http.StatusNotFound},
+	}
+	firmino := as.getLoggedInUser("firmino")
+
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			var name = fmt.Sprintf("user%s", test.username)
+			newUser := &models.User{Name: name, Role: "Driver", Username: name, Email: fmt.Sprintf("user%s@bigpanther.ca", test.username), TenantID: firmino.TenantID}
+			v, err := as.DB.ValidateAndCreate(newUser)
+			as.Nil(err)
+			as.Equal(0, len(v.Errors))
+
+			user := as.getLoggedInUser(test.username)
+			req := as.setupRequest(user, fmt.Sprintf("/users/%s", newUser.ID))
+			res := req.Delete()
+			as.Equal(test.responseCode, res.Code)
+			if test.responseCode == http.StatusOK {
+				var user = models.User{}
+				res.Bind(&user)
+				as.Equal(name, user.Name)
+				// Check if actually deleted
+				user = models.User{}
+				err = as.DB.Where("name=?", name).First(&user)
+				as.Contains(err.Error(), "no rows in result set")
+			} else {
+				user := models.User{}
+				err = as.DB.Where("name=?", name).First(&user)
+				//Not deleted yet
+				as.Equal(name, user.Name)
+			}
+		})
+	}
 }

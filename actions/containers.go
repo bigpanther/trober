@@ -204,7 +204,7 @@ func (v ContainersResource) UpdateStatus(c buffalo.Context) error {
 		return c.Error(http.StatusBadRequest, errors.New("invalid status"))
 	}
 	var loggedInUser = loggedInUser(c)
-	if loggedInUser.AtleastBackOffice() {
+	if loggedInUser.IsAtleastBackOffice() {
 		var driverID nulls.UUID
 
 		// Bind driver to the html form elements

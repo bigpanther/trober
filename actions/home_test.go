@@ -1,10 +1,24 @@
 package actions
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func (as *ActionSuite) Test_HomeHandler() {
 	res := as.JSON("/").Get()
-
 	as.Equal(http.StatusOK, res.Code)
-	as.Contains(res.Body.String(), "Welcome to Trober!")
+	var home = &home{}
+	res.Bind(home)
+	as.Equal(home.Message, "Welcome to Trober!")
+	as.Equal(home.Version, "dev")
+	as.Equal(home.Commit, "dev")
+}
+
+func (as *ActionSuite) Test_AppInfoHandler() {
+	res := as.JSON("/appinfo").Get()
+	as.Equal(http.StatusOK, res.Code)
+	var appInfo = &appInfo{}
+	res.Bind(appInfo)
+	as.Contains(appInfo.CurrentVersion, ".")
+	as.Contains(appInfo.MinVersion, ".")
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/models"
@@ -36,13 +37,22 @@ func tenantsList(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-
+	tenantName := strings.Trim(c.Param("name"), " '")
+	tenantType := strings.Trim(c.Param("type"), " '")
 	tenants := &models.Tenants{}
 
 	// Paginate results. Params "page" and "per_page" control pagination.
 	// Default values are "page=1" and "per_page=20".
 	q := tx.PaginateFromParams(c.Params())
-
+	if tenantName != "" {
+		if len(tenantName) < 2 {
+			return c.Render(http.StatusOK, r.JSON(tenants))
+		}
+		q = q.Where("name ILIKE ?", fmt.Sprintf("%s%%", tenantName))
+	}
+	if tenantType != "" {
+		q = q.Where("type = ?", tenantType)
+	}
 	// Retrieve all Tenants from the DB
 	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(tenants); err != nil {
 		return err
@@ -54,7 +64,8 @@ func tenantsList(c buffalo.Context) error {
 // the path GET /tenants/{tenant_id}
 func tenantsShow(c buffalo.Context) error {
 	tenantID := c.Param("tenant_id")
-	if !loggedInUser(c).IsSuperAdmin() && (loggedInUser(c).IsNotActive() || loggedInUser(c).TenantID.String() != tenantID) {
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.IsSuperAdmin() && (loggedInUser.IsNotActive() || loggedInUser.TenantID.String() != tenantID) {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
@@ -105,11 +116,8 @@ func tenantsCreate(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-
 	}
-
 	return c.Render(http.StatusCreated, r.JSON(tenant))
 
 }
@@ -144,9 +152,7 @@ func tenantsUpdate(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-
 	}
 
 	return c.Render(http.StatusOK, r.JSON(tenant))

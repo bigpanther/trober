@@ -159,9 +159,7 @@ func (v ContainersResource) Update(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-
 	}
 	if (container.Status.String == "Assigned" && container.DriverID != nulls.UUID{}) {
 		u := &models.User{}
@@ -231,9 +229,7 @@ func (v ContainersResource) UpdateStatus(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-
 	}
 
 	return c.Render(http.StatusOK, r.JSON(container))

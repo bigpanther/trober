@@ -71,6 +71,16 @@ func (u *User) IsSuperAdmin() bool {
 	return u.Role == userRoleSuperAdmin
 }
 
+// IsAdmin checks if a user can work across tenants
+func (u *User) IsAdmin() bool {
+	return u.Role == userRoleAdmin
+}
+
+// IsBackOffice checks if a user can work across tenants
+func (u *User) IsBackOffice() bool {
+	return u.Role == userRoleBackOffice
+}
+
 // IsDriver checks if a user is a driver
 func (u *User) IsDriver() bool {
 	return u.Role == userRoleDriver

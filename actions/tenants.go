@@ -45,7 +45,7 @@ func tenantsList(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Tenants from the DB
-	if err := q.Scope(restrictedScope(c)).All(tenants); err != nil {
+	if err := q.Scope(restrictedScope(c)).Order("created_at desc").All(tenants); err != nil {
 		return err
 	}
 

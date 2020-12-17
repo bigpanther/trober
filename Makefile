@@ -13,11 +13,11 @@ check-format:
 			$(foreach file,$(unformatted),$(\n)    gofmt -w -s $(file))$(\n)),\
 		@echo All files are well formatted.\
 	)
-
+.PHONY: test-demo
+test-demo:
+	buffalo task db:demo_create db:demo_drop
 .PHONY: test
 test:
-	buffalo pop create
-	buffalo task db:demo_create db:demo_drop
 	buffalo test -coverprofile=coverage.txt -covermode=atomic -race ./...
 API_VERSION = 0.1.0
 .PHONY: gen
@@ -36,6 +36,7 @@ pg:
 .PHONY: migrate
 migrate:
 	buffalo pop migrate
+
 
 .PHONY: seed
 seed:

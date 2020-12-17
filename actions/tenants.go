@@ -25,7 +25,7 @@ const (
 
 var errNotFound = errors.New(notFound)
 
-// List gets all Tenants. This function is mapped to the path
+// tenantsList gets all Tenants. This function is mapped to the path
 // GET /tenants
 func tenantsList(c buffalo.Context) error {
 	// Get the DB connection from the context
@@ -50,7 +50,7 @@ func tenantsList(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.JSON(tenants))
 }
 
-// Show gets the data for one Tenant. This function is mapped to
+// tenantsShow gets the data for one Tenant. This function is mapped to
 // the path GET /tenants/{tenant_id}
 func tenantsShow(c buffalo.Context) error {
 	tenantID := c.Param("tenant_id")
@@ -75,7 +75,7 @@ func tenantsShow(c buffalo.Context) error {
 
 }
 
-// Create adds a Tenant to the DB. This function is mapped to the
+// tenantsCreate adds a Tenant to the DB. This function is mapped to the
 // path POST /tenants
 func tenantsCreate(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {
@@ -114,7 +114,7 @@ func tenantsCreate(c buffalo.Context) error {
 
 }
 
-// Update changes a Tenant in the DB. This function is mapped to
+// tenantsUpdate changes a Tenant in the DB. This function is mapped to
 // the path PUT /tenants/{tenant_id}
 func tenantsUpdate(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {
@@ -153,7 +153,7 @@ func tenantsUpdate(c buffalo.Context) error {
 
 }
 
-// Destroy deletes a Tenant from the DB. This function is mapped
+// tenantsDestroy deletes a Tenant from the DB. This function is mapped
 // to the path DELETE /tenants/{tenant_id}
 func tenantsDestroy(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {

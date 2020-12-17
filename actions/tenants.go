@@ -164,7 +164,7 @@ func (v TenantsResource) Update(c buffalo.Context) error {
 // to the path DELETE /tenants/{tenant_id}
 func (v TenantsResource) Destroy(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errors.New("tenant listing operation not allowed for user"))))
+		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
@@ -176,7 +176,7 @@ func (v TenantsResource) Destroy(c buffalo.Context) error {
 	tenant := &models.Tenant{}
 
 	// To find the Tenant the parameter tenant_id is used.
-	if err := tx.Scope(restrictedScope(c)).Find(tenant, c.Param("tenant_id")); err != nil {
+	if err := tx.Find(tenant, c.Param("tenant_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 

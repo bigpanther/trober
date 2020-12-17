@@ -64,7 +64,7 @@ func (v ContainersResource) List(c buffalo.Context) error {
 	}
 
 	// Retrieve all Containers from the DB
-	if err := q.Scope(restrictedScope(c)).All(containers); err != nil {
+	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(containers); err != nil {
 		return err
 	}
 

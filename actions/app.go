@@ -91,11 +91,11 @@ func App() *buffalo.App {
 		tenantGroup.PUT("/{tenant_id}", tenantsUpdate)
 		tenantGroup.DELETE("/{tenant_id}", tenantsDestroy)
 		var userGroup = app.Group("/users")
-		userGroup.GET("/", UsersResource{}.List)
-		userGroup.GET("/{user_id}", UsersResource{}.Show)
-		userGroup.POST("/", UsersResource{}.Create)
-		userGroup.PUT("/{user_id}", UsersResource{}.Update)
-		userGroup.DELETE("/{user_id}", UsersResource{}.Destroy)
+		userGroup.GET("/", usersList)
+		userGroup.GET("/{user_id}", usersShow)
+		userGroup.POST("/", usersCreate)
+		userGroup.PUT("/{user_id}", usersUpdate)
+		userGroup.DELETE("/{user_id}", usersDestroy)
 		var customerGroup = app.Group("/customers")
 		customerGroup.GET("/", CustomersResource{}.List)
 		customerGroup.GET("/{customer_id}", CustomersResource{}.Show)
@@ -165,11 +165,13 @@ func forceSSL() buffalo.MiddlewareFunc {
 func restrictedScope(c buffalo.Context) pop.ScopeFunc {
 	return func(q *pop.Query) *pop.Query {
 		u := loggedInUser(c)
-
+		tenantID := c.Request().URL.Query().Get("tenant_id")
+		if tenantID != "" && !u.IsSuperAdmin() {
+			return q.Where("? = ?", u.TenantID, tenantID)
+		}
 		if !u.IsSuperAdmin() {
 			return q.Where("tenant_id = ?", u.TenantID)
 		}
-		tenantID := c.Request().URL.Query().Get("tenant_id")
 		if tenantID != "" {
 			return q.Where("tenant_id = ?", tenantID)
 		}

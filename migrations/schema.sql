@@ -121,7 +121,7 @@ CREATE TABLE public.tenants (
     type character varying(15) NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    code character varying(20)
+    code character varying(20) NOT NULL
 );
 
 
@@ -240,6 +240,13 @@ CREATE INDEX orders_tenant_id_serial_number_idx ON public.orders USING btree (te
 --
 
 CREATE UNIQUE INDEX schema_migration_version_idx ON public.schema_migration USING btree (version);
+
+
+--
+-- Name: users_tenant_id_email_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE UNIQUE INDEX users_tenant_id_email_idx ON public.users USING btree (tenant_id, email);
 
 
 --

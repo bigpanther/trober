@@ -43,7 +43,7 @@ func (v CustomersResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Customers from the DB
-	if err := q.Scope(restrictedScope(c)).All(customers); err != nil {
+	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(customers); err != nil {
 		return err
 	}
 

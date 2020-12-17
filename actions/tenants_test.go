@@ -31,9 +31,9 @@ func (as *ActionSuite) Test_TenantsResource_List() {
 			res := req.Get()
 			as.Equal(test.responseCode, res.Code)
 			if test.responseCode == http.StatusOK {
-				var tenants = &models.Tenants{}
-				res.Bind(tenants)
-				as.Equal(len(*tenants), test.tenantCount)
+				var tenants = models.Tenants{}
+				res.Bind(&tenants)
+				as.Equal(test.tenantCount, len(tenants))
 			}
 		})
 	}
@@ -49,10 +49,10 @@ func (as *ActionSuite) Test_TenantsResource_List_Order() {
 	req := as.setupRequest(user, "/tenants")
 	res := req.Get()
 	as.Equal(http.StatusOK, res.Code)
-	var tenants = &models.Tenants{}
-	res.Bind(tenants)
-	as.Equal(len(*tenants), 4)
-	as.Equal("Test", (*tenants)[0].Name)
+	var tenants = models.Tenants{}
+	res.Bind(&tenants)
+	as.Equal(len(tenants), 4)
+	as.Equal("Test", (tenants)[0].Name)
 }
 
 func (as *ActionSuite) Test_TenantsResource_List_Pagination() {
@@ -66,17 +66,17 @@ func (as *ActionSuite) Test_TenantsResource_List_Pagination() {
 	req := as.setupRequest(user, "/tenants?page=1&per_page=1")
 	res := req.Get()
 	as.Equal(http.StatusOK, res.Code)
-	var tenants = &models.Tenants{}
-	res.Bind(tenants)
-	as.Equal(len(*tenants), 1)
-	as.Equal("Test", (*tenants)[0].Name)
+	var tenants = models.Tenants{}
+	res.Bind(&tenants)
+	as.Equal(len(tenants), 1)
+	as.Equal("Test", (tenants)[0].Name)
 	req = as.setupRequest(user, "/tenants?page=2&per_page=2")
 	res = req.Get()
 	as.Equal(http.StatusOK, res.Code)
-	tenants = &models.Tenants{}
-	res.Bind(tenants)
-	as.Equal(len(*tenants), 2)
-	for _, v := range *tenants {
+	tenants = models.Tenants{}
+	res.Bind(&tenants)
+	as.Equal(len(tenants), 2)
+	for _, v := range tenants {
 		as.Contains(v.Name, "Big Panther")
 	}
 }
@@ -101,19 +101,19 @@ func (as *ActionSuite) Test_TenantsResource_List_Filter() {
 	req := as.setupRequest(user, "/tenants?name=ਪੰ")
 	res := req.Get()
 	as.Equal(http.StatusOK, res.Code)
-	var tenants = &models.Tenants{}
-	res.Bind(tenants)
-	as.Equal(5, len(*tenants))
-	for _, v := range *tenants {
+	var tenants = models.Tenants{}
+	res.Bind(&tenants)
+	as.Equal(5, len(tenants))
+	for _, v := range tenants {
 		as.Contains(v.Name, "ਪੰਜਾਬੀ")
 	}
 	req = as.setupRequest(user, "/tenants?name=tes&type=Production")
 	res = req.Get()
 	as.Equal(http.StatusOK, res.Code)
-	tenants = &models.Tenants{}
-	res.Bind(tenants)
-	as.Equal(3, len(*tenants))
-	for _, v := range *tenants {
+	tenants = models.Tenants{}
+	res.Bind(&tenants)
+	as.Equal(3, len(tenants))
+	for _, v := range tenants {
 		as.Contains(v.Name, "Test")
 	}
 }
@@ -141,7 +141,7 @@ func (as *ActionSuite) Test_TenantsResource_Show() {
 			as.Equal(test.responseCode, res.Code)
 			if test.responseCode == http.StatusOK {
 				var tenant = &models.Tenant{}
-				res.Bind(tenant)
+				res.Bind(&tenant)
 				as.Equal(test.tenantName, tenant.Name)
 			}
 		})
@@ -171,7 +171,7 @@ func (as *ActionSuite) Test_TenantsResource_Create() {
 			as.Equal(test.responseCode, res.Code)
 			if test.responseCode == http.StatusCreated {
 				var tenant = &models.Tenant{}
-				res.Bind(tenant)
+				res.Bind(&tenant)
 				as.Equal("Test", tenant.Name)
 				tenant = &models.Tenant{}
 				var err = as.DB.Where("name=?", "Test").First(tenant)
@@ -209,7 +209,7 @@ func (as *ActionSuite) Test_TenantsResource_Update() {
 			as.Equal(test.responseCode, res.Code)
 			if test.responseCode == http.StatusOK {
 				var tenant = &models.Tenant{}
-				res.Bind(tenant)
+				res.Bind(&tenant)
 				as.Equal("New Test", tenant.Name)
 				// Check if actually updated
 				tenant = &models.Tenant{}
@@ -251,7 +251,7 @@ func (as *ActionSuite) Test_TenantsResource_Destroy() {
 			as.Equal(test.responseCode, res.Code)
 			if test.responseCode == http.StatusOK {
 				var tenant = &models.Tenant{}
-				res.Bind(tenant)
+				res.Bind(&tenant)
 				as.Equal("Test", tenant.Name)
 				// Check if actually deleted
 				tenant = &models.Tenant{}

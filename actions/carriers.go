@@ -77,7 +77,7 @@ func (v CarriersResource) Show(c buffalo.Context) error {
 func (v CarriersResource) Create(c buffalo.Context) error {
 
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.AtleastBackOffice() {
+	if !loggedInUser.IsAtleastBackOffice() {
 		return models.ErrNotFound
 	}
 	// Allocate an empty Carrier
@@ -118,7 +118,7 @@ func (v CarriersResource) Create(c buffalo.Context) error {
 // the path PUT /carriers/{carrier_id}
 func (v CarriersResource) Update(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.AtleastBackOffice() {
+	if !loggedInUser.IsAtleastBackOffice() {
 		return models.ErrNotFound
 	}
 	// Get the DB connection from the context

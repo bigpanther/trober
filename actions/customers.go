@@ -76,7 +76,7 @@ func (v CustomersResource) Show(c buffalo.Context) error {
 // path POST /customers
 func (v CustomersResource) Create(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.AtleastBackOffice() {
+	if !loggedInUser.IsAtleastBackOffice() {
 		return models.ErrNotFound
 	}
 	// Allocate an empty Customer

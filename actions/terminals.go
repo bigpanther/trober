@@ -76,7 +76,7 @@ func (v TerminalsResource) Show(c buffalo.Context) error {
 // path POST /terminals
 func (v TerminalsResource) Create(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.AtleastBackOffice() {
+	if !loggedInUser.IsAtleastBackOffice() {
 		return models.ErrNotFound
 	}
 	// Allocate an empty Terminal
@@ -117,7 +117,7 @@ func (v TerminalsResource) Create(c buffalo.Context) error {
 // the path PUT /terminals/{terminal_id}
 func (v TerminalsResource) Update(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.AtleastBackOffice() {
+	if !loggedInUser.IsAtleastBackOffice() {
 		return models.ErrNotFound
 	}
 	// Get the DB connection from the context

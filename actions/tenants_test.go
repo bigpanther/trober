@@ -140,7 +140,7 @@ func (as *ActionSuite) Test_TenantsResource_Show() {
 			res := req.Get()
 			as.Equal(test.responseCode, res.Code)
 			if test.responseCode == http.StatusOK {
-				var tenant = &models.Tenant{}
+				var tenant = models.Tenant{}
 				res.Bind(&tenant)
 				as.Equal(test.tenantName, tenant.Name)
 			}
@@ -170,11 +170,11 @@ func (as *ActionSuite) Test_TenantsResource_Create() {
 			res := req.Post(newTenant)
 			as.Equal(test.responseCode, res.Code)
 			if test.responseCode == http.StatusCreated {
-				var tenant = &models.Tenant{}
+				var tenant = models.Tenant{}
 				res.Bind(&tenant)
 				as.Equal("Test", tenant.Name)
-				tenant = &models.Tenant{}
-				var err = as.DB.Where("name=?", "Test").First(tenant)
+				tenant = models.Tenant{}
+				var err = as.DB.Where("name=?", "Test").First(&tenant)
 				as.Nil(err)
 				as.Equal("Test", tenant.Name)
 			}
@@ -208,16 +208,16 @@ func (as *ActionSuite) Test_TenantsResource_Update() {
 			res := req.Put(newTenant)
 			as.Equal(test.responseCode, res.Code)
 			if test.responseCode == http.StatusOK {
-				var tenant = &models.Tenant{}
+				var tenant = models.Tenant{}
 				res.Bind(&tenant)
 				as.Equal("New Test", tenant.Name)
 				// Check if actually updated
-				tenant = &models.Tenant{}
-				err = as.DB.Where("name=?", "New Test").First(tenant)
+				tenant = models.Tenant{}
+				err = as.DB.Where("name=?", "New Test").First(&tenant)
 				as.Equal("New Test", tenant.Name)
 			} else {
-				tenant := &models.Tenant{}
-				err = as.DB.Where("name=?", "Test").First(tenant)
+				tenant := models.Tenant{}
+				err = as.DB.Where("name=?", "Test").First(&tenant)
 				//Not updated yet
 				as.Equal("Test", tenant.Name)
 			}
@@ -250,16 +250,16 @@ func (as *ActionSuite) Test_TenantsResource_Destroy() {
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
 			if test.responseCode == http.StatusOK {
-				var tenant = &models.Tenant{}
+				var tenant = models.Tenant{}
 				res.Bind(&tenant)
 				as.Equal("Test", tenant.Name)
 				// Check if actually deleted
-				tenant = &models.Tenant{}
-				err = as.DB.Where("name=?", "Test").First(tenant)
+				tenant = models.Tenant{}
+				err = as.DB.Where("name=?", "Test").First(&tenant)
 				as.Contains(err.Error(), "no rows in result set")
 			} else {
-				tenant := &models.Tenant{}
-				err = as.DB.Where("name=?", "Test").First(tenant)
+				tenant := models.Tenant{}
+				err = as.DB.Where("name=?", "Test").First(&tenant)
 				//Not deleted yet
 				as.Equal("Test", tenant.Name)
 			}

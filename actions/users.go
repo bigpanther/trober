@@ -30,7 +30,7 @@ import (
 // GET /users
 func usersList(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.AtleastBackOffice() {
+	if !loggedInUser.IsAtleastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
@@ -171,6 +171,10 @@ func usersUpdate(c buffalo.Context) error {
 // usersDestroy deletes a User from the DB. This function is mapped
 // to the path DELETE /users/{user_id}
 func usersDestroy(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.IsAtleastBackOffice() {
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {

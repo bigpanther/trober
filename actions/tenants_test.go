@@ -110,7 +110,7 @@ func (as *ActionSuite) Test_TenantsResource_Destroy() {
 				var tenant = &models.Tenant{}
 				res.Bind(tenant)
 				as.Equal("Test", tenant.Name)
-				// Check if actually delted
+				// Check if actually deleted
 				tenant = &models.Tenant{}
 				err = as.DB.Where("name=?", "Test").First(tenant)
 				as.Contains(err.Error(), "no rows in result set")

@@ -2,7 +2,9 @@ package actions
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/models"
@@ -24,38 +26,46 @@ import (
 // Path: Plural (/users)
 // View Template Folder: Plural (/templates/users/)
 
-// UsersResource is the resource for the User model
-type UsersResource struct {
-	buffalo.Resource
-}
-
-// List gets all Users. This function is mapped to the path
+// usersList gets all Users. This function is mapped to the path
 // GET /users
-func (v UsersResource) List(c buffalo.Context) error {
+func usersList(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.AtleastBackOffice() {
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
-
+	userName := strings.Trim(c.Param("name"), " '")
+	userRole := c.Param("role")
 	users := &models.Users{}
 
 	// Paginate results. Params "page" and "per_page" control pagination.
 	// Default values are "page=1" and "per_page=20".
 	q := tx.PaginateFromParams(c.Params())
 
-	// Retrieve all Users from the DB
-	if err := q.Scope(restrictedScope(c)).All(users); err != nil {
-		return err
+	if userName != "" {
+		if len(userName) < 2 {
+			return c.Render(http.StatusOK, r.JSON(users))
+		}
+		q = q.Where("name ILIKE ?", fmt.Sprintf("%s%%", userName))
+	}
+	if userRole != "" {
+		q = q.Where("role = ?", userRole)
 	}
 
+	// Retrieve all Users from the DB
+	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(users); err != nil {
+		return err
+	}
 	return c.Render(200, r.JSON(users))
-
 }
 
-// Show gets the data for one User. This function is mapped to
+// usersShow gets the data for one User. This function is mapped to
 // the path GET /users/{user_id}
-func (v UsersResource) Show(c buffalo.Context) error {
+func usersShow(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -75,9 +85,9 @@ func (v UsersResource) Show(c buffalo.Context) error {
 
 }
 
-// Create adds a User to the DB. This function is mapped to the
+// usersCreate adds a User to the DB. This function is mapped to the
 // path POST /users
-func (v UsersResource) Create(c buffalo.Context) error {
+func usersCreate(c buffalo.Context) error {
 	// Allocate an empty User
 	user := &models.User{}
 
@@ -115,9 +125,9 @@ func (v UsersResource) Create(c buffalo.Context) error {
 
 }
 
-// Update changes a User in the DB. This function is mapped to
+// usersUpdate changes a User in the DB. This function is mapped to
 // the path PUT /users/{user_id}
-func (v UsersResource) Update(c buffalo.Context) error {
+func usersUpdate(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -158,9 +168,9 @@ func (v UsersResource) Update(c buffalo.Context) error {
 
 }
 
-// Destroy deletes a User from the DB. This function is mapped
+// usersDestroy deletes a User from the DB. This function is mapped
 // to the path DELETE /users/{user_id}
-func (v UsersResource) Destroy(c buffalo.Context) error {
+func usersDestroy(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {

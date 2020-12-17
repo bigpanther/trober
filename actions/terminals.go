@@ -43,7 +43,7 @@ func (v TerminalsResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Terminals from the DB
-	if err := q.Scope(restrictedScope(c)).All(terminals); err != nil {
+	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(terminals); err != nil {
 		return err
 	}
 

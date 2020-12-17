@@ -38,7 +38,7 @@ func tenantsList(c buffalo.Context) error {
 		return models.ErrNotFound
 	}
 	tenantName := strings.Trim(c.Param("name"), " '")
-	tenantType := strings.Trim(c.Param("type"), " '")
+	tenantType := c.Param("type")
 	tenants := &models.Tenants{}
 
 	// Paginate results. Params "page" and "per_page" control pagination.

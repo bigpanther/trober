@@ -43,7 +43,7 @@ func (v CarriersResource) List(c buffalo.Context) error {
 	q := tx.PaginateFromParams(c.Params())
 
 	// Retrieve all Carriers from the DB
-	if err := q.Scope(restrictedScope(c)).All(carriers); err != nil {
+	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(carriers); err != nil {
 		return err
 	}
 

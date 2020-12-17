@@ -46,7 +46,7 @@ func (v OrdersResource) List(c buffalo.Context) error {
 		q = q.Where("customer_id = ?", customerID)
 	}
 	// Retrieve all Orders from the DB
-	if err := q.Scope(restrictedScope(c)).All(orders); err != nil {
+	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(orders); err != nil {
 		return err
 	}
 

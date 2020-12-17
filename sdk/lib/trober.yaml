@@ -21,6 +21,7 @@ paths:
       description: >-
         List all tenants
 
+
       parameters:
         - name: name
           in: query
@@ -888,14 +889,12 @@ paths:
           schema:
             type: string
             format: uuid
-
         - name: name
           in: query
           description: The name of the customer. Matches names that begin with the values
           schema:
             type: string
             minLength: 2
-
         - name: role
           in: query
           description: The role of the user
@@ -1033,6 +1032,7 @@ paths:
       summary: Get supported App info
       description: >-
         Get supported App info
+
 
       responses:
         "200":

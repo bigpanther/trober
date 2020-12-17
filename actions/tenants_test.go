@@ -38,6 +38,48 @@ func (as *ActionSuite) Test_TenantsResource_List() {
 		})
 	}
 }
+func (as *ActionSuite) Test_TenantsResource_List_Order() {
+	as.LoadFixture("Tenant bootstrap")
+	var username = "klopp"
+	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
+	v, err := as.DB.ValidateAndCreate(newTenant)
+	as.Nil(err)
+	as.Equal(0, len(v.Errors))
+	user := as.getLoggedInUser(username)
+	req := as.setupRequest(user, "/tenants")
+	res := req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	var tenants = &models.Tenants{}
+	res.Bind(tenants)
+	as.Equal(len(*tenants), 4)
+	as.Equal("Test", (*tenants)[0].Name)
+}
+
+func (as *ActionSuite) Test_TenantsResource_List_Pagination() {
+	as.LoadFixture("Tenant bootstrap")
+	var username = "klopp"
+	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
+	v, err := as.DB.ValidateAndCreate(newTenant)
+	as.Nil(err)
+	as.Equal(0, len(v.Errors))
+	user := as.getLoggedInUser(username)
+	req := as.setupRequest(user, "/tenants?page=1&per_page=1")
+	res := req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	var tenants = &models.Tenants{}
+	res.Bind(tenants)
+	as.Equal(len(*tenants), 1)
+	as.Equal("Test", (*tenants)[0].Name)
+	req = as.setupRequest(user, "/tenants?page=2&per_page=2")
+	res = req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	tenants = &models.Tenants{}
+	res.Bind(tenants)
+	as.Equal(len(*tenants), 2)
+	for _, v := range *tenants {
+		as.Contains(v.Name, "Big Panther")
+	}
+}
 
 func (as *ActionSuite) Test_TenantsResource_Show() {
 	as.LoadFixture("Tenant bootstrap")

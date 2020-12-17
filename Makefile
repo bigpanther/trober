@@ -16,7 +16,7 @@ check-format:
 
 .PHONY: test
 test:
-  buffalo pop create
+	buffalo pop create
 	buffalo task db:demo_create db:demo_drop
 	buffalo test -coverprofile=coverage.txt -covermode=atomic -race ./...
 API_VERSION = 0.1.0

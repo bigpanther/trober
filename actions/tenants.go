@@ -2,6 +2,7 @@ package actions
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -23,19 +24,14 @@ import (
 // Path: Plural (/tenants)
 // View Template Folder: Plural (/templates/tenants/)
 
-// TenantsResource is the resource for the Tenant model
-type TenantsResource struct {
-	buffalo.Resource
-}
-
 var errNotFound = errors.New("Not found")
 
 // List gets all Tenants. This function is mapped to the path
 // GET /tenants
-func (v TenantsResource) List(c buffalo.Context) error {
+func tenantsList(c buffalo.Context) error {
 	// Get the DB connection from the context
 	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError("Not found", fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -59,10 +55,10 @@ func (v TenantsResource) List(c buffalo.Context) error {
 
 // Show gets the data for one Tenant. This function is mapped to
 // the path GET /tenants/{tenant_id}
-func (v TenantsResource) Show(c buffalo.Context) error {
+func tenantsShow(c buffalo.Context) error {
 	tenantID := c.Param("tenant_id")
 	if !loggedInUser(c).IsSuperAdmin() && (loggedInUser(c).IsNotActive() || loggedInUser(c).TenantID.String() != tenantID) {
-		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError("Not found", fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
@@ -84,9 +80,9 @@ func (v TenantsResource) Show(c buffalo.Context) error {
 
 // Create adds a Tenant to the DB. This function is mapped to the
 // path POST /tenants
-func (v TenantsResource) Create(c buffalo.Context) error {
+func tenantsCreate(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError("Not found", fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Allocate an empty Tenant
 	tenant := &models.Tenant{}
@@ -123,9 +119,9 @@ func (v TenantsResource) Create(c buffalo.Context) error {
 
 // Update changes a Tenant in the DB. This function is mapped to
 // the path PUT /tenants/{tenant_id}
-func (v TenantsResource) Update(c buffalo.Context) error {
+func tenantsUpdate(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError("Not found", fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
@@ -162,9 +158,9 @@ func (v TenantsResource) Update(c buffalo.Context) error {
 
 // Destroy deletes a Tenant from the DB. This function is mapped
 // to the path DELETE /tenants/{tenant_id}
-func (v TenantsResource) Destroy(c buffalo.Context) error {
+func tenantsDestroy(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(404, r.JSON(models.NewCustomError("Not found", "404", errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError("Not found", fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)

@@ -2,6 +2,7 @@ package actions
 
 import (
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/bigpanther/trober/models"
@@ -15,12 +16,12 @@ func (as *ActionSuite) Test_TenantsResource_List() {
 		responseCode int
 		tenantCount  int
 	}{
-		{"mane", 404, 0},
-		{"firmino", 404, 0},
-		{"allan", 404, 0},
-		{"salah", 404, 0},
-		{"klopp", 200, 3},
-		{"adidas", 404, 0},
+		{"mane", http.StatusNotFound, 0},
+		{"firmino", http.StatusNotFound, 0},
+		{"allan", http.StatusNotFound, 0},
+		{"salah", http.StatusNotFound, 0},
+		{"klopp", http.StatusOK, 3},
+		{"adidas", http.StatusNotFound, 0},
 	}
 
 	for _, test := range tests {
@@ -29,7 +30,7 @@ func (as *ActionSuite) Test_TenantsResource_List() {
 			req := as.setupRequest(user, "/tenants")
 			res := req.Get()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == 200 {
+			if test.responseCode == http.StatusOK {
 				var tenants = &models.Tenants{}
 				res.Bind(tenants)
 				as.Equal(len(*tenants), test.tenantCount)
@@ -45,12 +46,12 @@ func (as *ActionSuite) Test_TenantsResource_Show() {
 		responseCode int
 		tenantName   string
 	}{
-		{"mane", 200, "Big Panther Liverpool"},
-		{"firmino", 200, "Big Panther Liverpool"},
-		{"allan", 404, "Big Panther Everton"},
-		{"salah", 200, "Big Panther Liverpool"},
-		{"klopp", 200, "Big Panther Test"},
-		{"adidas", 200, "Big Panther Everton"},
+		{"mane", http.StatusOK, "Big Panther Liverpool"},
+		{"firmino", http.StatusOK, "Big Panther Liverpool"},
+		{"allan", http.StatusNotFound, "Big Panther Everton"},
+		{"salah", http.StatusOK, "Big Panther Liverpool"},
+		{"klopp", http.StatusOK, "Big Panther Test"},
+		{"adidas", http.StatusOK, "Big Panther Everton"},
 	}
 
 	for _, test := range tests {
@@ -59,7 +60,7 @@ func (as *ActionSuite) Test_TenantsResource_Show() {
 			req := as.setupRequest(user, fmt.Sprintf("/tenants/%s", user.TenantID))
 			res := req.Get()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == 200 {
+			if test.responseCode == http.StatusOK {
 				var tenant = &models.Tenant{}
 				res.Bind(tenant)
 				as.Equal(test.tenantName, tenant.Name)
@@ -69,16 +70,80 @@ func (as *ActionSuite) Test_TenantsResource_Show() {
 }
 
 func (as *ActionSuite) Test_TenantsResource_Create() {
-	// var tenants = models.Tenants{}
-	// //var tenat
-	// res := as.JSON("/tenants").Post()
-	// as.Equal(200, res.Code)
-	// res.Bind(tenants)
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusNotFound},
+		{"firmino", http.StatusNotFound},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusNotFound},
+		{"adidas", http.StatusNotFound},
+		{"klopp", http.StatusCreated},
+	}
+	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
+
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			req := as.setupRequest(user, "/tenants")
+			res := req.Post(newTenant)
+			as.Equal(test.responseCode, res.Code)
+			if test.responseCode == http.StatusCreated {
+				var tenant = &models.Tenant{}
+				res.Bind(tenant)
+				as.Equal("Test", tenant.Name)
+				tenant = &models.Tenant{}
+				var err = as.DB.Where("name=?", "Test").First(tenant)
+				as.Nil(err)
+				as.Equal("Test", tenant.Name)
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_TenantsResource_Update() {
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusNotFound},
+		{"firmino", http.StatusNotFound},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusNotFound},
+		{"adidas", http.StatusNotFound},
+		{"klopp", http.StatusOK},
+	}
+	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
+	v, err := as.DB.ValidateAndCreate(newTenant)
+	as.Nil(err)
+	as.Equal(0, len(v.Errors))
+
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			req := as.setupRequest(user, fmt.Sprintf("/tenants/%s", newTenant.ID))
+			newTenant.Name = "New Test"
+			res := req.Put(newTenant)
+			as.Equal(test.responseCode, res.Code)
+			if test.responseCode == http.StatusOK {
+				var tenant = &models.Tenant{}
+				res.Bind(tenant)
+				as.Equal("New Test", tenant.Name)
+				// Check if actually updated
+				tenant = &models.Tenant{}
+				err = as.DB.Where("name=?", "New Test").First(tenant)
+				as.Equal("New Test", tenant.Name)
+			} else {
+				tenant := &models.Tenant{}
+				err = as.DB.Where("name=?", "Test").First(tenant)
+				//Not updated yet
+				as.Equal("Test", tenant.Name)
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_TenantsResource_Destroy() {
@@ -86,14 +151,13 @@ func (as *ActionSuite) Test_TenantsResource_Destroy() {
 	var tests = []struct {
 		username     string
 		responseCode int
-		tenantCount  int
 	}{
-		{"mane", 404, 0},
-		{"firmino", 404, 0},
-		{"allan", 404, 0},
-		{"salah", 404, 0},
-		{"adidas", 404, 0},
-		{"klopp", 200, 3},
+		{"mane", http.StatusNotFound},
+		{"firmino", http.StatusNotFound},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusNotFound},
+		{"adidas", http.StatusNotFound},
+		{"klopp", http.StatusOK},
 	}
 	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
 	v, err := as.DB.ValidateAndCreate(newTenant)
@@ -106,7 +170,7 @@ func (as *ActionSuite) Test_TenantsResource_Destroy() {
 			req := as.setupRequest(user, fmt.Sprintf("/tenants/%s", newTenant.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == 200 {
+			if test.responseCode == http.StatusOK {
 				var tenant = &models.Tenant{}
 				res.Bind(tenant)
 				as.Equal("Test", tenant.Name)

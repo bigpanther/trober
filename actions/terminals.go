@@ -106,9 +106,7 @@ func (v TerminalsResource) Create(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-
 	}
 
 	return c.Render(http.StatusCreated, r.JSON(terminal))
@@ -147,9 +145,7 @@ func (v TerminalsResource) Update(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-
 	}
 
 	return c.Render(http.StatusOK, r.JSON(terminal))

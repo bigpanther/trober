@@ -2,11 +2,11 @@ openapi: 3.0.3
 servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/harsimranmaan/jober/0.1.4
+    url: https://virtserver.swaggerhub.com/harsimranmaan/jober/0.1.5
   - description: SwaggerHub API Auto Mocking
     url: https://trober-test.herokuapp.com
 info:
-  version: "0.1.4"
+  version: "0.1.5"
   title: Trober API
   description: >-
     The trober API
@@ -21,6 +21,20 @@ paths:
       description: >-
         List all tenants
 
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: The name of the tenant. Matches names that begin with the values
+          schema:
+            type: string
+            minLength: 2
+        - name: type
+          in: query
+          required: false
+          description: The type of the tenant.
+          schema:
+            $ref: "#/components/schemas/TenantType"
 
       responses:
         "200":
@@ -155,7 +169,31 @@ paths:
           schema:
             type: string
             format: uuid
-
+        - name: serialNumber
+          in: query
+          required: false
+          description: The serialNumber of the container. Matches serialNumber that begin with the values
+          schema:
+            type: string
+            minLength: 2
+        - name: type
+          in: query
+          required: false
+          description: The type of the container.
+          schema:
+            $ref: "#/components/schemas/ContainerType"
+        - name: status
+          in: query
+          required: false
+          description: The status of the container.
+          schema:
+            $ref: "#/components/schemas/ContainerStatus"
+        - name: size
+          in: query
+          required: false
+          description: The size of the container.
+          schema:
+            $ref: "#/components/schemas/ContainerSize"
       responses:
         "200":
           description: OK
@@ -319,7 +357,19 @@ paths:
           schema:
             type: string
             format: uuid
-
+        - name: name
+          in: query
+          required: false
+          description: The name of the terminal. Matches names that begin with the values
+          schema:
+            type: string
+            minLength: 2
+        - name: type
+          in: query
+          required: false
+          description: The type of the terminal.
+          schema:
+            $ref: "#/components/schemas/TerminalType"
       responses:
         "200":
           description: OK
@@ -446,6 +496,19 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: serialNumber
+          in: query
+          required: false
+          description: The serialNumber of the order. Matches serialNumber that begin with the values
+          schema:
+            type: string
+            minLength: 2
+        - name: status
+          in: query
+          required: false
+          description: The status of the order.
+          schema:
+            $ref: "#/components/schemas/OrderStatus"
 
       responses:
         "200":
@@ -566,6 +629,19 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: name
+          in: query
+          required: false
+          description: The name of the carrier. Matches names that begin with the values
+          schema:
+            type: string
+            minLength: 2
+        - name: type
+          in: query
+          required: false
+          description: The type of the carrier.
+          schema:
+            $ref: "#/components/schemas/CarrierType"
       responses:
         "200":
           description: OK
@@ -685,6 +761,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: name
+          in: query
+          required: false
+          description: The name of the customer. Matches names that begin with the values
+          schema:
+            type: string
+            minLength: 2
       responses:
         "200":
           description: OK
@@ -808,9 +891,11 @@ paths:
 
         - name: name
           in: query
-          description: The name of the user
+          description: The name of the customer. Matches names that begin with the values
           schema:
             type: string
+            minLength: 2
+
         - name: role
           in: query
           description: The role of the user
@@ -943,6 +1028,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /appinfo:
+    get:
+      summary: Get supported App info
+      description: >-
+        Get supported App info
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppInfo"
+        default:
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /self:
     get:
       summary: Get details of the logged in user
@@ -1032,6 +1136,15 @@ components:
       items:
         $ref: "#/components/schemas/User"
       description: A list of Users
+    AppInfo:
+      type: object
+      properties:
+        currentVersion:
+          type: string
+          readOnly: true
+        minVersion:
+          type: string
+          readOnly: true
     User:
       type: object
       properties:

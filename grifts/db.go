@@ -30,7 +30,6 @@ var _ = grift.Namespace("db", func() {
 			Email:    "info@bigpanther.ca",
 		}
 		return models.DB.Create(user)
-
 	})
 	grift.Desc("demo_create", "Create demo tenant")
 	grift.Add("demo_create", func(c *grift.Context) error {

@@ -80,6 +80,43 @@ func (as *ActionSuite) Test_TenantsResource_List_Pagination() {
 		as.Contains(v.Name, "Big Panther")
 	}
 }
+func (as *ActionSuite) Test_TenantsResource_List_Filter() {
+	as.LoadFixture("Tenant bootstrap")
+	var prefixes = []string{"ਪੰਜਾਬੀ", "Test"}
+	for _, p := range prefixes {
+		for i := 0; i < 5; i++ {
+			tenantType := "Test"
+			if i%2 == 0 {
+				tenantType = "Production"
+			}
+			newTenant := &models.Tenant{Name: fmt.Sprintf("%s - %d", p, i), Type: tenantType, Code: nulls.NewString("someC")}
+			v, err := as.DB.ValidateAndCreate(newTenant)
+			as.Nil(err)
+			as.Equal(0, len(v.Errors))
+		}
+	}
+
+	var username = "klopp"
+	user := as.getLoggedInUser(username)
+	req := as.setupRequest(user, "/tenants?name=ਪੰ")
+	res := req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	var tenants = &models.Tenants{}
+	res.Bind(tenants)
+	as.Equal(5, len(*tenants))
+	for _, v := range *tenants {
+		as.Contains(v.Name, "ਪੰਜਾਬੀ")
+	}
+	req = as.setupRequest(user, "/tenants?name=tes&type=Production")
+	res = req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	tenants = &models.Tenants{}
+	res.Bind(tenants)
+	as.Equal(3, len(*tenants))
+	for _, v := range *tenants {
+		as.Contains(v.Name, "Test")
+	}
+}
 
 func (as *ActionSuite) Test_TenantsResource_Show() {
 	as.LoadFixture("Tenant bootstrap")

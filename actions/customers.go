@@ -107,9 +107,7 @@ func (v CustomersResource) Create(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-
 	}
 
 	return c.Render(http.StatusCreated, r.JSON(customer))
@@ -144,9 +142,7 @@ func (v CustomersResource) Update(c buffalo.Context) error {
 	}
 
 	if verrs.HasAny() {
-
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-
 	}
 
 	return c.Render(http.StatusOK, r.JSON(customer))

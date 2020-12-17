@@ -82,7 +82,8 @@ func App() *buffalo.App {
 		app.Use(setCurrentUser)
 
 		app.GET("/", homeHandler)
-		app.Middleware.Skip(setCurrentUser, homeHandler)
+		app.GET("/appinfo", appInfoHandler)
+		app.Middleware.Skip(setCurrentUser, homeHandler, appInfoHandler)
 		var tenantGroup = app.Group("/tenants")
 		tenantGroup.GET("/", tenantsList)
 		tenantGroup.GET("/{tenant_id}", tenantsShow)

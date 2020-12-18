@@ -9,7 +9,7 @@ import (
 	"github.com/gobuffalo/nulls"
 )
 
-func (as *ActionSuite) Test_TenantsResource_List() {
+func (as *ActionSuite) Test_TenantsList() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string
@@ -38,7 +38,7 @@ func (as *ActionSuite) Test_TenantsResource_List() {
 		})
 	}
 }
-func (as *ActionSuite) Test_TenantsResource_List_Order() {
+func (as *ActionSuite) Test_TenantsListOrder() {
 	as.LoadFixture("Tenant bootstrap")
 	var username = "klopp"
 	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
@@ -55,7 +55,7 @@ func (as *ActionSuite) Test_TenantsResource_List_Order() {
 	as.Equal("Test", (tenants)[0].Name)
 }
 
-func (as *ActionSuite) Test_TenantsResource_List_Pagination() {
+func (as *ActionSuite) Test_TenantsListPagination() {
 	as.LoadFixture("Tenant bootstrap")
 	var username = "klopp"
 	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
@@ -80,7 +80,7 @@ func (as *ActionSuite) Test_TenantsResource_List_Pagination() {
 		as.Contains(v.Name, "Big Panther")
 	}
 }
-func (as *ActionSuite) Test_TenantsResource_List_Filter() {
+func (as *ActionSuite) Test_TenantsListFilter() {
 	as.LoadFixture("Tenant bootstrap")
 	var prefixes = []string{"ਪੰਜਾਬੀ", "Test"}
 	for _, p := range prefixes {
@@ -118,7 +118,7 @@ func (as *ActionSuite) Test_TenantsResource_List_Filter() {
 	}
 }
 
-func (as *ActionSuite) Test_TenantsResource_Show() {
+func (as *ActionSuite) Test_TenantsShow() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string
@@ -148,7 +148,7 @@ func (as *ActionSuite) Test_TenantsResource_Show() {
 	}
 }
 
-func (as *ActionSuite) Test_TenantsResource_Create() {
+func (as *ActionSuite) Test_TenantsCreate() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string
@@ -182,7 +182,7 @@ func (as *ActionSuite) Test_TenantsResource_Create() {
 	}
 }
 
-func (as *ActionSuite) Test_TenantsResource_Update() {
+func (as *ActionSuite) Test_TenantsUpdate() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string
@@ -225,7 +225,7 @@ func (as *ActionSuite) Test_TenantsResource_Update() {
 	}
 }
 
-func (as *ActionSuite) Test_TenantsResource_Destroy() {
+func (as *ActionSuite) Test_TenantsDestroy() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string

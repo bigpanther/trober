@@ -10,7 +10,7 @@ import (
 	"github.com/gobuffalo/nulls"
 )
 
-func (as *ActionSuite) Test_CarriersResource_List() {
+func (as *ActionSuite) Test_CarriersList() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string
@@ -50,7 +50,7 @@ func (as *ActionSuite) Test_CarriersResource_List() {
 	}
 }
 
-func (as *ActionSuite) Test_CarriersResource_List_Filter() {
+func (as *ActionSuite) Test_CarriersListFilter() {
 	as.LoadFixture("Tenant bootstrap")
 	var username = "firmino"
 	user := as.getLoggedInUser(username)
@@ -98,7 +98,7 @@ func (as *ActionSuite) Test_CarriersResource_List_Filter() {
 	as.Equal(0, len(carriers))
 }
 
-func (as *ActionSuite) Test_CarriersResource_List_Order() {
+func (as *ActionSuite) Test_CarriersListOrder() {
 	as.LoadFixture("Tenant bootstrap")
 	var username = "firmino"
 	user := as.getLoggedInUser(username)
@@ -132,19 +132,19 @@ func (as *ActionSuite) Test_CarriersResource_List_Order() {
 	}
 
 }
-func (as *ActionSuite) Test_CarriersResource_Show() {
+func (as *ActionSuite) Test_CarriersShow() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_CarriersResource_Create() {
+func (as *ActionSuite) Test_CarriersCreate() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_CarriersResource_Update() {
+func (as *ActionSuite) Test_CarriersUpdate() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_CarriersResource_Testroy() {
+func (as *ActionSuite) Test_CarriersTestroy() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string

@@ -26,14 +26,9 @@ import (
 // Path: Plural (/containers)
 // View Template Folder: Plural (/templates/containers/)
 
-// ContainersResource is the resource for the Container model
-type ContainersResource struct {
-	buffalo.Resource
-}
-
-// List gets all Containers. This function is mapped to the path
+// containersList gets all Containers. This function is mapped to the path
 // GET /containers
-func (v ContainersResource) List(c buffalo.Context) error {
+func containersList(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -72,9 +67,9 @@ func (v ContainersResource) List(c buffalo.Context) error {
 
 }
 
-// Show gets the data for one Container. This function is mapped to
+// containersShow gets the data for one Container. This function is mapped to
 // the path GET /containers/{container_id}
-func (v ContainersResource) Show(c buffalo.Context) error {
+func containersShow(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -94,9 +89,9 @@ func (v ContainersResource) Show(c buffalo.Context) error {
 
 }
 
-// Create adds a Container to the DB. This function is mapped to the
+// containersCreate adds a Container to the DB. This function is mapped to the
 // path POST /containers
-func (v ContainersResource) Create(c buffalo.Context) error {
+func containersCreate(c buffalo.Context) error {
 	// Allocate an empty Container
 	container := &models.Container{}
 
@@ -131,9 +126,9 @@ func (v ContainersResource) Create(c buffalo.Context) error {
 
 }
 
-// Update changes a Container in the DB. This function is mapped to
+// containersUpdate changes a Container in the DB. This function is mapped to
 // the path PUT /containers/{container_id}
-func (v ContainersResource) Update(c buffalo.Context) error {
+func containersUpdate(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -185,8 +180,8 @@ func (v ContainersResource) Update(c buffalo.Context) error {
 
 }
 
-// UpdateStatus of a container
-func (v ContainersResource) UpdateStatus(c buffalo.Context) error {
+// containersUpdateStatus of a container
+func containersUpdateStatus(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -236,9 +231,9 @@ func (v ContainersResource) UpdateStatus(c buffalo.Context) error {
 
 }
 
-// Destroy deletes a Container from the DB. This function is mapped
+// containersDestroy deletes a Container from the DB. This function is mapped
 // to the path DELETE /containers/{container_id}
-func (v ContainersResource) Destroy(c buffalo.Context) error {
+func containersDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))

@@ -23,14 +23,9 @@ import (
 // Path: Plural (/orders)
 // View Template Folder: Plural (/templates/orders/)
 
-// OrdersResource is the resource for the Order model
-type OrdersResource struct {
-	buffalo.Resource
-}
-
-// List gets all Orders. This function is mapped to the path
+// ordersList gets all Orders. This function is mapped to the path
 // GET /orders
-func (v OrdersResource) List(c buffalo.Context) error {
+func ordersList(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -55,9 +50,9 @@ func (v OrdersResource) List(c buffalo.Context) error {
 
 }
 
-// Show gets the data for one Order. This function is mapped to
+// ordersShow gets the data for one Order. This function is mapped to
 // the path GET /orders/{order_id}
-func (v OrdersResource) Show(c buffalo.Context) error {
+func ordersShow(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -77,9 +72,9 @@ func (v OrdersResource) Show(c buffalo.Context) error {
 
 }
 
-// Create adds a Order to the DB. This function is mapped to the
+// ordersCreate adds a Order to the DB. This function is mapped to the
 // path POST /orders
-func (v OrdersResource) Create(c buffalo.Context) error {
+func ordersCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 
 	// Allocate an empty Order
@@ -117,9 +112,9 @@ func (v OrdersResource) Create(c buffalo.Context) error {
 
 }
 
-// Update changes a Order in the DB. This function is mapped to
+// ordersUpdate changes a Order in the DB. This function is mapped to
 // the path PUT /orders/{order_id}
-func (v OrdersResource) Update(c buffalo.Context) error {
+func ordersUpdate(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -152,9 +147,9 @@ func (v OrdersResource) Update(c buffalo.Context) error {
 
 }
 
-// Destroy deletes a Order from the DB. This function is mapped
+// ordersDestroy deletes a Order from the DB. This function is mapped
 // to the path DELETE /orders/{order_id}
-func (v OrdersResource) Destroy(c buffalo.Context) error {
+func ordersDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))

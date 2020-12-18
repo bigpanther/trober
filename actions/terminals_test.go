@@ -48,6 +48,54 @@ func (as *ActionSuite) Test_TerminalsResource_List() {
 	}
 }
 
+func (as *ActionSuite) Test_TerminalsResource_List_Filter() {
+	as.LoadFixture("Tenant bootstrap")
+	var username = "firmino"
+	user := as.getLoggedInUser(username)
+	var prefixes = []string{"ਪੰਜਾਬੀ", "Test"}
+	for _, p := range prefixes {
+		for i := 0; i < 5; i++ {
+			terminalType := "Port"
+			if i%2 == 0 {
+				terminalType = "Airport"
+			}
+			_ = as.createTerminal(fmt.Sprintf("%s-%d", p, i), terminalType, user.TenantID, user.ID)
+		}
+	}
+	req := as.setupRequest(user, "/terminals?name=ਪੰ&type=Port")
+	res := req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	var terminals = models.Terminals{}
+	res.Bind(&terminals)
+	as.Equal(2, len(terminals))
+	for _, v := range terminals {
+		as.Contains(v.Name, "ਪੰਜਾਬੀ")
+		as.Equal("Port", v.Type)
+	}
+	klopp := as.getLoggedInUser("klopp")
+	as.NotEqual(klopp.TenantID, user.TenantID)
+
+	as.False(user.IsSuperAdmin())
+	req = as.setupRequest(user, fmt.Sprintf("/terminals?tenant_id=%s", klopp.TenantID))
+	res = req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	terminals = models.Terminals{}
+	res.Bind(&terminals)
+	as.Equal(0, len(terminals))
+
+	lewin := as.getLoggedInUser("lewin")
+	as.NotEqual(klopp.TenantID, lewin.TenantID)
+	as.NotEqual(lewin.TenantID, user.TenantID)
+	as.True(klopp.IsSuperAdmin())
+	req = as.setupRequest(klopp, fmt.Sprintf("/terminals?tenant_id=%s", lewin.TenantID))
+	res = req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	terminals = models.Terminals{}
+	res.Bind(&terminals)
+	as.Equal(0, len(terminals))
+
+}
+
 func (as *ActionSuite) Test_TerminalsResource_Show() {
 	as.False(false)
 }

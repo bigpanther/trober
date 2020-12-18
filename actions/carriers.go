@@ -3,6 +3,7 @@ package actions
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/models"
@@ -35,11 +36,22 @@ func carriersList(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
+	carrierName := strings.Trim(c.Param("name"), " '")
+	carrierType := c.Param("type")
 	carriers := &models.Carriers{}
 	// Paginate results. Params "page" and "per_page" control pagination.
 	// Default values are "page=1" and "per_page=20".
 	q := tx.PaginateFromParams(c.Params())
 
+	if carrierName != "" {
+		if len(carrierName) < 2 {
+			return c.Render(http.StatusOK, r.JSON(carriers))
+		}
+		q = q.Where("name ILIKE ?", fmt.Sprintf("%s%%", carrierName))
+	}
+	if carrierType != "" {
+		q = q.Where("type = ?", carrierType)
+	}
 	// Retrieve all Carriers from the DB
 	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(carriers); err != nil {
 		return err

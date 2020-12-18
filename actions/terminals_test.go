@@ -93,7 +93,6 @@ func (as *ActionSuite) Test_TerminalsResource_List_Filter() {
 	terminals = models.Terminals{}
 	res.Bind(&terminals)
 	as.Equal(0, len(terminals))
-
 }
 
 func (as *ActionSuite) Test_TerminalsResource_Show() {

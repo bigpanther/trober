@@ -45,7 +45,7 @@ func (as *ActionSuite) createCarrier(name string, carrierType string, eta nulls.
 	return newCarrier
 }
 
-func (as *ActionSuite) createCustomer(name string, eta nulls.Time, tenantID uuid.UUID, createdBy nulls.UUID) *models.Customer {
+func (as *ActionSuite) createCustomer(name string, tenantID uuid.UUID, createdBy nulls.UUID) *models.Customer {
 	newCustomer := &models.Customer{Name: name, TenantID: tenantID, CreatedBy: createdBy}
 	v, err := as.DB.ValidateAndCreate(newCustomer)
 	as.Nil(err)

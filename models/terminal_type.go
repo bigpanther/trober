@@ -1,7 +1,7 @@
 package models
 // TerminalType represents the TerminalType enum
 type TerminalType string
-const(
+const (
 	// TerminalTypeRail represents Rail TerminalType
 	TerminalTypeRail TerminalType = "Rail"
 	// TerminalTypePort represents Port TerminalType
@@ -13,6 +13,7 @@ const(
 	// TerminalTypeCustom represents Custom TerminalType
 	TerminalTypeCustom TerminalType = "Custom"
 )
+
 var allowedTerminalType [5]TerminalType = [5]TerminalType{
 	TerminalTypeRail,
 	TerminalTypePort,
@@ -20,8 +21,9 @@ var allowedTerminalType [5]TerminalType = [5]TerminalType{
 	TerminalTypeYard,
 	TerminalTypeCustom,
 }
+
 // IsValidTerminalType validates if the input is a TerminalType
-func IsValidTerminalType(s string) bool{
+func IsValidTerminalType(s string) bool {
 	t := TerminalType(s)
 	return TerminalTypeRail == t || TerminalTypePort == t || TerminalTypeWarehouse == t || TerminalTypeYard == t || TerminalTypeCustom == t
 }

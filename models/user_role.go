@@ -1,7 +1,7 @@
 package models
 // UserRole represents the UserRole enum
 type UserRole string
-const(
+const (
 	// UserRoleSuperAdmin represents SuperAdmin UserRole
 	UserRoleSuperAdmin UserRole = "SuperAdmin"
 	// UserRoleAdmin represents Admin UserRole
@@ -15,6 +15,7 @@ const(
 	// UserRoleNone represents None UserRole
 	UserRoleNone UserRole = "None"
 )
+
 var allowedUserRole [6]UserRole = [6]UserRole{
 	UserRoleSuperAdmin,
 	UserRoleAdmin,
@@ -23,8 +24,9 @@ var allowedUserRole [6]UserRole = [6]UserRole{
 	UserRoleCustomer,
 	UserRoleNone,
 }
+
 // IsValidUserRole validates if the input is a UserRole
-func IsValidUserRole(s string) bool{
+func IsValidUserRole(s string) bool {
 	t := UserRole(s)
 	return UserRoleSuperAdmin == t || UserRoleAdmin == t || UserRoleBackOffice == t || UserRoleDriver == t || UserRoleCustomer == t || UserRoleNone == t
 }

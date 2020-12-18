@@ -1,7 +1,7 @@
 package models
 // ContainerStatus represents the ContainerStatus enum
 type ContainerStatus string
-const(
+const (
 	// ContainerStatusUnassigned represents Unassigned ContainerStatus
 	ContainerStatusUnassigned ContainerStatus = "Unassigned"
 	// ContainerStatusInTransit represents InTransit ContainerStatus
@@ -21,6 +21,7 @@ const(
 	// ContainerStatusAbandoned represents Abandoned ContainerStatus
 	ContainerStatusAbandoned ContainerStatus = "Abandoned"
 )
+
 var allowedContainerStatus [9]ContainerStatus = [9]ContainerStatus{
 	ContainerStatusUnassigned,
 	ContainerStatusInTransit,
@@ -32,8 +33,9 @@ var allowedContainerStatus [9]ContainerStatus = [9]ContainerStatus{
 	ContainerStatusUnloaded,
 	ContainerStatusAbandoned,
 }
+
 // IsValidContainerStatus validates if the input is a ContainerStatus
-func IsValidContainerStatus(s string) bool{
+func IsValidContainerStatus(s string) bool {
 	t := ContainerStatus(s)
 	return ContainerStatusUnassigned == t || ContainerStatusInTransit == t || ContainerStatusArrived == t || ContainerStatusAssigned == t || ContainerStatusAccepted == t || ContainerStatusRejected == t || ContainerStatusLoaded == t || ContainerStatusUnloaded == t || ContainerStatusAbandoned == t
 }

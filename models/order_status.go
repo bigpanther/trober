@@ -1,7 +1,7 @@
 package models
 // OrderStatus represents the OrderStatus enum
 type OrderStatus string
-const(
+const (
 	// OrderStatusOpen represents Open OrderStatus
 	OrderStatusOpen OrderStatus = "Open"
 	// OrderStatusAccepted represents Accepted OrderStatus
@@ -17,6 +17,7 @@ const(
 	// OrderStatusPaymentReceived represents PaymentReceived OrderStatus
 	OrderStatusPaymentReceived OrderStatus = "PaymentReceived"
 )
+
 var allowedOrderStatus [7]OrderStatus = [7]OrderStatus{
 	OrderStatusOpen,
 	OrderStatusAccepted,
@@ -26,8 +27,9 @@ var allowedOrderStatus [7]OrderStatus = [7]OrderStatus{
 	OrderStatusInvoiced,
 	OrderStatusPaymentReceived,
 }
+
 // IsValidOrderStatus validates if the input is a OrderStatus
-func IsValidOrderStatus(s string) bool{
+func IsValidOrderStatus(s string) bool {
 	t := OrderStatus(s)
 	return OrderStatusOpen == t || OrderStatusAccepted == t || OrderStatusCancelled == t || OrderStatusInProgress == t || OrderStatusDelivered == t || OrderStatusInvoiced == t || OrderStatusPaymentReceived == t
 }

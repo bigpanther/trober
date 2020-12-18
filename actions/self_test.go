@@ -81,6 +81,14 @@ func (as *ActionSuite) getLoggedInUser(username string) *models.User {
 	return user
 }
 
+func (as *ActionSuite) getCustomer(name string) *models.Customer {
+	var customer = &models.Customer{}
+	err := as.DB.Where("name=?", name).First(customer)
+	as.NoError(err)
+	as.NotZero(customer.ID)
+	return customer
+}
+
 func (as *ActionSuite) setupRequest(user *models.User, route string) *httptest.JSON {
 	req := as.JSON(route)
 	req.Headers[xToken] = user.Username

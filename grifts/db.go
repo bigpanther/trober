@@ -90,7 +90,7 @@ var _ = grift.Namespace("db", func() {
 		customer := &models.Customer{
 			Name:      "Shipment Enterprises",
 			TenantID:  tenant.ID,
-			CreatedBy: user.ID,
+			CreatedBy: nulls.NewUUID(user.ID),
 		}
 		err = models.DB.Create(customer)
 		if err != nil {

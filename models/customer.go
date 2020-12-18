@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
@@ -12,14 +13,14 @@ import (
 
 // Customer is used by pop to map your customers database table to your go code.
 type Customer struct {
-	ID        uuid.UUID `json:"id" db:"id"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
-	CreatedBy uuid.UUID `json:"created_by" db:"created_by"`
-	Name      string    `json:"name" db:"name"`
-	TenantID  uuid.UUID `json:"tenant_id" db:"tenant_id"`
-	Tenant    *Tenant   `belongs_to:"tenant" json:"-"`
-	Orders    Orders    `has_many:"orders" json:"orders,omitempty"`
+	ID        uuid.UUID  `json:"id" db:"id"`
+	CreatedAt time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at" db:"updated_at"`
+	CreatedBy nulls.UUID `json:"created_by" db:"created_by"`
+	Name      string     `json:"name" db:"name"`
+	TenantID  uuid.UUID  `json:"tenant_id" db:"tenant_id"`
+	Tenant    *Tenant    `belongs_to:"tenant" json:"-"`
+	Orders    Orders     `has_many:"orders" json:"orders,omitempty"`
 }
 
 // String is not required by pop and may be deleted

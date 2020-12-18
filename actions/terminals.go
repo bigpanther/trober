@@ -23,14 +23,9 @@ import (
 // Path: Plural (/terminals)
 // View Template Folder: Plural (/templates/terminals/)
 
-// TerminalsResource is the resource for the Terminal model
-type TerminalsResource struct {
-	buffalo.Resource
-}
-
-// List gets all Terminals. This function is mapped to the path
+// terminalsList gets all Terminals. This function is mapped to the path
 // GET /terminals
-func (v TerminalsResource) List(c buffalo.Context) error {
+func terminalsList(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -52,9 +47,9 @@ func (v TerminalsResource) List(c buffalo.Context) error {
 
 }
 
-// Show gets the data for one Terminal. This function is mapped to
+// terminalsShow gets the data for one Terminal. This function is mapped to
 // the path GET /terminals/{terminal_id}
-func (v TerminalsResource) Show(c buffalo.Context) error {
+func terminalsShow(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -73,9 +68,9 @@ func (v TerminalsResource) Show(c buffalo.Context) error {
 
 }
 
-// Create adds a Terminal to the DB. This function is mapped to the
+// terminalsCreate adds a Terminal to the DB. This function is mapped to the
 // path POST /terminals
-func (v TerminalsResource) Create(c buffalo.Context) error {
+func terminalsCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
 		return models.ErrNotFound
@@ -114,9 +109,9 @@ func (v TerminalsResource) Create(c buffalo.Context) error {
 
 }
 
-// Update changes a Terminal in the DB. This function is mapped to
+// terminalsUpdate changes a Terminal in the DB. This function is mapped to
 // the path PUT /terminals/{terminal_id}
-func (v TerminalsResource) Update(c buffalo.Context) error {
+func terminalsUpdate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
 		return models.ErrNotFound
@@ -153,9 +148,9 @@ func (v TerminalsResource) Update(c buffalo.Context) error {
 
 }
 
-// Destroy deletes a Terminal from the DB. This function is mapped
+// terminalsDestroy deletes a Terminal from the DB. This function is mapped
 // to the path DELETE /terminals/{terminal_id}
-func (v TerminalsResource) Destroy(c buffalo.Context) error {
+func terminalsDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))

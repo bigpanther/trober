@@ -24,14 +24,9 @@ import (
 // Path: Plural (/customers)
 // View Template Folder: Plural (/templates/customers/)
 
-// CustomersResource is the resource for the Customer model
-type CustomersResource struct {
-	buffalo.Resource
-}
-
-// List gets all Customers. This function is mapped to the path
+// customersList gets all Customers. This function is mapped to the path
 // GET /customers
-func (v CustomersResource) List(c buffalo.Context) error {
+func customersList(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -53,9 +48,9 @@ func (v CustomersResource) List(c buffalo.Context) error {
 
 }
 
-// Show gets the data for one Customer. This function is mapped to
+// customersShow gets the data for one Customer. This function is mapped to
 // the path GET /customers/{customer_id}
-func (v CustomersResource) Show(c buffalo.Context) error {
+func customersShow(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -74,9 +69,9 @@ func (v CustomersResource) Show(c buffalo.Context) error {
 
 }
 
-// Create adds a Customer to the DB. This function is mapped to the
+// customersCreate adds a Customer to the DB. This function is mapped to the
 // path POST /customers
-func (v CustomersResource) Create(c buffalo.Context) error {
+func customersCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
 		return models.ErrNotFound
@@ -116,9 +111,9 @@ func (v CustomersResource) Create(c buffalo.Context) error {
 
 }
 
-// Update changes a Customer in the DB. This function is mapped to
+// customersUpdate changes a Customer in the DB. This function is mapped to
 // the path PUT /customers/{customer_id}
-func (v CustomersResource) Update(c buffalo.Context) error {
+func customersUpdate(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -151,9 +146,9 @@ func (v CustomersResource) Update(c buffalo.Context) error {
 
 }
 
-// Destroy deletes a Customer from the DB. This function is mapped
+// customersDestroy deletes a Customer from the DB. This function is mapped
 // to the path DELETE /customers/{customer_id}
-func (v CustomersResource) Destroy(c buffalo.Context) error {
+func customersDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))

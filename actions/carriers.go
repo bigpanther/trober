@@ -23,14 +23,9 @@ import (
 // Path: Plural (/carriers)
 // View Template Folder: Plural (/templates/carriers/)
 
-// CarriersResource is the resource for the Carrier model
-type CarriersResource struct {
-	buffalo.Resource
-}
-
-// List gets all Carriers. This function is mapped to the path
+// carriersList gets all Carriers. This function is mapped to the path
 // GET /carriers
-func (v CarriersResource) List(c buffalo.Context) error {
+func carriersList(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -52,9 +47,9 @@ func (v CarriersResource) List(c buffalo.Context) error {
 
 }
 
-// Show gets the data for one Carrier. This function is mapped to
+// carriersShow gets the data for one Carrier. This function is mapped to
 // the path GET /carriers/{carrier_id}
-func (v CarriersResource) Show(c buffalo.Context) error {
+func carriersShow(c buffalo.Context) error {
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -73,9 +68,9 @@ func (v CarriersResource) Show(c buffalo.Context) error {
 
 }
 
-// Create adds a Carrier to the DB. This function is mapped to the
+// carriersCreate adds a Carrier to the DB. This function is mapped to the
 // path POST /carriers
-func (v CarriersResource) Create(c buffalo.Context) error {
+func carriersCreate(c buffalo.Context) error {
 
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
@@ -115,9 +110,9 @@ func (v CarriersResource) Create(c buffalo.Context) error {
 
 }
 
-// Update changes a Carrier in the DB. This function is mapped to
+// carriersUpdate changes a Carrier in the DB. This function is mapped to
 // the path PUT /carriers/{carrier_id}
-func (v CarriersResource) Update(c buffalo.Context) error {
+func carriersUpdate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
 		return models.ErrNotFound
@@ -154,9 +149,9 @@ func (v CarriersResource) Update(c buffalo.Context) error {
 
 }
 
-// Destroy deletes a Carrier from the DB. This function is mapped
+// carriersDestroy deletes a Carrier from the DB. This function is mapped
 // to the path DELETE /carriers/{carrier_id}
-func (v CarriersResource) Destroy(c buffalo.Context) error {
+func carriersDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))

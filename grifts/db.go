@@ -130,7 +130,7 @@ var _ = grift.Namespace("db", func() {
 			return err
 		}
 		carrier := &models.Carrier{
-			Name:      nulls.NewString("Global Shippers"),
+			Name:      "Global Shippers",
 			TenantID:  tenant.ID,
 			Eta:       nulls.NewTime(time.Now().AddDate(0, 0, 1)),
 			Type:      "Vessel",

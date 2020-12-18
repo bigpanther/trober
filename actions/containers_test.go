@@ -1,21 +1,21 @@
 package actions
 
-func (as *ActionSuite) Test_ContainersResource_List() {
+func (as *ActionSuite) Test_ContainersList() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_ContainersResource_Show() {
+func (as *ActionSuite) Test_ContainersShow() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_ContainersResource_Create() {
+func (as *ActionSuite) Test_ContainersCreate() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_ContainersResource_Update() {
+func (as *ActionSuite) Test_ContainersUpdate() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_ContainersResource_Destroy() {
+func (as *ActionSuite) Test_ContainersDestroy() {
 	as.False(false)
 }

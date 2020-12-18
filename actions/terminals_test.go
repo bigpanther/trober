@@ -8,7 +8,7 @@ import (
 	"github.com/bigpanther/trober/models"
 )
 
-func (as *ActionSuite) Test_TerminalsResource_List() {
+func (as *ActionSuite) Test_TerminalsList() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username      string
@@ -48,7 +48,7 @@ func (as *ActionSuite) Test_TerminalsResource_List() {
 	}
 }
 
-func (as *ActionSuite) Test_TerminalsResource_List_Filter() {
+func (as *ActionSuite) Test_TerminalsListFilter() {
 	as.LoadFixture("Tenant bootstrap")
 	var username = "firmino"
 	user := as.getLoggedInUser(username)
@@ -95,19 +95,19 @@ func (as *ActionSuite) Test_TerminalsResource_List_Filter() {
 	as.Equal(0, len(terminals))
 }
 
-func (as *ActionSuite) Test_TerminalsResource_Show() {
+func (as *ActionSuite) Test_TerminalsShow() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_TerminalsResource_Create() {
+func (as *ActionSuite) Test_TerminalsCreate() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_TerminalsResource_Update() {
+func (as *ActionSuite) Test_TerminalsUpdate() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_TerminalsResource_Destroy() {
+func (as *ActionSuite) Test_TerminalsDestroy() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string

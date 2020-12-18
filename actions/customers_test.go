@@ -9,7 +9,7 @@ import (
 	"github.com/gobuffalo/nulls"
 )
 
-func (as *ActionSuite) Test_CustomersResource_List() {
+func (as *ActionSuite) Test_CustomersList() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username      string
@@ -48,7 +48,7 @@ func (as *ActionSuite) Test_CustomersResource_List() {
 	}
 }
 
-func (as *ActionSuite) Test_CustomersResource_List_Filter() {
+func (as *ActionSuite) Test_CustomersListFilter() {
 	as.LoadFixture("Tenant bootstrap")
 	var username = "firmino"
 	user := as.getLoggedInUser(username)
@@ -90,18 +90,18 @@ func (as *ActionSuite) Test_CustomersResource_List_Filter() {
 	as.Equal(3, len(customers))
 }
 
-func (as *ActionSuite) Test_CustomersResource_Show() {
+func (as *ActionSuite) Test_CustomersShow() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_CustomersResource_Create() {
+func (as *ActionSuite) Test_CustomersCreate() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_CustomersResource_Update() {
+func (as *ActionSuite) Test_CustomersUpdate() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_CustomersResource_Destroy() {
+func (as *ActionSuite) Test_CustomersDestroy() {
 	as.False(false)
 }

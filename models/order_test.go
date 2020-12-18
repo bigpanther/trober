@@ -1,5 +1,5 @@
 package models
 
-func (ms *ModelSuite) Test_Order() {
+func (ms *ModelSuite) TestOrder() {
 	ms.False(false)
 }

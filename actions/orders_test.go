@@ -8,23 +8,23 @@ import (
 	"github.com/bigpanther/trober/models"
 )
 
-func (as *ActionSuite) Test_OrdersResource_List() {
+func (as *ActionSuite) Test_OrdersList() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_OrdersResource_Show() {
+func (as *ActionSuite) Test_OrdersShow() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_OrdersResource_Create() {
+func (as *ActionSuite) Test_OrdersCreate() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_OrdersResource_Update() {
+func (as *ActionSuite) Test_OrdersUpdate() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_OrdersResource_Destroy() {
+func (as *ActionSuite) Test_OrdersDestroy() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string

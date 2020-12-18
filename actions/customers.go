@@ -1,11 +1,13 @@
 package actions
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gofrs/uuid"
 )
@@ -96,7 +98,7 @@ func (v CustomersResource) Create(c buffalo.Context) error {
 	if !loggedInUser.IsSuperAdmin() || customer.TenantID == uuid.Nil {
 		customer.TenantID = loggedInUser.TenantID
 	}
-	customer.CreatedBy = loggedInUser.ID
+	customer.CreatedBy = nulls.NewUUID(loggedInUser.ID)
 	customer.CreatedAt = time.Now().UTC()
 	customer.UpdatedAt = time.Now().UTC()
 
@@ -152,6 +154,10 @@ func (v CustomersResource) Update(c buffalo.Context) error {
 // Destroy deletes a Customer from the DB. This function is mapped
 // to the path DELETE /customers/{customer_id}
 func (v CustomersResource) Destroy(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.IsAtleastBackOffice() {
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {

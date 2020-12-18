@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -53,7 +55,15 @@ func main() {
 		if c.Ref == "" {
 			if c.Value.Type == "string" {
 				fmt.Println(key, c.Value.Type)
-				err = t.ExecuteTemplate(os.Stdout, "model_string.go.tmpl", struct {
+				f, err := os.OpenFile(fmt.Sprintf("../models/%s.go", ToSnakeCase(key)), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+				if err != nil {
+					log.Fatal(err)
+				}
+				err = f.Truncate(0)
+				if err != nil {
+					log.Fatal(err)
+				}
+				err = t.ExecuteTemplate(f, "model_string.go.tmpl", struct {
 					Key       string
 					PluralKey string
 					Schema    *openapi3.Schema
@@ -76,4 +86,16 @@ func main() {
 		}
 	}
 
+}
+
+var matchFirstCap = regexp.MustCompile("([A-Z])([A-Z][a-z])")
+var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+
+// ToSnakeCase converts the provided string to snake_case.
+// Based on https://gist.github.com/stoewer/fbe273b711e6a06315d19552dd4d33e6
+func ToSnakeCase(input string) string {
+	output := matchFirstCap.ReplaceAllString(input, "${1}_${2}")
+	output = matchAllCap.ReplaceAllString(output, "${1}_${2}")
+	output = strings.ReplaceAll(output, "-", "_")
+	return strings.ToLower(output)
 }

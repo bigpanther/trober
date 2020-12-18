@@ -3,6 +3,7 @@ package actions
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/models"
@@ -35,13 +36,23 @@ func terminalsList(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-
+	terminalName := strings.Trim(c.Param("name"), " '")
+	terminalType := c.Param("type")
 	terminals := &models.Terminals{}
 
 	// Paginate results. Params "page" and "per_page" control pagination.
 	// Default values are "page=1" and "per_page=20".
 	q := tx.PaginateFromParams(c.Params())
 
+	if terminalName != "" {
+		if len(terminalName) < 2 {
+			return c.Render(http.StatusOK, r.JSON(terminals))
+		}
+		q = q.Where("name ILIKE ?", fmt.Sprintf("%s%%", terminalName))
+	}
+	if terminalType != "" {
+		q = q.Where("type = ?", terminalType)
+	}
 	// Retrieve all Terminals from the DB
 	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(terminals); err != nil {
 		return err

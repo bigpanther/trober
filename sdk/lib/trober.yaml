@@ -1420,6 +1420,7 @@ components:
       enum:
         - Rail
         - Port
+        - Airport
         - Warehouse
         - Yard
         - Custom

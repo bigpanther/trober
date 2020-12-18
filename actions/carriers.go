@@ -26,14 +26,16 @@ import (
 // carriersList gets all Carriers. This function is mapped to the path
 // GET /carriers
 func carriersList(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.IsNotActive() {
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
-
 	carriers := &models.Carriers{}
-
 	// Paginate results. Params "page" and "per_page" control pagination.
 	// Default values are "page=1" and "per_page=20".
 	q := tx.PaginateFromParams(c.Params())

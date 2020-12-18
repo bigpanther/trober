@@ -6,10 +6,47 @@ import (
 	"testing"
 
 	"github.com/bigpanther/trober/models"
+	"github.com/gobuffalo/nulls"
 )
 
 func (as *ActionSuite) Test_CarriersResource_List() {
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+		carrierCount int
+	}{
+		{"klopp", http.StatusOK, 1},
+		{"firmino", http.StatusOK, 1},
+		{"mane", http.StatusOK, 1},
+		{"salah", http.StatusOK, 1},
+		{"nike", http.StatusOK, 1},
+		{"coutinho", http.StatusNotFound, 0},
+		{"richarlson", http.StatusOK, 0},
+		{"rodriguez", http.StatusOK, 0},
+		{"lewin", http.StatusOK, 0},
+		{"allan", http.StatusNotFound, 0},
+		{"adidas", http.StatusOK, 0},
+	}
+	firmino := as.getLoggedInUser("firmino")
+	newcarrier := as.createCarrier("carrier", "Port", nulls.Time{}, firmino.TenantID, firmino.ID)
+
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			req := as.setupRequest(user, "/carriers")
+			res := req.Get()
+			as.Equal(test.responseCode, res.Code)
+			if test.responseCode == http.StatusOK {
+				var carriers = models.Carriers{}
+				res.Bind(&carriers)
+				as.Equal(test.carrierCount, len(carriers))
+				if test.carrierCount > 0 {
+					as.Equal(newcarrier.Name, carriers[0].Name)
+				}
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_CarriersResource_Show() {

@@ -259,8 +259,9 @@ func (as *ActionSuite) Test_TenantsResource_Destroy() {
 				as.Contains(err.Error(), "no rows in result set")
 			} else {
 				tenant := models.Tenant{}
-				err = as.DB.Where("name=?", "Test").First(&tenant)
+				err := as.DB.Where("name=?", "Test").First(&tenant)
 				//Not deleted yet
+				as.Nil(err)
 				as.Equal("Test", tenant.Name)
 			}
 		})

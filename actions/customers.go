@@ -27,6 +27,10 @@ import (
 // customersList gets all Customers. This function is mapped to the path
 // GET /customers
 func customersList(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.IsAtleastBackOffice() {
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {

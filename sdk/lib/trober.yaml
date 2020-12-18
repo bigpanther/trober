@@ -170,7 +170,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: serialNumber
+        - name: serial_number
           in: query
           required: false
           description: The serialNumber of the container. Matches serialNumber that begin with the values
@@ -497,7 +497,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: serialNumber
+        - name: serial_number
           in: query
           required: false
           description: The serialNumber of the order. Matches serialNumber that begin with the values

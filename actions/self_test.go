@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/bigpanther/trober/models"
-	"github.com/gobuffalo/httptest"
 )
 
 func (as *ActionSuite) Test_SelfGetTenant() {
@@ -71,26 +70,4 @@ func (as *ActionSuite) Test_SelfGet() {
 			as.True(test.f(self))
 		})
 	}
-}
-
-func (as *ActionSuite) getLoggedInUser(username string) *models.User {
-	var user = &models.User{}
-	err := as.DB.Where("username=?", username).First(user)
-	as.NoError(err)
-	as.NotZero(user.ID)
-	return user
-}
-
-func (as *ActionSuite) getCustomer(name string) *models.Customer {
-	var customer = &models.Customer{}
-	err := as.DB.Where("name=?", name).First(customer)
-	as.NoError(err)
-	as.NotZero(customer.ID)
-	return customer
-}
-
-func (as *ActionSuite) setupRequest(user *models.User, route string) *httptest.JSON {
-	req := as.JSON(route)
-	req.Headers[xToken] = user.Username
-	return req
 }

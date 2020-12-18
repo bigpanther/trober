@@ -29,6 +29,10 @@ import (
 // containersList gets all Containers. This function is mapped to the path
 // GET /containers
 func containersList(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.IsNotActive() {
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -50,7 +54,6 @@ func containersList(c buffalo.Context) error {
 	}
 	driverID := c.Param("driver_id")
 
-	var loggedInUser = loggedInUser(c)
 	if loggedInUser.IsDriver() {
 		driverID = loggedInUser.ID.String()
 	}

@@ -55,10 +55,7 @@ func (as *ActionSuite) Test_UsersResource_List_Filter() {
 			if i%2 == 0 {
 				userRole = "BackOffice"
 			}
-			newUser := &models.User{Name: fmt.Sprintf("%s - %d", p, i), Role: userRole, Username: fmt.Sprintf("%s-%d", p, i), Email: fmt.Sprintf("%s-%d@bigpanther.ca", p, i), TenantID: user.TenantID}
-			v, err := as.DB.ValidateAndCreate(newUser)
-			as.Nil(err)
-			as.Equal(0, len(v.Errors))
+			_ = as.createUser(fmt.Sprintf("%s-%d", p, i), userRole, fmt.Sprintf("%s-%d@bigpanther.ca", p, i), user.TenantID)
 		}
 	}
 	req := as.setupRequest(user, "/users?name=ਪੰ&role=Driver")
@@ -129,11 +126,7 @@ func (as *ActionSuite) Test_UsersResource_Destroy() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			var name = fmt.Sprintf("user%s", test.username)
-			newUser := &models.User{Name: name, Role: "Driver", Username: name, Email: fmt.Sprintf("user%s@bigpanther.ca", test.username), TenantID: firmino.TenantID}
-			v, err := as.DB.ValidateAndCreate(newUser)
-			as.Nil(err)
-			as.Equal(0, len(v.Errors))
-
+			newUser := as.createUser(name, "Driver", fmt.Sprintf("user%s@bigpanther.ca", test.username), firmino.TenantID)
 			user := as.getLoggedInUser(test.username)
 			req := as.setupRequest(user, fmt.Sprintf("/users/%s", newUser.ID))
 			res := req.Delete()
@@ -144,11 +137,12 @@ func (as *ActionSuite) Test_UsersResource_Destroy() {
 				as.Equal(name, user.Name)
 				// Check if actually deleted
 				user = models.User{}
-				err = as.DB.Where("name=?", name).First(&user)
+				var err = as.DB.Where("name=?", name).First(&user)
 				as.Contains(err.Error(), "no rows in result set")
 			} else {
 				user := models.User{}
-				err = as.DB.Where("name=?", name).First(&user)
+				err := as.DB.Where("name=?", name).First(&user)
+				as.Nil(err)
 				//Not deleted yet
 				as.Equal(name, user.Name)
 			}

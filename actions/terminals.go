@@ -26,6 +26,10 @@ import (
 // terminalsList gets all Terminals. This function is mapped to the path
 // GET /terminals
 func terminalsList(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.IsNotActive() {
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -134,7 +138,6 @@ func terminalsUpdate(c buffalo.Context) error {
 		return err
 	}
 	terminal.UpdatedAt = time.Now().UTC()
-
 	verrs, err := tx.ValidateAndUpdate(terminal)
 	if err != nil {
 		return err
@@ -143,9 +146,7 @@ func terminalsUpdate(c buffalo.Context) error {
 	if verrs.HasAny() {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
-
 	return c.Render(http.StatusOK, r.JSON(terminal))
-
 }
 
 // terminalsDestroy deletes a Terminal from the DB. This function is mapped

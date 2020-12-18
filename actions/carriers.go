@@ -53,7 +53,8 @@ func carriersList(c buffalo.Context) error {
 		q = q.Where("type = ?", carrierType)
 	}
 	// Retrieve all Carriers from the DB
-	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(carriers); err != nil {
+	// Order by the ones that are going to arrive soon
+	if err := q.Scope(restrictedScope(c)).Order(fmt.Sprintf("GREATEST(-(now()-eta),(now()-eta)), %s", orderByCreatedAtDesc)).All(carriers); err != nil {
 		return err
 	}
 

@@ -25,5 +25,6 @@ require (
 	github.com/rs/cors v1.7.0
 	github.com/spf13/cobra v1.0.0 // indirect
 	github.com/unrolled/secure v1.0.7
+	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
 	google.golang.org/api v0.35.0
 )

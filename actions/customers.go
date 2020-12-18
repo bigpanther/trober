@@ -3,6 +3,7 @@ package actions
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/models"
@@ -36,13 +37,19 @@ func customersList(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
+	customerName := strings.Trim(c.Param("name"), " '")
 
 	customers := &models.Customers{}
 
 	// Paginate results. Params "page" and "per_page" control pagination.
 	// Default values are "page=1" and "per_page=20".
 	q := tx.PaginateFromParams(c.Params())
-
+	if customerName != "" {
+		if len(customerName) < 2 {
+			return c.Render(http.StatusOK, r.JSON(customers))
+		}
+		q = q.Where("name ILIKE ?", fmt.Sprintf("%s%%", customerName))
+	}
 	// Retrieve all Customers from the DB
 	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(customers); err != nil {
 		return err

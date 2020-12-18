@@ -81,6 +81,7 @@ func (as *ActionSuite) Test_UsersResource_List_Filter() {
 
 	lewin := as.getLoggedInUser("lewin")
 	as.NotEqual(klopp.TenantID, lewin.TenantID)
+	as.NotEqual(lewin.TenantID, user.TenantID)
 
 	as.True(klopp.IsSuperAdmin())
 	req = as.setupRequest(klopp, fmt.Sprintf("/users?tenant_id=%s", lewin.TenantID))

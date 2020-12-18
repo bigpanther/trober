@@ -1,20 +1,22 @@
 package models
 // {{.Key}} represents the {{.Key}} enum
 type {{.Key}} string
-const(
+const (
 	{{- $key:=.Key -}}
 	{{range .Schema.Enum}}
 	// {{$key}}{{.}} represents {{.}} {{$key}}
 	{{$key}}{{.}} {{$key}} = "{{.}}"
 	{{- end}}
 )
+
 var allowed{{$key}} [{{len .Schema.Enum }}]{{$key}} = [{{len .Schema.Enum }}]{{$key}}{
 	{{- range .Schema.Enum}}
 	{{$key}}{{.}},
 	{{- end}}
 }
+
 // IsValid{{.Key}} validates if the input is a {{.Key}}
-func IsValid{{.Key}}(s string) bool{
+func IsValid{{.Key}}(s string) bool {
 	t := {{.Key}}(s)
 	{{range $index, $element := .Schema.Enum -}}
 	{{if eq $index 0}}return{{else}} ||{{end}} {{$key}}{{$element}} == t{{- end}}

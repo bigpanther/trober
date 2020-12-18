@@ -45,7 +45,7 @@ func main() {
 	// 	},
 	//}
 	t := template.New("").Funcs(funcMap)
-	t, err = t.ParseFiles("model_object.go.tmpl", "model_array.go.tmpl", "model_string.go.tmpl")
+	t, err = t.ParseFiles("model_object.go.tmpl", "model_array.go.tmpl", "model_string.go.tmpl", "model_string_test.go.tmpl")
 	if err != nil {
 		panic(err)
 	}
@@ -68,8 +68,22 @@ func main() {
 					PluralKey string
 					Schema    *openapi3.Schema
 				}{Key: key, PluralKey: plural, Schema: c.Value})
+				f, err = os.OpenFile(fmt.Sprintf("../models/%s_test.go", ToSnakeCase(key)), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 				if err != nil {
-					panic(err)
+					log.Fatal(err)
+				}
+				err = f.Truncate(0)
+				if err != nil {
+					log.Fatal(err)
+				}
+				err = t.ExecuteTemplate(f, "model_string_test.go.tmpl", struct {
+					Key         string
+					PluralKey   string
+					PackageName string
+					Schema      *openapi3.Schema
+				}{Key: key, PluralKey: plural, Schema: c.Value, PackageName: "github.com/bigpanther/trober/models"})
+				if err != nil {
+					log.Fatal(err)
 				}
 			}
 			continue

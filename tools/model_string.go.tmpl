@@ -4,6 +4,7 @@ package models
 
 // {{.Key}} represents the {{.Key}} enum
 type {{.Key}} string
+
 const (
 	{{- $key:=.Key -}}
 	{{range .Schema.Enum}}

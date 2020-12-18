@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/nulls"
@@ -96,6 +97,41 @@ func (as *ActionSuite) Test_CarriersResource_List_Filter() {
 	res.Bind(&carriers)
 	as.Equal(0, len(carriers))
 }
+
+func (as *ActionSuite) Test_CarriersResource_List_Order() {
+	as.LoadFixture("Tenant bootstrap")
+	var username = "firmino"
+	user := as.getLoggedInUser(username)
+	var prefixes = []string{"ਪੰਜਾਬੀ", "Test"}
+	var now = time.Now().UTC()
+	for _, p := range prefixes {
+		for i := 0; i < 3; i++ {
+			carrierType := "Vessel"
+			// Create eta based on the index. The smaller index should arrive closer to current time
+			hours := i + 1
+			if i%2 == 0 {
+				carrierType = "Air"
+				// Setup some etas in the past
+				hours = hours * -1
+			}
+			eta := now.Add(time.Duration(time.Hour * time.Duration(hours)))
+			_ = as.createCarrier(fmt.Sprintf("%s-%d", p, i), carrierType, nulls.NewTime(eta), user.TenantID, user.ID)
+		}
+	}
+	// Since ਪੰਜਾਬੀ are created first, they'll be farther from now than the corresponding Test based on created_at time
+	var expectedOrder = []string{"Test-0", "ਪੰਜਾਬੀ-0", "Test-1", "ਪੰਜਾਬੀ-1", "Test-2", "ਪੰਜਾਬੀ-2"}
+	req := as.setupRequest(user, "/carriers")
+	res := req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	var carriers = models.Carriers{}
+	res.Bind(&carriers)
+	as.Equal(6, len(carriers))
+
+	for i, v := range carriers {
+		as.Equal(expectedOrder[i], v.Name)
+	}
+
+}
 func (as *ActionSuite) Test_CarriersResource_Show() {
 	as.False(false)
 }
@@ -108,7 +144,7 @@ func (as *ActionSuite) Test_CarriersResource_Update() {
 	as.False(false)
 }
 
-func (as *ActionSuite) Test_CarriersResource_Destroy() {
+func (as *ActionSuite) Test_CarriersResource_Testroy() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string

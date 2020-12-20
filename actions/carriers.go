@@ -140,16 +140,22 @@ func carriersUpdate(c buffalo.Context) error {
 
 	// Allocate an empty Carrier
 	carrier := &models.Carrier{}
-
 	if err := tx.Scope(restrictedScope(c)).Find(carrier, c.Param("carrier_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-
-	// Bind Carrier to the html form elements
-	if err := c.Bind(carrier); err != nil {
+	newCarrier := &models.Carrier{}
+	// Bind carrier to the html form elements
+	if err := c.Bind(newCarrier); err != nil {
 		return err
 	}
-	carrier.UpdatedAt = time.Now().UTC()
+	if newCarrier.Name != carrier.Name || newCarrier.Type != carrier.Type || newCarrier.Eta != carrier.Eta {
+		carrier.UpdatedAt = time.Now().UTC()
+		carrier.Name = newCarrier.Name
+		carrier.Type = newCarrier.Type
+		carrier.Eta = newCarrier.Eta
+	} else {
+		return c.Render(http.StatusOK, r.JSON(carrier))
+	}
 
 	verrs, err := tx.ValidateAndUpdate(carrier)
 	if err != nil {

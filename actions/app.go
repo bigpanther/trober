@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	"encoding/base64"
@@ -85,7 +84,11 @@ func App() *buffalo.App {
 		app.GET("/", homeHandler)
 		app.GET("/appinfo", appInfoHandler)
 		app.Middleware.Skip(setCurrentUser, homeHandler, appInfoHandler)
+
 		app.Middleware.Skip(requireActiveUser, homeHandler, appInfoHandler, selfGet, selfGetTenant)
+		var selfGroup = app.Group("/self")
+		selfGroup.GET("/", selfGet)
+		selfGroup.GET("/tenant", selfGetTenant)
 
 		var tenantGroup = app.Group("/tenants")
 		tenantGroup.GET("/", requireSuperAdminUser(tenantsList))
@@ -94,45 +97,42 @@ func App() *buffalo.App {
 		tenantGroup.PUT("/{tenant_id}", requireSuperAdminUser(tenantsUpdate))
 		tenantGroup.DELETE("/{tenant_id}", requireSuperAdminUser(tenantsDestroy))
 		var userGroup = app.Group("/users")
-		userGroup.GET("/", usersList)
-		userGroup.GET("/{user_id}", usersShow)
-		userGroup.POST("/", usersCreate)
-		userGroup.PUT("/{user_id}", usersUpdate)
-		userGroup.DELETE("/{user_id}", usersDestroy)
+		userGroup.GET("/", requireAtLeastBackOfficeUser(usersList))
+		userGroup.GET("/{user_id}", requireAtLeastBackOfficeUser(usersShow))
+		userGroup.POST("/", requireAtLeastBackOfficeUser(usersCreate))
+		userGroup.PUT("/{user_id}", requireAtLeastBackOfficeUser(usersUpdate))
+		userGroup.DELETE("/{user_id}", requireAtLeastBackOfficeUser(usersDestroy))
 		var customerGroup = app.Group("/customers")
-		customerGroup.GET("/", customersList)
-		customerGroup.GET("/{customer_id}", customersShow)
-		customerGroup.POST("/", customersCreate)
-		customerGroup.PUT("/{customer_id}", customersUpdate)
-		customerGroup.DELETE("/{customer_id}", customersDestroy)
+		customerGroup.GET("/", requireAtLeastBackOfficeUser(customersList))
+		customerGroup.GET("/{customer_id}", requireAtCustomerUser(customersShow))
+		customerGroup.POST("/", requireAtLeastBackOfficeUser(customersCreate))
+		customerGroup.PUT("/{customer_id}", requireAtLeastBackOfficeUser(customersUpdate))
+		customerGroup.DELETE("/{customer_id}", requireAtLeastBackOfficeUser(customersDestroy))
 		var terminalGroup = app.Group("/terminals")
 		terminalGroup.GET("/", terminalsList)
 		terminalGroup.GET("/{terminal_id}", terminalsShow)
-		terminalGroup.POST("/", terminalsCreate)
-		terminalGroup.PUT("/{terminal_id}", terminalsUpdate)
-		terminalGroup.DELETE("/{terminal_id}", terminalsDestroy)
+		terminalGroup.POST("/", requireAtLeastBackOfficeUser(terminalsCreate))
+		terminalGroup.PUT("/{terminal_id}", requireAtLeastBackOfficeUser(terminalsUpdate))
+		terminalGroup.DELETE("/{terminal_id}", requireAtLeastBackOfficeUser(terminalsDestroy))
 		var carrierGroup = app.Group("/carriers")
 		carrierGroup.GET("/", carriersList)
 		carrierGroup.GET("/{carrier_id}", carriersShow)
-		carrierGroup.POST("/", carriersCreate)
-		carrierGroup.PUT("/{carrier_id}", carriersUpdate)
-		carrierGroup.DELETE("/{carrier_id}", carriersDestroy)
+		carrierGroup.POST("/", requireAtLeastBackOfficeUser(carriersCreate))
+		carrierGroup.PUT("/{carrier_id}", requireAtLeastBackOfficeUser(carriersUpdate))
+		carrierGroup.DELETE("/{carrier_id}", requireAtLeastBackOfficeUser(carriersDestroy))
 		var containerGroup = app.Group("/containers")
 		containerGroup.GET("/", containersList)
 		containerGroup.GET("/{container_id}", containersShow)
 		containerGroup.POST("/", containersCreate)
 		containerGroup.PUT("/{container_id}", containersUpdate)
 		containerGroup.PATCH("/{container_id}/assign/{status}", containersUpdateStatus)
-		containerGroup.DELETE("/{container_id}", containersDestroy)
+		containerGroup.DELETE("/{container_id}", requireAtLeastBackOfficeUser(containersDestroy))
 		var orderGroup = app.Group("/orders")
-		orderGroup.GET("/", ordersList)
-		orderGroup.GET("/{order_id}", ordersShow)
-		orderGroup.POST("/", ordersCreate)
-		orderGroup.PUT("/{order_id}", ordersUpdate)
-		orderGroup.DELETE("/{order_id}", ordersDestroy)
-		var selfGroup = app.Group("/self")
-		selfGroup.GET("/", selfGet)
-		selfGroup.GET("/tenant", selfGetTenant)
+		orderGroup.GET("/", requireAtCustomerUser(ordersList))
+		orderGroup.GET("/{order_id}", requireAtCustomerUser(ordersShow))
+		orderGroup.POST("/", requireAtCustomerUser(ordersCreate))
+		orderGroup.PUT("/{order_id}", requireAtLeastBackOfficeUser(ordersUpdate))
+		orderGroup.DELETE("/{order_id}", requireAtCustomerUser(ordersDestroy))
 
 		app.Worker.Register("sendNotifications", sendNotifications)
 		app.Worker.Register("testWorker", testWorker)
@@ -220,51 +220,6 @@ func firebaseClient() (*firebaseSdkClient, error) {
 }
 
 const currentUserKey = "current_user"
-
-// setCurrentUser attempts to find a user based on the firebase token in the request headers
-// If one is found it is set on the context.
-func setCurrentUser(next buffalo.Handler) buffalo.Handler {
-	return func(c buffalo.Context) error {
-		var user *models.User
-		var err error
-		if ENV == "production" {
-			user, err = getCurrentUserFromToken(c)
-		} else {
-			user = &models.User{}
-			tx := c.Value("tx").(*pop.Connection)
-			var username = c.Request().Header.Get(xToken)
-			err = tx.Where("username = ?", username).First(user)
-			if err != nil {
-				return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
-			}
-		}
-		if err != nil {
-			return err
-		}
-		c.Set(currentUserKey, user)
-		return next(c)
-	}
-}
-
-func requireActiveUser(next buffalo.Handler) buffalo.Handler {
-	return func(c buffalo.Context) error {
-		var loggedInUser = loggedInUser(c)
-		if loggedInUser.IsNotActive() {
-			return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
-		}
-		return next(c)
-	}
-}
-
-func requireSuperAdminUser(next buffalo.Handler) buffalo.Handler {
-	return func(c buffalo.Context) error {
-		var loggedInUser = loggedInUser(c)
-		if !loggedInUser.IsSuperAdmin() {
-			return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
-		}
-		return next(c)
-	}
-}
 
 func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 	userID := c.Request().Header.Get(xToken)

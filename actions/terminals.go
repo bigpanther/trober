@@ -87,7 +87,7 @@ func terminalsShow(c buffalo.Context) error {
 // path POST /terminals
 func terminalsCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtleastBackOffice() {
+	if !loggedInUser.IsAtLeastBackOffice() {
 		return models.ErrNotFound
 	}
 	// Allocate an empty Terminal
@@ -128,7 +128,7 @@ func terminalsCreate(c buffalo.Context) error {
 // the path PUT /terminals/{terminal_id}
 func terminalsUpdate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtleastBackOffice() {
+	if !loggedInUser.IsAtLeastBackOffice() {
 		return models.ErrNotFound
 	}
 	// Get the DB connection from the context
@@ -164,7 +164,7 @@ func terminalsUpdate(c buffalo.Context) error {
 // to the path DELETE /terminals/{terminal_id}
 func terminalsDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtleastBackOffice() {
+	if !loggedInUser.IsAtLeastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context

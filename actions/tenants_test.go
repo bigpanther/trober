@@ -178,7 +178,7 @@ func (as *ActionSuite) Test_TenantsCreate() {
 			req := as.setupRequest(user, "/tenants")
 			res := req.Post(newTenant)
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusCreated {
+			if res.Code == http.StatusCreated {
 				var tenant = models.Tenant{}
 				res.Bind(&tenant)
 				as.Equal("Test", tenant.Name)

@@ -148,7 +148,7 @@ func (as *ActionSuite) Test_carriersShow() {
 	lewin := as.getLoggedInUser("lewin")
 	firmino := as.getLoggedInUser("firmino")
 	as.NotEqual(firmino.TenantID, lewin.TenantID)
-	eta := nulls.NewTime(time.Now().UTC())
+	eta := nulls.NewTime(time.Now())
 	var carriers = []*models.Carrier{as.createCarrier("carr1", models.CarrierTypeAir, eta, firmino.TenantID, firmino.ID),
 		as.createCarrier("carr2", models.CarrierTypeRail, eta, lewin.TenantID, lewin.ID)}
 	as.NotEqual(carriers[0].TenantID, carriers[1].TenantID)
@@ -169,7 +169,7 @@ func (as *ActionSuite) Test_carriersShow() {
 					res.Bind(&carrier)
 					as.Equal(v.Name, carrier.Name)
 					as.Equal(v.Type, carrier.Type)
-					as.Equal(eta, carrier.Eta)
+					as.Equal(eta.Time.UTC().Truncate(time.Minute), carrier.Eta.Time)
 				}
 			}
 		})
@@ -202,11 +202,13 @@ func (as *ActionSuite) Test_carriersCreate() {
 			req := as.setupRequest(user, "/carriers")
 			res := req.Post(newCarrier)
 			as.Equal(test.responseCode, res.Code)
-			if res.Code == http.StatusOK {
+			if res.Code == http.StatusCreated {
 				var carrier = models.Carrier{}
 				res.Bind(&carrier)
 				as.Equal(newCarrier.Name, carrier.Name)
 				as.Equal(newCarrier.Type, carrier.Type)
+				// should be null
+				as.False(carrier.Eta.Valid)
 				if user.IsSuperAdmin() {
 					as.Equal(firmino.TenantID, carrier.TenantID)
 				} else {
@@ -242,8 +244,8 @@ func (as *ActionSuite) Test_carriersUpdate() {
 			newCarrier := as.createCarrier(user.Username, carrierType, eta, firmino.TenantID, firmino.ID)
 			req := as.setupRequest(user, fmt.Sprintf("/carriers/%s", newCarrier.ID))
 			// Try to update ID and tenant ID. Expect these calls to be excluded at update
-			updatedcarrier := models.Carrier{Name: fmt.Sprintf("not%s", test.username), Type: string(models.CarrierTypeRail), Eta: nulls.NewTime(eta.Time.Add(1)), ID: user.ID, TenantID: user.ID}
-			res := req.Put(updatedcarrier)
+			updatedCarrier := models.Carrier{Name: fmt.Sprintf("not%s", test.username), Type: string(models.CarrierTypeRail), Eta: nulls.NewTime(eta.Time.Add(1)), ID: user.ID, TenantID: user.ID}
+			res := req.Put(updatedCarrier)
 			as.Equal(test.responseCode, res.Code)
 			var dbCarrier = *newCarrier
 			err := as.DB.Reload(&dbCarrier)
@@ -251,8 +253,9 @@ func (as *ActionSuite) Test_carriersUpdate() {
 			if res.Code == http.StatusOK {
 				var carrier = models.Carrier{}
 				res.Bind(&carrier)
-				as.Equal(updatedcarrier.Name, carrier.Name)
-				as.Equal(updatedcarrier.Type, carrier.Type)
+				as.Equal(updatedCarrier.Name, carrier.Name)
+				as.Equal(updatedCarrier.Type, carrier.Type)
+				as.Equal(updatedCarrier.Eta.Time.UTC().Truncate(time.Minute), carrier.Eta.Time)
 				as.Equal(newCarrier.ID, carrier.ID)
 				as.Equal(dbCarrier.Name, carrier.Name)
 			} else {

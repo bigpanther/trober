@@ -52,11 +52,20 @@ func (c *Carrier) Validate(tx *pop.Connection) (*validate.Errors, error) {
 // ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.
 // This method is not required and may be deleted.
 func (c *Carrier) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
+	c.truncateEta()
 	return validate.NewErrors(), nil
 }
 
 // ValidateUpdate gets run every time you call "pop.ValidateAndUpdate" method.
 // This method is not required and may be deleted.
 func (c *Carrier) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
+	c.truncateEta()
 	return validate.NewErrors(), nil
+}
+
+// truncateEta converts eta to with a minute precision
+func (c *Carrier) truncateEta() {
+	if c.Eta.Valid {
+		c.Eta = nulls.NewTime(c.Eta.Time.UTC().Truncate(time.Minute))
+	}
 }

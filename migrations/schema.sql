@@ -27,7 +27,7 @@ SET default_table_access_method = heap;
 CREATE TABLE public.carriers (
     id uuid NOT NULL,
     created_by uuid NOT NULL,
-    name character varying(50),
+    name character varying(50) NOT NULL,
     type character varying(15) NOT NULL,
     eta timestamp without time zone,
     tenant_id uuid NOT NULL,

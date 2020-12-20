@@ -28,7 +28,7 @@ func (as *ActionSuite) Test_TerminalsList() {
 		{"adidas", http.StatusOK, 0},
 	}
 	firmino := as.getLoggedInUser("firmino")
-	newTerminal := as.createTerminal("terminal", "Port", firmino.TenantID, firmino.ID)
+	newTerminal := as.createTerminal("terminal", models.TerminalTypePort, firmino.TenantID, firmino.ID)
 
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
@@ -36,7 +36,7 @@ func (as *ActionSuite) Test_TerminalsList() {
 			req := as.setupRequest(user, "/terminals")
 			res := req.Get()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var terminals = models.Terminals{}
 				res.Bind(&terminals)
 				as.Equal(test.terminalCount, len(terminals))
@@ -55,9 +55,9 @@ func (as *ActionSuite) Test_TerminalsListFilter() {
 	var prefixes = []string{"ਪੰਜਾਬੀ", "Test"}
 	for _, p := range prefixes {
 		for i := 0; i < 5; i++ {
-			terminalType := "Port"
+			terminalType := models.TerminalTypePort
 			if i%2 == 0 {
-				terminalType = "Airport"
+				terminalType = models.TerminalTypeRail
 			}
 			_ = as.createTerminal(fmt.Sprintf("%s-%d", p, i), terminalType, user.TenantID, user.ID)
 		}
@@ -70,7 +70,7 @@ func (as *ActionSuite) Test_TerminalsListFilter() {
 	as.Equal(2, len(terminals))
 	for _, v := range terminals {
 		as.Contains(v.Name, "ਪੰਜਾਬੀ")
-		as.Equal("Port", v.Type)
+		as.Equal(string(models.TerminalTypePort), v.Type)
 	}
 	klopp := as.getLoggedInUser("klopp")
 	as.NotEqual(klopp.TenantID, user.TenantID)
@@ -96,7 +96,46 @@ func (as *ActionSuite) Test_TerminalsListFilter() {
 }
 
 func (as *ActionSuite) Test_TerminalsShow() {
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusOK},
+		{"firmino", http.StatusOK},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusOK},
+		{"klopp", http.StatusOK},
+		{"adidas", http.StatusOK},
+	}
+	lewin := as.getLoggedInUser("lewin")
+	firmino := as.getLoggedInUser("firmino")
+	as.NotEqual(firmino.TenantID, lewin.TenantID)
+
+	var terminals = []*models.Terminal{as.createTerminal("term1", models.TerminalTypePort, firmino.TenantID, firmino.ID),
+		as.createTerminal("term2", models.TerminalTypeRail, lewin.TenantID, lewin.ID)}
+	as.NotEqual(terminals[0].TenantID, terminals[1].TenantID)
+
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			for _, v := range terminals {
+				req := as.setupRequest(user, fmt.Sprintf("/terminals/%s", v.ID))
+				res := req.Get()
+				if v.TenantID == user.TenantID || user.IsSuperAdmin() {
+					as.Equal(test.responseCode, res.Code)
+				} else {
+					as.Equal(http.StatusNotFound, res.Code)
+				}
+				if res.Code == http.StatusOK {
+					var terminal = models.Terminal{}
+					res.Bind(&terminal)
+					as.Equal(v.Name, terminal.Name)
+					as.Equal(v.Type, terminal.Type)
+				}
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_TerminalsCreate() {
@@ -130,13 +169,13 @@ func (as *ActionSuite) Test_TerminalsDestroy() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			var name = fmt.Sprintf("terminal%s", test.username)
-			newTerminal := as.createTerminal(name, "Port", firmino.TenantID, firmino.ID)
+			newTerminal := as.createTerminal(name, models.TerminalTypePort, firmino.TenantID, firmino.ID)
 
 			user := as.getLoggedInUser(test.username)
 			req := as.setupRequest(user, fmt.Sprintf("/terminals/%s", newTerminal.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var terminal = models.Terminal{}
 				res.Bind(&terminal)
 				as.Equal(name, terminal.Name)

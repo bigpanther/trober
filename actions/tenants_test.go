@@ -30,7 +30,7 @@ func (as *ActionSuite) Test_TenantsList() {
 			req := as.setupRequest(user, "/tenants")
 			res := req.Get()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var tenants = models.Tenants{}
 				res.Bind(&tenants)
 				as.Equal(test.tenantCount, len(tenants))
@@ -147,7 +147,7 @@ func (as *ActionSuite) Test_TenantsShow() {
 				req := as.setupRequest(user, fmt.Sprintf("/tenants/%s", v))
 				res := req.Get()
 				as.Equal(test.responseCode, res.Code)
-				if test.responseCode == http.StatusOK {
+				if res.Code == http.StatusOK {
 					var tenant = models.Tenant{}
 					res.Bind(&tenant)
 					as.Equal(k, tenant.Name)
@@ -216,7 +216,7 @@ func (as *ActionSuite) Test_TenantsUpdate() {
 			newTenant.Name = "New Test"
 			res := req.Put(newTenant)
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var tenant = models.Tenant{}
 				res.Bind(&tenant)
 				as.Equal("New Test", tenant.Name)
@@ -258,7 +258,7 @@ func (as *ActionSuite) Test_TenantsDestroy() {
 			req := as.setupRequest(user, fmt.Sprintf("/tenants/%s", newTenant.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var tenant = models.Tenant{}
 				res.Bind(&tenant)
 				as.Equal("Test", tenant.Name)

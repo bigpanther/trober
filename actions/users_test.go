@@ -30,7 +30,7 @@ func (as *ActionSuite) Test_UsersList() {
 			req := as.setupRequest(user, "/users")
 			res := req.Get()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var users = models.Users{}
 				res.Bind(&users)
 				as.Equal(test.userCount, len(users))
@@ -134,7 +134,7 @@ func (as *ActionSuite) Test_UsersShow() {
 				if k == test.otherUser {
 					as.Equal(test.responseCode, res.Code)
 				}
-				if test.responseCode == http.StatusOK {
+				if res.Code == http.StatusOK {
 					var user = models.User{}
 					res.Bind(&user)
 					as.Equal(k, user.Username)
@@ -180,7 +180,7 @@ func (as *ActionSuite) Test_UsersDestroy() {
 			req := as.setupRequest(user, fmt.Sprintf("/users/%s", newUser.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var user = models.User{}
 				res.Bind(&user)
 				as.Equal(name, user.Name)

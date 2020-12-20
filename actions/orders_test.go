@@ -58,7 +58,7 @@ func (as *ActionSuite) Test_OrdersDestroy() {
 			req := as.setupRequest(user, fmt.Sprintf("/orders/%s", neworder.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var order = models.Order{}
 				res.Bind(&order)
 				as.Equal(name, order.SerialNumber)

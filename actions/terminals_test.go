@@ -164,7 +164,7 @@ func (as *ActionSuite) Test_TerminalsCreate() {
 			req := as.setupRequest(user, "/terminals")
 			res := req.Post(newTerminal)
 			as.Equal(test.responseCode, res.Code)
-			if res.Code == http.StatusOK {
+			if res.Code == http.StatusCreated {
 				var terminal = models.Terminal{}
 				res.Bind(&terminal)
 				as.Equal(newTerminal.Name, terminal.Name)

@@ -29,8 +29,8 @@ func (as *ActionSuite) setupRequest(user *models.User, route string) *httptest.J
 	return req
 }
 
-func (as *ActionSuite) createTerminal(name string, terminalType string, tenantID uuid.UUID, createdBy uuid.UUID) *models.Terminal {
-	newTerminal := &models.Terminal{Name: name, Type: terminalType, TenantID: tenantID, CreatedBy: createdBy}
+func (as *ActionSuite) createTerminal(name string, terminalType models.TerminalType, tenantID uuid.UUID, createdBy uuid.UUID) *models.Terminal {
+	newTerminal := &models.Terminal{Name: name, Type: string(terminalType), TenantID: tenantID, CreatedBy: createdBy}
 	v, err := as.DB.ValidateAndCreate(newTerminal)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))

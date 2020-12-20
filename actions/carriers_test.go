@@ -38,7 +38,7 @@ func (as *ActionSuite) Test_CarriersList() {
 			req := as.setupRequest(user, "/carriers")
 			res := req.Get()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var carriers = models.Carriers{}
 				res.Bind(&carriers)
 				as.Equal(test.carrierCount, len(carriers))
@@ -176,7 +176,7 @@ func (as *ActionSuite) Test_CarriersTestroy() {
 			req := as.setupRequest(user, fmt.Sprintf("/carriers/%s", newcarrier.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var carrier = models.Carrier{}
 				res.Bind(&carrier)
 				as.Equal(name, carrier.Name)

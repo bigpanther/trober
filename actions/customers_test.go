@@ -34,7 +34,7 @@ func (as *ActionSuite) Test_CustomersList() {
 			req := as.setupRequest(user, "/customers")
 			res := req.Get()
 			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
+			if res.Code == http.StatusOK {
 				var customers = models.Customers{}
 				res.Bind(&customers)
 				as.Equal(test.customerCount, len(customers))

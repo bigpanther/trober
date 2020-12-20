@@ -139,7 +139,40 @@ func (as *ActionSuite) Test_TerminalsShow() {
 }
 
 func (as *ActionSuite) Test_TerminalsCreate() {
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusCreated},
+		{"firmino", http.StatusCreated},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusNotFound},
+		{"klopp", http.StatusCreated},
+		{"adidas", http.StatusNotFound},
+	}
+	for i, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			terminalType := models.TerminalTypePort
+			if i%2 == 0 {
+				terminalType = models.TerminalTypeRail
+			}
+			newTerminal := models.Terminal{Name: user.Username, Type: string(terminalType)}
+			req := as.setupRequest(user, fmt.Sprintf("/terminals"))
+			res := req.Post(newTerminal)
+			as.Equal(test.responseCode, res.Code)
+			if res.Code == http.StatusOK {
+				var terminal = models.Terminal{}
+				res.Bind(&terminal)
+				as.Equal(newTerminal.Name, terminal.Name)
+				as.Equal(newTerminal.Type, terminal.Type)
+				if !user.IsSuperAdmin() {
+					as.Equal(user.TenantID, terminal.TenantID)
+				}
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_TerminalsUpdate() {

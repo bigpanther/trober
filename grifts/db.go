@@ -16,7 +16,7 @@ var _ = grift.Namespace("db", func() {
 		tenant := &models.Tenant{
 			Name: "system",
 			Type: "System",
-			Code: nulls.NewString("6mapg"),
+			Code: "6mapg",
 		}
 		err := models.DB.Create(tenant)
 		if err != nil {
@@ -37,7 +37,7 @@ var _ = grift.Namespace("db", func() {
 		tenant := &models.Tenant{
 			Name: "Acme Enterprises",
 			Type: "Test",
-			Code: nulls.NewString("7acme"),
+			Code: "7acme",
 		}
 		err := models.DB.Create(tenant)
 		if err != nil {

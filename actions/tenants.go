@@ -93,8 +93,6 @@ func tenantsCreate(c buffalo.Context) error {
 		return err
 	}
 	tenant.CreatedBy = nulls.NewUUID(loggedInUser(c).ID)
-	tenant.CreatedAt = time.Now().UTC()
-	tenant.UpdatedAt = time.Now().UTC()
 
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
@@ -123,19 +121,24 @@ func tenantsUpdate(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-
 	// Allocate an empty Tenant
 	tenant := &models.Tenant{}
-
 	if err := tx.Scope(restrictedScope(c)).Find(tenant, c.Param("tenant_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-
+	newTenant := &models.Tenant{}
 	// Bind Tenant to the html form elements
-	if err := c.Bind(tenant); err != nil {
+	if err := c.Bind(newTenant); err != nil {
 		return err
 	}
-	tenant.UpdatedAt = time.Now().UTC()
+	if newTenant.Name != tenant.Name || newTenant.Type != tenant.Type || newTenant.Code != tenant.Code {
+		tenant.UpdatedAt = time.Now().UTC()
+		tenant.Name = newTenant.Name
+		tenant.Type = newTenant.Type
+		tenant.Code = newTenant.Code
+	} else {
+		return c.Render(http.StatusOK, r.JSON(tenant))
+	}
 	verrs, err := tx.ValidateAndUpdate(tenant)
 	if err != nil {
 		return err

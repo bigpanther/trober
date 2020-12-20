@@ -1,3 +1,4 @@
 change_column("users", "email", "string", {"size": 50})
 change_column("carriers", "name", "string", {"size": 50})
 add_index("users", ["tenant_id", "email"], {"unique": true})
+change_column("tenants", "code", "string", {"size": 20})

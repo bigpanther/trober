@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/bigpanther/trober/models"
-	"github.com/gobuffalo/nulls"
 )
 
 func (as *ActionSuite) Test_TenantsList() {
@@ -41,7 +40,7 @@ func (as *ActionSuite) Test_TenantsList() {
 func (as *ActionSuite) Test_TenantsListOrder() {
 	as.LoadFixture("Tenant bootstrap")
 	var username = "klopp"
-	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
+	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: "someC"}
 	v, err := as.DB.ValidateAndCreate(newTenant)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))
@@ -58,7 +57,7 @@ func (as *ActionSuite) Test_TenantsListOrder() {
 func (as *ActionSuite) Test_TenantsListPagination() {
 	as.LoadFixture("Tenant bootstrap")
 	var username = "klopp"
-	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
+	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: "someC"}
 	v, err := as.DB.ValidateAndCreate(newTenant)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))
@@ -89,7 +88,7 @@ func (as *ActionSuite) Test_TenantsListFilter() {
 			if i%2 == 0 {
 				tenantType = "Production"
 			}
-			newTenant := &models.Tenant{Name: fmt.Sprintf("%s - %d", p, i), Type: tenantType, Code: nulls.NewString("someC")}
+			newTenant := &models.Tenant{Name: fmt.Sprintf("%s - %d", p, i), Type: tenantType, Code: "someC"}
 			v, err := as.DB.ValidateAndCreate(newTenant)
 			as.Nil(err)
 			as.Equal(0, len(v.Errors))
@@ -170,7 +169,7 @@ func (as *ActionSuite) Test_TenantsCreate() {
 		{"adidas", http.StatusNotFound},
 		{"klopp", http.StatusCreated},
 	}
-	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
+	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: "someC"}
 
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
@@ -204,7 +203,7 @@ func (as *ActionSuite) Test_TenantsUpdate() {
 		{"adidas", http.StatusNotFound},
 		{"klopp", http.StatusOK},
 	}
-	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
+	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: "someC"}
 	v, err := as.DB.ValidateAndCreate(newTenant)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))
@@ -213,17 +212,17 @@ func (as *ActionSuite) Test_TenantsUpdate() {
 		as.T().Run(test.username, func(t *testing.T) {
 			user := as.getLoggedInUser(test.username)
 			req := as.setupRequest(user, fmt.Sprintf("/tenants/%s", newTenant.ID))
-			newTenant.Name = "New Test"
-			res := req.Put(newTenant)
+			updatedTenant := models.Tenant{Name: fmt.Sprintf("not%s", test.username), Type: string(models.TenantTypeProduction), Code: "shared", ID: user.ID}
+			res := req.Put(updatedTenant)
 			as.Equal(test.responseCode, res.Code)
 			if res.Code == http.StatusOK {
 				var tenant = models.Tenant{}
 				res.Bind(&tenant)
-				as.Equal("New Test", tenant.Name)
+				as.Equal(fmt.Sprintf("not%s", test.username), tenant.Name)
 				// Check if actually updated
 				tenant = models.Tenant{}
-				err = as.DB.Where("name=?", "New Test").First(&tenant)
-				as.Equal("New Test", tenant.Name)
+				err = as.DB.Find(&tenant, newTenant.ID)
+				as.Equal(fmt.Sprintf("not%s", test.username), tenant.Name)
 				as.Equal(newTenant.ID, tenant.ID)
 			} else {
 				tenant := models.Tenant{}
@@ -248,7 +247,7 @@ func (as *ActionSuite) Test_TenantsDestroy() {
 		{"adidas", http.StatusNotFound},
 		{"klopp", http.StatusOK},
 	}
-	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: nulls.NewString("someC")}
+	newTenant := &models.Tenant{Name: "Test", Type: "Production", Code: "someC"}
 	v, err := as.DB.ValidateAndCreate(newTenant)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))

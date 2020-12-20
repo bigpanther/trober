@@ -30,7 +30,7 @@ func (as *ActionSuite) Test_CarriersList() {
 		{"adidas", http.StatusOK, 0},
 	}
 	firmino := as.getLoggedInUser("firmino")
-	newcarrier := as.createCarrier("carrier", "Port", nulls.Time{}, firmino.TenantID, firmino.ID)
+	newCarrier := as.createCarrier("carrier", "Port", nulls.Time{}, firmino.TenantID, firmino.ID)
 
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
@@ -43,7 +43,7 @@ func (as *ActionSuite) Test_CarriersList() {
 				res.Bind(&carriers)
 				as.Equal(test.carrierCount, len(carriers))
 				if test.carrierCount > 0 {
-					as.Equal(newcarrier.Name, carriers[0].Name)
+					as.Equal(newCarrier.Name, carriers[0].Name)
 				}
 			}
 		})
@@ -57,9 +57,9 @@ func (as *ActionSuite) Test_CarriersListFilter() {
 	var prefixes = []string{"ਪੰਜਾਬੀ", "Test"}
 	for _, p := range prefixes {
 		for i := 0; i < 5; i++ {
-			carrierType := "Vessel"
+			carrierType := models.CarrierTypeVessel
 			if i%2 == 0 {
-				carrierType = "Air"
+				carrierType = models.CarrierTypeAir
 			}
 			_ = as.createCarrier(fmt.Sprintf("%s-%d", p, i), carrierType, nulls.Time{}, user.TenantID, user.ID)
 		}
@@ -72,7 +72,7 @@ func (as *ActionSuite) Test_CarriersListFilter() {
 	as.Equal(2, len(carriers))
 	for _, v := range carriers {
 		as.Contains(v.Name, "ਪੰਜਾਬੀ")
-		as.Equal("Vessel", v.Type)
+		as.Equal(string(models.CarrierTypeVessel), v.Type)
 	}
 	klopp := as.getLoggedInUser("klopp")
 	as.NotEqual(klopp.TenantID, user.TenantID)
@@ -106,11 +106,11 @@ func (as *ActionSuite) Test_CarriersListOrder() {
 	var now = time.Now().UTC()
 	for _, p := range prefixes {
 		for i := 0; i < 3; i++ {
-			carrierType := "Vessel"
+			carrierType := models.CarrierTypeVessel
 			// Create eta based on the index. The smaller index should arrive closer to current time
 			hours := i + 1
 			if i%2 == 0 {
-				carrierType = "Air"
+				carrierType = models.CarrierTypeAir
 				// Setup some etas in the past
 				hours = hours * -1
 			}
@@ -132,16 +132,135 @@ func (as *ActionSuite) Test_CarriersListOrder() {
 	}
 
 }
-func (as *ActionSuite) Test_CarriersShow() {
-	as.False(false)
+func (as *ActionSuite) Test_carriersShow() {
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusOK},
+		{"firmino", http.StatusOK},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusOK},
+		{"klopp", http.StatusOK},
+		{"adidas", http.StatusOK},
+	}
+	lewin := as.getLoggedInUser("lewin")
+	firmino := as.getLoggedInUser("firmino")
+	as.NotEqual(firmino.TenantID, lewin.TenantID)
+	eta := nulls.NewTime(time.Now().UTC())
+	var carriers = []*models.Carrier{as.createCarrier("carr1", models.CarrierTypeAir, eta, firmino.TenantID, firmino.ID),
+		as.createCarrier("carr2", models.CarrierTypeRail, eta, lewin.TenantID, lewin.ID)}
+	as.NotEqual(carriers[0].TenantID, carriers[1].TenantID)
+
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			for _, v := range carriers {
+				req := as.setupRequest(user, fmt.Sprintf("/carriers/%s", v.ID))
+				res := req.Get()
+				if v.TenantID == user.TenantID || user.IsSuperAdmin() {
+					as.Equal(test.responseCode, res.Code)
+				} else {
+					as.Equal(http.StatusNotFound, res.Code)
+				}
+				if res.Code == http.StatusOK {
+					var carrier = models.Carrier{}
+					res.Bind(&carrier)
+					as.Equal(v.Name, carrier.Name)
+					as.Equal(v.Type, carrier.Type)
+					as.Equal(eta, carrier.Eta)
+				}
+			}
+		})
+	}
 }
 
-func (as *ActionSuite) Test_CarriersCreate() {
-	as.False(false)
+func (as *ActionSuite) Test_carriersCreate() {
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusCreated},
+		{"firmino", http.StatusCreated},
+		{"rodriguez", http.StatusCreated},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusNotFound},
+		{"klopp", http.StatusCreated},
+		{"adidas", http.StatusNotFound},
+	}
+	var firmino = as.getLoggedInUser("firmino")
+	for i, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			carrierType := models.CarrierTypeAir
+			if i%2 == 0 {
+				carrierType = models.CarrierTypeRail
+			}
+			newCarrier := models.Carrier{Name: user.Username, Type: string(carrierType), TenantID: firmino.TenantID}
+			req := as.setupRequest(user, "/carriers")
+			res := req.Post(newCarrier)
+			as.Equal(test.responseCode, res.Code)
+			if res.Code == http.StatusOK {
+				var carrier = models.Carrier{}
+				res.Bind(&carrier)
+				as.Equal(newCarrier.Name, carrier.Name)
+				as.Equal(newCarrier.Type, carrier.Type)
+				if user.IsSuperAdmin() {
+					as.Equal(firmino.TenantID, carrier.TenantID)
+				} else {
+					as.Equal(user.TenantID, carrier.TenantID)
+				}
+			}
+		})
+	}
 }
 
-func (as *ActionSuite) Test_CarriersUpdate() {
-	as.False(false)
+func (as *ActionSuite) Test_carriersUpdate() {
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusOK},
+		{"firmino", http.StatusOK},
+		{"rodriguez", http.StatusNotFound},
+		{"coutinho", http.StatusNotFound},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusNotFound},
+		{"klopp", http.StatusOK},
+		{"adidas", http.StatusNotFound},
+		{"nike", http.StatusNotFound},
+	}
+	var firmino = as.getLoggedInUser("firmino")
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			carrierType := models.CarrierTypeAir
+			eta := nulls.NewTime(time.Now())
+			newCarrier := as.createCarrier(user.Username, carrierType, eta, firmino.TenantID, firmino.ID)
+			req := as.setupRequest(user, fmt.Sprintf("/carriers/%s", newCarrier.ID))
+			// Try to update ID and tenant ID. Expect these calls to be excluded at update
+			updatedcarrier := models.Carrier{Name: fmt.Sprintf("not%s", test.username), Type: string(models.CarrierTypeRail), Eta: nulls.NewTime(eta.Time.Add(1)), ID: user.ID, TenantID: user.ID}
+			res := req.Put(updatedcarrier)
+			as.Equal(test.responseCode, res.Code)
+			var dbCarrier = *newCarrier
+			err := as.DB.Reload(&dbCarrier)
+			as.Nil(err)
+			if res.Code == http.StatusOK {
+				var carrier = models.Carrier{}
+				res.Bind(&carrier)
+				as.Equal(updatedcarrier.Name, carrier.Name)
+				as.Equal(updatedcarrier.Type, carrier.Type)
+				as.Equal(newCarrier.ID, carrier.ID)
+				as.Equal(dbCarrier.Name, carrier.Name)
+			} else {
+				// Ensure update did not succeed
+				as.Equal(dbCarrier.Name, newCarrier.Name)
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_CarriersTestroy() {
@@ -167,13 +286,13 @@ func (as *ActionSuite) Test_CarriersTestroy() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			var name = fmt.Sprintf("carrier%s", test.username)
-			newcarrier := &models.Carrier{Name: name, Type: "Port", TenantID: firmino.TenantID, CreatedBy: firmino.ID}
-			v, err := as.DB.ValidateAndCreate(newcarrier)
+			newCarrier := &models.Carrier{Name: name, Type: "Port", TenantID: firmino.TenantID, CreatedBy: firmino.ID}
+			v, err := as.DB.ValidateAndCreate(newCarrier)
 			as.Nil(err)
 			as.Equal(0, len(v.Errors))
 
 			user := as.getLoggedInUser(test.username)
-			req := as.setupRequest(user, fmt.Sprintf("/carriers/%s", newcarrier.ID))
+			req := as.setupRequest(user, fmt.Sprintf("/carriers/%s", newCarrier.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
 			if res.Code == http.StatusOK {

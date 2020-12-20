@@ -37,8 +37,8 @@ func (as *ActionSuite) createTerminal(name string, terminalType models.TerminalT
 	return newTerminal
 }
 
-func (as *ActionSuite) createCarrier(name string, carrierType string, eta nulls.Time, tenantID uuid.UUID, createdBy uuid.UUID) *models.Carrier {
-	newCarrier := &models.Carrier{Name: name, Type: carrierType, TenantID: tenantID, CreatedBy: createdBy, Eta: eta}
+func (as *ActionSuite) createCarrier(name string, carrierType models.CarrierType, eta nulls.Time, tenantID uuid.UUID, createdBy uuid.UUID) *models.Carrier {
+	newCarrier := &models.Carrier{Name: name, Type: string(carrierType), TenantID: tenantID, CreatedBy: createdBy, Eta: eta}
 	v, err := as.DB.ValidateAndCreate(newCarrier)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))

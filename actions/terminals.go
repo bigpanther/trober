@@ -73,23 +73,18 @@ func terminalsShow(c buffalo.Context) error {
 
 	// Allocate an empty Terminal
 	terminal := &models.Terminal{}
-
 	// To find the Terminal the parameter terminal_id is used.
 	if err := tx.Scope(restrictedScope(c)).Find(terminal, c.Param("terminal_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-
 	return c.Render(200, r.JSON(terminal))
-
 }
 
 // terminalsCreate adds a Terminal to the DB. This function is mapped to the
 // path POST /terminals
 func terminalsCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtLeastBackOffice() {
-		return models.ErrNotFound
-	}
+
 	// Allocate an empty Terminal
 	terminal := &models.Terminal{}
 
@@ -108,8 +103,6 @@ func terminalsCreate(c buffalo.Context) error {
 		terminal.TenantID = loggedInUser.TenantID
 	}
 	terminal.CreatedBy = loggedInUser.ID
-	terminal.CreatedAt = time.Now().UTC()
-	terminal.UpdatedAt = time.Now().UTC()
 	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(terminal)
 	if err != nil {
@@ -127,10 +120,6 @@ func terminalsCreate(c buffalo.Context) error {
 // terminalsUpdate changes a Terminal in the DB. This function is mapped to
 // the path PUT /terminals/{terminal_id}
 func terminalsUpdate(c buffalo.Context) error {
-	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtLeastBackOffice() {
-		return models.ErrNotFound
-	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -139,17 +128,22 @@ func terminalsUpdate(c buffalo.Context) error {
 
 	// Allocate an empty Terminal
 	terminal := &models.Terminal{}
-
 	if err := tx.Scope(restrictedScope(c)).Find(terminal, c.Param("terminal_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-
+	newTerminal := &models.Terminal{}
 	// Bind Terminal to the html form elements
-	if err := c.Bind(terminal); err != nil {
+	if err := c.Bind(newTerminal); err != nil {
 		return err
 	}
-	terminal.UpdatedAt = time.Now().UTC()
-	verrs, err := tx.ValidateAndUpdate(terminal)
+	if newTerminal.Name != terminal.Name || newTerminal.Type != terminal.Type {
+		terminal.UpdatedAt = time.Now().UTC()
+		terminal.Name = newTerminal.Name
+		terminal.Type = newTerminal.Type
+	} else {
+		return c.Render(http.StatusOK, r.JSON(terminal))
+	}
+	verrs, err := tx.ValidateAndUpdate(terminal, excludeUpdateColumnsDefault()...)
 	if err != nil {
 		return err
 	}
@@ -163,10 +157,6 @@ func terminalsUpdate(c buffalo.Context) error {
 // terminalsDestroy deletes a Terminal from the DB. This function is mapped
 // to the path DELETE /terminals/{terminal_id}
 func terminalsDestroy(c buffalo.Context) error {
-	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtLeastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {

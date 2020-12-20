@@ -224,6 +224,7 @@ func (as *ActionSuite) Test_TenantsUpdate() {
 				tenant = models.Tenant{}
 				err = as.DB.Where("name=?", "New Test").First(&tenant)
 				as.Equal("New Test", tenant.Name)
+				as.Equal(newTenant.ID, tenant.ID)
 			} else {
 				tenant := models.Tenant{}
 				err = as.DB.Where("name=?", "Test").First(&tenant)

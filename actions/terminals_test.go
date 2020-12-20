@@ -161,7 +161,7 @@ func (as *ActionSuite) Test_TerminalsCreate() {
 				terminalType = models.TerminalTypeRail
 			}
 			newTerminal := models.Terminal{Name: user.Username, Type: string(terminalType), TenantID: firmino.TenantID}
-			req := as.setupRequest(user, fmt.Sprintf("/terminals"))
+			req := as.setupRequest(user, "/terminals")
 			res := req.Post(newTerminal)
 			as.Equal(test.responseCode, res.Code)
 			if res.Code == http.StatusOK {
@@ -180,7 +180,48 @@ func (as *ActionSuite) Test_TerminalsCreate() {
 }
 
 func (as *ActionSuite) Test_TerminalsUpdate() {
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusOK},
+		{"firmino", http.StatusOK},
+		{"rodriguez", http.StatusNotFound},
+		{"coutinho", http.StatusNotFound},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusNotFound},
+		{"klopp", http.StatusOK},
+		{"adidas", http.StatusNotFound},
+		{"nike", http.StatusNotFound},
+	}
+	var firmino = as.getLoggedInUser("firmino")
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			terminalType := models.TerminalTypePort
+			newTerminal := as.createTerminal(user.Username, terminalType, firmino.TenantID, firmino.ID)
+			req := as.setupRequest(user, fmt.Sprintf("/terminals/%s", newTerminal.ID))
+			// Try to update ID and tenant ID. Expect these calls to be excluded at update
+			updatedTerminal := models.Terminal{Name: fmt.Sprintf("not%s", test.username), Type: string(models.TerminalTypeRail), ID: user.ID, TenantID: user.ID}
+			res := req.Put(updatedTerminal)
+			as.Equal(test.responseCode, res.Code)
+			var dbTerminal = *newTerminal
+			err := as.DB.Reload(&dbTerminal)
+			as.Nil(err)
+			if res.Code == http.StatusOK {
+				var terminal = models.Terminal{}
+				res.Bind(&terminal)
+				as.Equal(updatedTerminal.Name, terminal.Name)
+				as.Equal(updatedTerminal.Type, terminal.Type)
+				as.Equal(newTerminal.ID, terminal.ID)
+				as.Equal(dbTerminal.Name, terminal.Name)
+			} else {
+				// Ensure update did not succeed
+				as.Equal(dbTerminal.Name, newTerminal.Name)
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_TerminalsDestroy() {

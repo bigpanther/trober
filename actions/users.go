@@ -31,7 +31,7 @@ import (
 func usersList(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
@@ -66,6 +66,7 @@ func usersList(c buffalo.Context) error {
 // usersShow gets the data for one User. This function is mapped to
 // the path GET /users/{user_id}
 func usersShow(c buffalo.Context) error {
+
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -88,6 +89,10 @@ func usersShow(c buffalo.Context) error {
 // usersCreate adds a User to the DB. This function is mapped to the
 // path POST /users
 func usersCreate(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if !loggedInUser.IsAtleastBackOffice() {
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
+	}
 	// Allocate an empty User
 	user := &models.User{}
 
@@ -95,14 +100,13 @@ func usersCreate(c buffalo.Context) error {
 	if err := c.Bind(user); err != nil {
 		return err
 	}
+	if !loggedInUser.IsSuperAdmin() && user.IsSuperAdmin() {
+		return c.Render(http.StatusBadRequest, r.JSON(models.NewCustomError(http.StatusText(http.StatusBadRequest), fmt.Sprint(http.StatusBadRequest), errors.New("User Role value is not valid"))))
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
-	}
-	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsSuperAdmin() && user.IsSuperAdmin() {
-		return c.Render(400, r.JSON(models.NewCustomError("Bad Request", "400", errors.New("User Role value is not valid"))))
 	}
 
 	if !loggedInUser.IsSuperAdmin() || user.TenantID == uuid.Nil {
@@ -173,7 +177,7 @@ func usersUpdate(c buffalo.Context) error {
 func usersDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)

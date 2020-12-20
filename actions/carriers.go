@@ -27,10 +27,6 @@ import (
 // carriersList gets all Carriers. This function is mapped to the path
 // GET /carriers
 func carriersList(c buffalo.Context) error {
-	var loggedInUser = loggedInUser(c)
-	if loggedInUser.IsNotActive() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -65,6 +61,10 @@ func carriersList(c buffalo.Context) error {
 // carriersShow gets the data for one Carrier. This function is mapped to
 // the path GET /carriers/{carrier_id}
 func carriersShow(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.IsNotActive() {
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -169,7 +169,7 @@ func carriersUpdate(c buffalo.Context) error {
 func carriersDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)

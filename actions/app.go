@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"encoding/base64"
@@ -79,17 +80,19 @@ func App() *buffalo.App {
 		//  c.Value("tx").(*pop.Connection)
 		// Remove to disable this.
 		app.Use(popmw.Transaction(models.DB))
-		app.Use(setCurrentUser)
+		app.Use(setCurrentUser, requireActiveUser)
 
 		app.GET("/", homeHandler)
 		app.GET("/appinfo", appInfoHandler)
 		app.Middleware.Skip(setCurrentUser, homeHandler, appInfoHandler)
+		app.Middleware.Skip(requireActiveUser, homeHandler, appInfoHandler, selfGet, selfGetTenant)
+
 		var tenantGroup = app.Group("/tenants")
-		tenantGroup.GET("/", tenantsList)
-		tenantGroup.GET("/{tenant_id}", tenantsShow)
-		tenantGroup.POST("/", tenantsCreate)
-		tenantGroup.PUT("/{tenant_id}", tenantsUpdate)
-		tenantGroup.DELETE("/{tenant_id}", tenantsDestroy)
+		tenantGroup.GET("/", requireSuperAdminUser(tenantsList))
+		tenantGroup.GET("/{tenant_id}", requireSuperAdminUser(tenantsShow))
+		tenantGroup.POST("/", requireSuperAdminUser(tenantsCreate))
+		tenantGroup.PUT("/{tenant_id}", requireSuperAdminUser(tenantsUpdate))
+		tenantGroup.DELETE("/{tenant_id}", requireSuperAdminUser(tenantsDestroy))
 		var userGroup = app.Group("/users")
 		userGroup.GET("/", usersList)
 		userGroup.GET("/{user_id}", usersShow)
@@ -239,6 +242,26 @@ func setCurrentUser(next buffalo.Handler) buffalo.Handler {
 			return err
 		}
 		c.Set(currentUserKey, user)
+		return next(c)
+	}
+}
+
+func requireActiveUser(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		var loggedInUser = loggedInUser(c)
+		if loggedInUser.IsNotActive() {
+			return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
+		}
+		return next(c)
+	}
+}
+
+func requireSuperAdminUser(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		var loggedInUser = loggedInUser(c)
+		if !loggedInUser.IsSuperAdmin() {
+			return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
+		}
 		return next(c)
 	}
 }

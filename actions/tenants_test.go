@@ -125,24 +125,33 @@ func (as *ActionSuite) Test_TenantsShow() {
 		responseCode int
 		tenantName   string
 	}{
-		{"mane", http.StatusOK, "Big Panther Liverpool"},
-		{"firmino", http.StatusOK, "Big Panther Liverpool"},
+		{"mane", http.StatusNotFound, "Big Panther Liverpool"},
+		{"firmino", http.StatusNotFound, "Big Panther Liverpool"},
 		{"allan", http.StatusNotFound, "Big Panther Everton"},
-		{"salah", http.StatusOK, "Big Panther Liverpool"},
+		{"salah", http.StatusNotFound, "Big Panther Liverpool"},
 		{"klopp", http.StatusOK, "Big Panther Test"},
-		{"adidas", http.StatusOK, "Big Panther Everton"},
+		{"adidas", http.StatusNotFound, "Big Panther Everton"},
 	}
-
+	firmino := as.getLoggedInUser("firmino")
+	klopp := as.getLoggedInUser("klopp")
+	as.NotEqual(firmino.TenantID, klopp.TenantID)
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			user := as.getLoggedInUser(test.username)
-			req := as.setupRequest(user, fmt.Sprintf("/tenants/%s", user.TenantID))
-			res := req.Get()
-			as.Equal(test.responseCode, res.Code)
-			if test.responseCode == http.StatusOK {
-				var tenant = models.Tenant{}
-				res.Bind(&tenant)
-				as.Equal(test.tenantName, tenant.Name)
+			var tenantIDs = map[string]string{
+				"Big Panther Test":      klopp.TenantID.String(),
+				"Big Panther Liverpool": firmino.TenantID.String(),
+				test.tenantName:         user.TenantID.String(),
+			}
+			for k, v := range tenantIDs {
+				req := as.setupRequest(user, fmt.Sprintf("/tenants/%s", v))
+				res := req.Get()
+				as.Equal(test.responseCode, res.Code)
+				if test.responseCode == http.StatusOK {
+					var tenant = models.Tenant{}
+					res.Bind(&tenant)
+					as.Equal(k, tenant.Name)
+				}
 			}
 		})
 	}

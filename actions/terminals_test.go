@@ -146,11 +146,13 @@ func (as *ActionSuite) Test_TerminalsCreate() {
 	}{
 		{"mane", http.StatusCreated},
 		{"firmino", http.StatusCreated},
+		{"rodriguez", http.StatusCreated},
 		{"allan", http.StatusNotFound},
 		{"salah", http.StatusNotFound},
 		{"klopp", http.StatusCreated},
 		{"adidas", http.StatusNotFound},
 	}
+	var firmino = as.getLoggedInUser("firmino")
 	for i, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			user := as.getLoggedInUser(test.username)
@@ -158,7 +160,7 @@ func (as *ActionSuite) Test_TerminalsCreate() {
 			if i%2 == 0 {
 				terminalType = models.TerminalTypeRail
 			}
-			newTerminal := models.Terminal{Name: user.Username, Type: string(terminalType)}
+			newTerminal := models.Terminal{Name: user.Username, Type: string(terminalType), TenantID: firmino.TenantID}
 			req := as.setupRequest(user, fmt.Sprintf("/terminals"))
 			res := req.Post(newTerminal)
 			as.Equal(test.responseCode, res.Code)
@@ -167,7 +169,9 @@ func (as *ActionSuite) Test_TerminalsCreate() {
 				res.Bind(&terminal)
 				as.Equal(newTerminal.Name, terminal.Name)
 				as.Equal(newTerminal.Type, terminal.Type)
-				if !user.IsSuperAdmin() {
+				if user.IsSuperAdmin() {
+					as.Equal(firmino.TenantID, terminal.TenantID)
+				} else {
 					as.Equal(user.TenantID, terminal.TenantID)
 				}
 			}

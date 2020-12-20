@@ -1107,6 +1107,10 @@ components:
       description: A list of Tenants
     Tenant:
       type: object
+      required:
+        - name
+        - code
+        - type
       properties:
         id:
           type: string
@@ -1126,16 +1130,13 @@ components:
           readOnly: true
         name:
           type: string
-          required: true
           minLength: 3
           maxLength: 50
         code:
           type: string
-          required: true
           minLength: 6
           maxLength: 20
         type:
-          required: true
           $ref: "#/components/schemas/TenantType"
       description: A Tenant in the system
     Users:
@@ -1154,6 +1155,13 @@ components:
           readOnly: true
     User:
       type: object
+      required:
+        - name
+        - code
+        - role
+        - tenant_id
+        - email
+        - username
       properties:
         id:
           type: string
@@ -1203,6 +1211,9 @@ components:
       description: A list of Customers for the tenants
     Customer:
       type: object
+      required:
+        - name
+        - tenant_id
       properties:
         id:
           type: string
@@ -1270,6 +1281,10 @@ components:
       description: A list of Carriers
     Carrier:
       type: object
+      required:
+        - name
+        - tenant_id
+        - type
       properties:
         id:
           type: string

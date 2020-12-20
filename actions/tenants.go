@@ -20,19 +20,15 @@ import (
 // Path: Plural (/tenants)
 // View Template Folder: Plural (/templates/tenants/)
 const (
-	notFound             = "Not found"
 	orderByCreatedAtDesc = "created_at DESC"
 )
 
-var errNotFound = errors.New(notFound)
+var errNotFound = errors.New(http.StatusText(http.StatusNotFound))
 
 // tenantsList gets all Tenants. This function is mapped to the path
 // GET /tenants
 func tenantsList(c buffalo.Context) error {
 	// Get the DB connection from the context
-	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -64,10 +60,7 @@ func tenantsList(c buffalo.Context) error {
 // the path GET /tenants/{tenant_id}
 func tenantsShow(c buffalo.Context) error {
 	tenantID := c.Param("tenant_id")
-	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsSuperAdmin() && (loggedInUser.IsNotActive() || loggedInUser.TenantID.String() != tenantID) {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
+
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -90,7 +83,7 @@ func tenantsShow(c buffalo.Context) error {
 // path POST /tenants
 func tenantsCreate(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Allocate an empty Tenant
 	tenant := &models.Tenant{}
@@ -125,9 +118,6 @@ func tenantsCreate(c buffalo.Context) error {
 // tenantsUpdate changes a Tenant in the DB. This function is mapped to
 // the path PUT /tenants/{tenant_id}
 func tenantsUpdate(c buffalo.Context) error {
-	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -162,9 +152,6 @@ func tenantsUpdate(c buffalo.Context) error {
 // tenantsDestroy deletes a Tenant from the DB. This function is mapped
 // to the path DELETE /tenants/{tenant_id}
 func tenantsDestroy(c buffalo.Context) error {
-	if !loggedInUser(c).IsSuperAdmin() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {

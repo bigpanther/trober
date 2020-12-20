@@ -28,7 +28,7 @@ import (
 func ordersList(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
@@ -156,7 +156,7 @@ func ordersUpdate(c buffalo.Context) error {
 func ordersDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	if !loggedInUser.IsAtleastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(notFound, fmt.Sprint(http.StatusNotFound), errNotFound)))
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)

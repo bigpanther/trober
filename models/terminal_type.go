@@ -10,6 +10,8 @@ const (
 	TerminalTypeRail TerminalType = "Rail"
 	// TerminalTypePort represents Port TerminalType
 	TerminalTypePort TerminalType = "Port"
+	// TerminalTypeAirport represents Airport TerminalType
+	TerminalTypeAirport TerminalType = "Airport"
 	// TerminalTypeWarehouse represents Warehouse TerminalType
 	TerminalTypeWarehouse TerminalType = "Warehouse"
 	// TerminalTypeYard represents Yard TerminalType
@@ -18,9 +20,10 @@ const (
 	TerminalTypeCustom TerminalType = "Custom"
 )
 
-var allowedTerminalType [5]TerminalType = [5]TerminalType{
+var allowedTerminalType [6]TerminalType = [6]TerminalType{
 	TerminalTypeRail,
 	TerminalTypePort,
+	TerminalTypeAirport,
 	TerminalTypeWarehouse,
 	TerminalTypeYard,
 	TerminalTypeCustom,
@@ -29,5 +32,5 @@ var allowedTerminalType [5]TerminalType = [5]TerminalType{
 // IsValidTerminalType validates if the input is a TerminalType
 func IsValidTerminalType(s string) bool {
 	t := TerminalType(s)
-	return TerminalTypeRail == t || TerminalTypePort == t || TerminalTypeWarehouse == t || TerminalTypeYard == t || TerminalTypeCustom == t
+	return TerminalTypeRail == t || TerminalTypePort == t || TerminalTypeAirport == t || TerminalTypeWarehouse == t || TerminalTypeYard == t || TerminalTypeCustom == t
 }

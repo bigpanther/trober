@@ -88,7 +88,7 @@ func carriersShow(c buffalo.Context) error {
 func carriersCreate(c buffalo.Context) error {
 
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtleastBackOffice() {
+	if !loggedInUser.IsAtLeastBackOffice() {
 		return models.ErrNotFound
 	}
 	// Allocate an empty Carrier
@@ -129,7 +129,7 @@ func carriersCreate(c buffalo.Context) error {
 // the path PUT /carriers/{carrier_id}
 func carriersUpdate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtleastBackOffice() {
+	if !loggedInUser.IsAtLeastBackOffice() {
 		return models.ErrNotFound
 	}
 	// Get the DB connection from the context
@@ -168,7 +168,7 @@ func carriersUpdate(c buffalo.Context) error {
 // to the path DELETE /carriers/{carrier_id}
 func carriersDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtleastBackOffice() {
+	if !loggedInUser.IsAtLeastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context

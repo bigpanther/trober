@@ -29,7 +29,7 @@ import (
 // GET /customers
 func customersList(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtleastBackOffice() {
+	if !loggedInUser.IsAtLeastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context
@@ -84,7 +84,7 @@ func customersShow(c buffalo.Context) error {
 // path POST /customers
 func customersCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtleastBackOffice() {
+	if !loggedInUser.IsAtLeastBackOffice() {
 		return models.ErrNotFound
 	}
 	// Allocate an empty Customer
@@ -161,7 +161,7 @@ func customersUpdate(c buffalo.Context) error {
 // to the path DELETE /customers/{customer_id}
 func customersDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtleastBackOffice() {
+	if !loggedInUser.IsAtLeastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context

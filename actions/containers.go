@@ -200,7 +200,7 @@ func containersUpdateStatus(c buffalo.Context) error {
 		return c.Error(http.StatusBadRequest, errors.New("invalid status"))
 	}
 	var loggedInUser = loggedInUser(c)
-	if loggedInUser.IsAtleastBackOffice() {
+	if loggedInUser.IsAtLeastBackOffice() {
 		var driverID nulls.UUID
 
 		// Bind driver to the html form elements
@@ -236,7 +236,7 @@ func containersUpdateStatus(c buffalo.Context) error {
 // to the path DELETE /containers/{container_id}
 func containersDestroy(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtleastBackOffice() {
+	if !loggedInUser.IsAtLeastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
 	// Get the DB connection from the context

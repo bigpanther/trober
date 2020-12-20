@@ -40,10 +40,10 @@ func (as *ActionSuite) Test_SelfGet() {
 		f        func(u *models.User) bool
 	}{
 		{"mane", func(u *models.User) bool {
-			return u.IsAtleastTenantBackOffice() && u.IsAtleastBackOffice() && u.IsBackOffice()
+			return u.IsAtLeastTenantBackOffice() && u.IsAtLeastBackOffice() && u.IsBackOffice()
 		}},
 		{"firmino", func(u *models.User) bool {
-			return u.IsAtleastTenantBackOffice() && u.IsAtleastBackOffice() && u.IsAdmin()
+			return u.IsAtLeastTenantBackOffice() && u.IsAtLeastBackOffice() && u.IsAdmin()
 		}},
 		{"allan", func(u *models.User) bool {
 			return u.IsNotActive()
@@ -52,7 +52,7 @@ func (as *ActionSuite) Test_SelfGet() {
 			return u.IsDriver()
 		}},
 		{"klopp", func(u *models.User) bool {
-			return u.IsAtleastBackOffice() && u.IsSuperAdmin()
+			return u.IsAtLeastBackOffice() && u.IsSuperAdmin()
 		}},
 		{"adidas", func(u *models.User) bool {
 			return u.IsCustomer()

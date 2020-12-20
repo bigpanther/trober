@@ -93,7 +93,55 @@ func (as *ActionSuite) Test_UsersListFilter() {
 
 }
 func (as *ActionSuite) Test_UsersShow() {
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+		otherUser    string
+	}{
+		{"mane", http.StatusOK, "firmino"},
+		{"mane", http.StatusNotFound, "allan"},
+		{"mane", http.StatusNotFound, "klopp"},
+		{"firmino", http.StatusOK, "salah"},
+		{"firmino", http.StatusNotFound, "klopp"},
+		{"salah", http.StatusNotFound, "firmino"},
+		{"salah", http.StatusNotFound, "allan"},
+		{"salah", http.StatusNotFound, "klopp"},
+		{"allan", http.StatusNotFound, "lewin"},
+		{"allan", http.StatusNotFound, "mane"},
+		{"allan", http.StatusNotFound, "klopp"},
+		{"klopp", http.StatusOK, "mane"},
+		{"klopp", http.StatusOK, "allan"},
+		{"klopp", http.StatusOK, "adidas"},
+		{"adidas", http.StatusNotFound, "mane"},
+		{"adidas", http.StatusNotFound, "klopp"},
+		{"adidas", http.StatusNotFound, "lewin"},
+	}
+	for _, test := range tests {
+		as.T().Run(fmt.Sprint(test.username, test.otherUser), func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			otherUser := as.getLoggedInUser(test.otherUser)
+			var UserIDs = map[string]string{
+				user.Username:      user.ID.String(),
+				otherUser.Username: otherUser.ID.String(),
+			}
+			for k, v := range UserIDs {
+				req := as.setupRequest(user, fmt.Sprintf("/users/%s", v))
+				res := req.Get()
+				if !user.IsAtLeastBackOffice() {
+					as.Equal(http.StatusNotFound, res.Code)
+				}
+				if k == test.otherUser {
+					as.Equal(test.responseCode, res.Code)
+				}
+				if test.responseCode == http.StatusOK {
+					var user = models.User{}
+					res.Bind(&user)
+					as.Equal(k, user.Username)
+				}
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_UsersCreate() {

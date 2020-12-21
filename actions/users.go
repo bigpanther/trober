@@ -70,24 +70,19 @@ func usersList(c buffalo.Context) error {
 // usersShow gets the data for one User. This function is mapped to
 // the path GET /users/{user_id}
 func usersShow(c buffalo.Context) error {
-
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
-
 	// Allocate an empty User
 	user := &models.User{}
 	var populatedFields = []string{"Customer"}
-
 	// To find the User the parameter user_id is used.
 	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-
 	return c.Render(200, r.JSON(user))
-
 }
 
 // usersCreate adds a User to the DB. This function is mapped to the
@@ -99,7 +94,6 @@ func usersCreate(c buffalo.Context) error {
 	}
 	// Allocate an empty User
 	user := &models.User{}
-
 	// Bind user to the html form elements
 	if err := c.Bind(user); err != nil {
 		return err
@@ -112,7 +106,6 @@ func usersCreate(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-
 	if !loggedInUser.IsSuperAdmin() || user.TenantID == uuid.Nil {
 		user.TenantID = loggedInUser.TenantID
 	}
@@ -122,13 +115,10 @@ func usersCreate(c buffalo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	if verrs.HasAny() {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
-
 	return c.Render(http.StatusCreated, r.JSON(user))
-
 }
 
 // usersUpdate changes a User in the DB. This function is mapped to

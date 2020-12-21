@@ -146,7 +146,40 @@ func (as *ActionSuite) Test_UsersShow() {
 }
 
 func (as *ActionSuite) Test_UsersCreate() {
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusCreated},
+		{"firmino", http.StatusCreated},
+		{"rodriguez", http.StatusCreated},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusNotFound},
+		{"klopp", http.StatusCreated},
+		{"adidas", http.StatusNotFound},
+	}
+	var firmino = as.getLoggedInUser("firmino")
+	for i, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			userRole := models.UserRoleBackOffice
+			if i%2 == 0 {
+				userRole = models.UserRoleDriver
+			}
+			newUser := models.User{Name: test.username, Username: fmt.Sprintf("%stest", test.username), Email: fmt.Sprintf("%stest@bigpanther.ca", test.username), Role: string(userRole), TenantID: firmino.TenantID}
+			req := as.setupRequest(user, "/users")
+			res := req.Post(newUser)
+			as.Equal(test.responseCode, res.Code)
+			if res.Code == http.StatusCreated {
+				var user = models.User{}
+				res.Bind(&user)
+				as.Equal(newUser.Name, user.Name)
+				as.Equal(newUser.Role, user.Role)
+				as.Equal(user.TenantID, user.TenantID)
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_UsersUpdate() {

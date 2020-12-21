@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"testing"
@@ -65,7 +66,7 @@ func (as *ActionSuite) Test_OrdersDestroy() {
 				// Check if actually deleted
 				order = models.Order{}
 				err = as.DB.Where("serial_number=?", name).First(&order)
-				as.Contains(err.Error(), "no rows in result set")
+				as.Equal(err, sql.ErrNoRows)
 			} else {
 				order := models.Order{}
 				err = as.DB.Where("serial_number=?", name).First(&order)

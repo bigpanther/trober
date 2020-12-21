@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"testing"
@@ -256,7 +257,7 @@ func (as *ActionSuite) Test_TerminalsDestroy() {
 				// Check if actually deleted
 				terminal = models.Terminal{}
 				err := as.DB.Where("name=?", name).First(&terminal)
-				as.Contains(err.Error(), "no rows in result set")
+				as.Equal(err, sql.ErrNoRows)
 			} else {
 				terminal := models.Terminal{}
 				err := as.DB.Where("name=?", name).First(&terminal)

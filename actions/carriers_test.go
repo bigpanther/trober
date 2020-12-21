@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"testing"
@@ -301,7 +302,7 @@ func (as *ActionSuite) Test_CarriersDestroy() {
 				// Check if actually deleted
 				carrier = models.Carrier{}
 				err = as.DB.Where("name=?", name).First(&carrier)
-				as.Contains(err.Error(), "no rows in result set")
+				as.Equal(err, sql.ErrNoRows)
 			} else {
 				carrier := models.Carrier{}
 				err = as.DB.Where("name=?", name).First(&carrier)

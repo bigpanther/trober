@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"testing"
@@ -265,7 +266,7 @@ func (as *ActionSuite) Test_TenantsDestroy() {
 				// Check if actually deleted
 				tenant = models.Tenant{}
 				err = as.DB.Where("name=?", "Test").First(&tenant)
-				as.Contains(err.Error(), "no rows in result set")
+				as.Equal(err, sql.ErrNoRows)
 			} else {
 				tenant := models.Tenant{}
 				err := as.DB.Where("name=?", "Test").First(&tenant)

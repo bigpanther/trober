@@ -167,7 +167,7 @@ func (as *ActionSuite) Test_UsersCreate() {
 			if i%2 == 0 {
 				userRole = models.UserRoleDriver
 			}
-			newUser := models.User{Name: test.username, Username: fmt.Sprintf("%stest", test.username), Email: fmt.Sprintf("%stest@bigpanther.ca", test.username), Role: string(userRole), TenantID: firmino.TenantID}
+			newUser := models.User{Name: test.username, Username: fmt.Sprintf("%stest", test.username), Email: fmt.Sprintf("%stest@bigpanther.ca", test.username), Role: userRole.String(), TenantID: firmino.TenantID}
 			req := as.setupRequest(user, "/users")
 			res := req.Post(newUser)
 			as.Equal(test.responseCode, res.Code)

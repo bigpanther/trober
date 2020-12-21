@@ -29,6 +29,11 @@ var allowedUserRole [6]UserRole = [6]UserRole{
 	UserRoleNone,
 }
 
+// String returns the string representation of
+func (k UserRole) String() string {
+	return string(k)
+}
+
 // IsValidUserRole validates if the input is a UserRole
 func IsValidUserRole(s string) bool {
 	t := UserRole(s)

@@ -30,7 +30,7 @@ func (as *ActionSuite) setupRequest(user *models.User, route string) *httptest.J
 }
 
 func (as *ActionSuite) createTerminal(name string, terminalType models.TerminalType, tenantID uuid.UUID, createdBy uuid.UUID) *models.Terminal {
-	newTerminal := &models.Terminal{Name: name, Type: string(terminalType), TenantID: tenantID, CreatedBy: createdBy}
+	newTerminal := &models.Terminal{Name: name, Type: terminalType.String(), TenantID: tenantID, CreatedBy: createdBy}
 	v, err := as.DB.ValidateAndCreate(newTerminal)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))
@@ -38,7 +38,7 @@ func (as *ActionSuite) createTerminal(name string, terminalType models.TerminalT
 }
 
 func (as *ActionSuite) createCarrier(name string, carrierType models.CarrierType, eta nulls.Time, tenantID uuid.UUID, createdBy uuid.UUID) *models.Carrier {
-	newCarrier := &models.Carrier{Name: name, Type: string(carrierType), TenantID: tenantID, CreatedBy: createdBy, Eta: eta}
+	newCarrier := &models.Carrier{Name: name, Type: carrierType.String(), TenantID: tenantID, CreatedBy: createdBy, Eta: eta}
 	v, err := as.DB.ValidateAndCreate(newCarrier)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))
@@ -61,7 +61,7 @@ func (as *ActionSuite) createOrder(serialNumber string, orderStatus string, eta 
 }
 
 func (as *ActionSuite) createUser(name string, role models.UserRole, email string, tenantID uuid.UUID, customerID nulls.UUID) *models.User {
-	newUser := &models.User{Name: name, Role: string(role), Username: name, Email: email, TenantID: tenantID, CustomerID: customerID}
+	newUser := &models.User{Name: name, Role: role.String(), Username: name, Email: email, TenantID: tenantID, CustomerID: customerID}
 	v, err := as.DB.ValidateAndCreate(newUser)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))

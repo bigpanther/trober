@@ -23,6 +23,11 @@ var allowedCarrierType [4]CarrierType = [4]CarrierType{
 	CarrierTypeRoad,
 }
 
+// String returns the string representation of
+func (k CarrierType) String() string {
+	return string(k)
+}
+
 // IsValidCarrierType validates if the input is a CarrierType
 func IsValidCarrierType(s string) bool {
 	t := CarrierType(s)

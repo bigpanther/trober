@@ -70,7 +70,7 @@ func (as *ActionSuite) Test_TerminalsListFilter() {
 	as.Equal(2, len(terminals))
 	for _, v := range terminals {
 		as.Contains(v.Name, "ਪੰਜਾਬੀ")
-		as.Equal(string(models.TerminalTypePort), v.Type)
+		as.Equal(models.TerminalTypePort.String(), v.Type)
 	}
 	klopp := as.getLoggedInUser("klopp")
 	as.NotEqual(klopp.TenantID, user.TenantID)
@@ -160,7 +160,7 @@ func (as *ActionSuite) Test_TerminalsCreate() {
 			if i%2 == 0 {
 				terminalType = models.TerminalTypeRail
 			}
-			newTerminal := models.Terminal{Name: user.Username, Type: string(terminalType), TenantID: firmino.TenantID}
+			newTerminal := models.Terminal{Name: user.Username, Type: terminalType.String(), TenantID: firmino.TenantID}
 			req := as.setupRequest(user, "/terminals")
 			res := req.Post(newTerminal)
 			as.Equal(test.responseCode, res.Code)
@@ -199,7 +199,7 @@ func (as *ActionSuite) Test_TerminalsUpdate() {
 			newTerminal := as.createTerminal(user.Username, terminalType, firmino.TenantID, firmino.ID)
 			req := as.setupRequest(user, fmt.Sprintf("/terminals/%s", newTerminal.ID))
 			// Try to update ID and tenant ID. Expect these calls to be excluded at update
-			updatedTerminal := models.Terminal{Name: fmt.Sprintf("not%s", test.username), Type: string(models.TerminalTypeRail), ID: user.ID, TenantID: user.ID}
+			updatedTerminal := models.Terminal{Name: fmt.Sprintf("not%s", test.username), Type: models.TerminalTypeRail.String(), ID: user.ID, TenantID: user.ID}
 			res := req.Put(updatedTerminal)
 			as.Equal(test.responseCode, res.Code)
 			var dbTerminal = *newTerminal

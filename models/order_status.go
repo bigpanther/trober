@@ -32,6 +32,11 @@ var allowedOrderStatus [7]OrderStatus = [7]OrderStatus{
 	OrderStatusPaymentReceived,
 }
 
+// String returns the string representation of
+func (k OrderStatus) String() string {
+	return string(k)
+}
+
 // IsValidOrderStatus validates if the input is a OrderStatus
 func IsValidOrderStatus(s string) bool {
 	t := OrderStatus(s)

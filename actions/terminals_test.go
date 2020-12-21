@@ -169,11 +169,7 @@ func (as *ActionSuite) Test_TerminalsCreate() {
 				res.Bind(&terminal)
 				as.Equal(newTerminal.Name, terminal.Name)
 				as.Equal(newTerminal.Type, terminal.Type)
-				if user.IsSuperAdmin() {
-					as.Equal(firmino.TenantID, terminal.TenantID)
-				} else {
-					as.Equal(user.TenantID, terminal.TenantID)
-				}
+				as.Equal(user.TenantID, terminal.TenantID)
 			}
 		})
 	}

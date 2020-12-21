@@ -162,11 +162,7 @@ func (as *ActionSuite) Test_CustomersCreate() {
 				var customer = models.Customer{}
 				res.Bind(&customer)
 				as.Equal(newCustomer.Name, customer.Name)
-				if user.IsSuperAdmin() {
-					as.Equal(firmino.TenantID, customer.TenantID)
-				} else {
-					as.Equal(user.TenantID, customer.TenantID)
-				}
+				as.Equal(user.TenantID, customer.TenantID)
 			}
 		})
 	}

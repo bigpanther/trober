@@ -212,7 +212,7 @@ func (as *ActionSuite) Test_TenantsUpdate() {
 		as.T().Run(test.username, func(t *testing.T) {
 			user := as.getLoggedInUser(test.username)
 			req := as.setupRequest(user, fmt.Sprintf("/tenants/%s", newTenant.ID))
-			updatedTenant := models.Tenant{Name: fmt.Sprintf("not%s", test.username), Type: string(models.TenantTypeProduction), Code: "shared", ID: user.ID}
+			updatedTenant := models.Tenant{Name: fmt.Sprintf("not%s", test.username), Type: models.TenantTypeProduction.String(), Code: "shared", ID: user.ID}
 			res := req.Put(updatedTenant)
 			as.Equal(test.responseCode, res.Code)
 			if res.Code == http.StatusOK {

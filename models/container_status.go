@@ -38,6 +38,11 @@ var allowedContainerStatus [9]ContainerStatus = [9]ContainerStatus{
 	ContainerStatusAbandoned,
 }
 
+// String returns the string representation of
+func (k ContainerStatus) String() string {
+	return string(k)
+}
+
 // IsValidContainerStatus validates if the input is a ContainerStatus
 func IsValidContainerStatus(s string) bool {
 	t := ContainerStatus(s)

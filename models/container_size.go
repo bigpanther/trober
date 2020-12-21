@@ -26,6 +26,11 @@ var allowedContainerSize [5]ContainerSize = [5]ContainerSize{
 	ContainerSizeCustom,
 }
 
+// String returns the string representation of
+func (k ContainerSize) String() string {
+	return string(k)
+}
+
 // IsValidContainerSize validates if the input is a ContainerSize
 func IsValidContainerSize(s string) bool {
 	t := ContainerSize(s)

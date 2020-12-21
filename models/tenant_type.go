@@ -20,6 +20,11 @@ var allowedTenantType [3]TenantType = [3]TenantType{
 	TenantTypeProduction,
 }
 
+// String returns the string representation of
+func (k TenantType) String() string {
+	return string(k)
+}
+
 // IsValidTenantType validates if the input is a TenantType
 func IsValidTenantType(s string) bool {
 	t := TenantType(s)

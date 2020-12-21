@@ -72,7 +72,7 @@ func (as *ActionSuite) Test_CarriersListFilter() {
 	as.Equal(2, len(carriers))
 	for _, v := range carriers {
 		as.Contains(v.Name, "ਪੰਜਾਬੀ")
-		as.Equal(string(models.CarrierTypeVessel), v.Type)
+		as.Equal(models.CarrierTypeVessel.String(), v.Type)
 	}
 	klopp := as.getLoggedInUser("klopp")
 	as.NotEqual(klopp.TenantID, user.TenantID)
@@ -198,7 +198,7 @@ func (as *ActionSuite) Test_CarriersCreate() {
 			if i%2 == 0 {
 				carrierType = models.CarrierTypeRail
 			}
-			newCarrier := models.Carrier{Name: user.Username, Type: string(carrierType), TenantID: firmino.TenantID}
+			newCarrier := models.Carrier{Name: user.Username, Type: carrierType.String(), TenantID: firmino.TenantID}
 			req := as.setupRequest(user, "/carriers")
 			res := req.Post(newCarrier)
 			as.Equal(test.responseCode, res.Code)
@@ -240,7 +240,7 @@ func (as *ActionSuite) Test_CarriersUpdate() {
 			newCarrier := as.createCarrier(user.Username, carrierType, eta, firmino.TenantID, firmino.ID)
 			req := as.setupRequest(user, fmt.Sprintf("/carriers/%s", newCarrier.ID))
 			// Try to update ID and tenant ID. Expect these calls to be excluded at update
-			updatedCarrier := models.Carrier{Name: fmt.Sprintf("not%s", test.username), Type: string(models.CarrierTypeRail), Eta: nulls.NewTime(eta.Time.Add(1)), ID: user.ID, TenantID: user.ID}
+			updatedCarrier := models.Carrier{Name: fmt.Sprintf("not%s", test.username), Type: models.CarrierTypeRail.String(), Eta: nulls.NewTime(eta.Time.Add(1)), ID: user.ID, TenantID: user.ID}
 			res := req.Put(updatedCarrier)
 			as.Equal(test.responseCode, res.Code)
 			var dbCarrier = *newCarrier

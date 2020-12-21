@@ -17,6 +17,11 @@ var allowedContainerType [2]ContainerType = [2]ContainerType{
 	ContainerTypeOutGoing,
 }
 
+// String returns the string representation of
+func (k ContainerType) String() string {
+	return string(k)
+}
+
 // IsValidContainerType validates if the input is a ContainerType
 func IsValidContainerType(s string) bool {
 	t := ContainerType(s)

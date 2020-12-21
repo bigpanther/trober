@@ -29,6 +29,11 @@ var allowedTerminalType [6]TerminalType = [6]TerminalType{
 	TerminalTypeCustom,
 }
 
+// String returns the string representation of
+func (k TerminalType) String() string {
+	return string(k)
+}
+
 // IsValidTerminalType validates if the input is a TerminalType
 func IsValidTerminalType(s string) bool {
 	t := TerminalType(s)

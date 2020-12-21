@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"testing"
@@ -250,7 +251,7 @@ func (as *ActionSuite) Test_CustomersDestroy() {
 				// Check if actually deleted
 				customer = models.Customer{}
 				err = as.DB.Where("name=?", name).First(&customer)
-				as.Contains(err.Error(), "no rows in result set")
+				as.Equal(err, sql.ErrNoRows)
 			} else {
 				customer := models.Customer{}
 				err = as.DB.Where("name=?", name).First(&customer)

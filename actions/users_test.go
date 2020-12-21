@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"testing"
@@ -221,7 +222,7 @@ func (as *ActionSuite) Test_UsersDestroy() {
 				// Check if actually deleted
 				user = models.User{}
 				var err = as.DB.Where("name=?", name).First(&user)
-				as.Contains(err.Error(), "no rows in result set")
+				as.Equal(err, sql.ErrNoRows)
 			} else {
 				user := models.User{}
 				err := as.DB.Where("name=?", name).First(&user)

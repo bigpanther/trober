@@ -132,7 +132,7 @@ func (as *ActionSuite) Test_CarriersListOrder() {
 	}
 
 }
-func (as *ActionSuite) Test_carriersShow() {
+func (as *ActionSuite) Test_CarriersShow() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string
@@ -176,7 +176,7 @@ func (as *ActionSuite) Test_carriersShow() {
 	}
 }
 
-func (as *ActionSuite) Test_carriersCreate() {
+func (as *ActionSuite) Test_CarriersCreate() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string
@@ -219,7 +219,7 @@ func (as *ActionSuite) Test_carriersCreate() {
 	}
 }
 
-func (as *ActionSuite) Test_carriersUpdate() {
+func (as *ActionSuite) Test_CarriersUpdate() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string
@@ -266,7 +266,7 @@ func (as *ActionSuite) Test_carriersUpdate() {
 	}
 }
 
-func (as *ActionSuite) Test_CarriersTestroy() {
+func (as *ActionSuite) Test_CarriersDestroy() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
 		username     string

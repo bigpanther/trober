@@ -209,11 +209,7 @@ func (as *ActionSuite) Test_CarriersCreate() {
 				as.Equal(newCarrier.Type, carrier.Type)
 				// should be null
 				as.False(carrier.Eta.Valid)
-				if user.IsSuperAdmin() {
-					as.Equal(firmino.TenantID, carrier.TenantID)
-				} else {
-					as.Equal(user.TenantID, carrier.TenantID)
-				}
+				as.Equal(user.TenantID, carrier.TenantID)
 			}
 		})
 	}

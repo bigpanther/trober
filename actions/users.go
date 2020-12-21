@@ -117,8 +117,6 @@ func usersCreate(c buffalo.Context) error {
 		user.TenantID = loggedInUser.TenantID
 	}
 	user.CreatedBy = nulls.NewUUID(loggedInUser.ID)
-	user.CreatedAt = time.Now().UTC()
-	user.UpdatedAt = time.Now().UTC()
 	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(user)
 	if err != nil {

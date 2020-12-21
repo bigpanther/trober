@@ -157,7 +157,7 @@ func containersUpdate(c buffalo.Context) error {
 	if verrs.HasAny() {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
-	if (container.Status.String == "Assigned" && container.DriverID != nulls.UUID{}) {
+	if (container.Status == "Assigned" && container.DriverID != nulls.UUID{}) {
 		u := &models.User{}
 		_ = tx.Where("id = ?", container.DriverID.UUID).First(u)
 		if u.DeviceID.String != "" {
@@ -166,11 +166,11 @@ func containersUpdate(c buffalo.Context) error {
 				Handler: "sendNotifications",
 				Args: worker.Args{
 					"to":            []string{u.DeviceID.String},
-					"message.title": fmt.Sprintf("You have been assigned a pickup - %s", container.SerialNumber.String),
-					"message.body":  container.SerialNumber.String,
+					"message.title": fmt.Sprintf("You have been assigned a pickup - %s", container.SerialNumber),
+					"message.body":  container.SerialNumber,
 					"message.data": map[string]string{
 						"container.id":           container.ID.String(),
-						"container.serialNumber": container.SerialNumber.String,
+						"container.serialNumber": container.SerialNumber,
 					},
 				},
 			})
@@ -208,11 +208,11 @@ func containersUpdateStatus(c buffalo.Context) error {
 			return err
 		}
 		container.DriverID = driverID
-		container.Status.String = status
+		container.Status = status
 	}
 	if loggedInUser.IsDriver() {
 		if container.IsAssigned() {
-			container.Status.String = status
+			container.Status = status
 		}
 		//notify backoffice
 	}

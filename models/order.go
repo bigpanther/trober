@@ -45,7 +45,9 @@ func (o Orders) String() string {
 func (o *Order) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: o.SerialNumber, Name: "SerialNumber"},
-		&validators.StringIsPresent{Field: o.Status, Name: "Status"},
+		&validators.FuncValidator{Fn: func() bool {
+			return IsValidOrderStatus(o.Status)
+		}, Field: o.Status, Name: "Status"},
 	), nil
 }
 

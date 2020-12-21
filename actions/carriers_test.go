@@ -30,7 +30,7 @@ func (as *ActionSuite) Test_CarriersList() {
 		{"adidas", http.StatusOK, 0},
 	}
 	firmino := as.getLoggedInUser("firmino")
-	newCarrier := as.createCarrier("carrier", "Port", nulls.Time{}, firmino.TenantID, firmino.ID)
+	newCarrier := as.createCarrier("carrier", models.CarrierTypeAir, nulls.Time{}, firmino.TenantID, firmino.ID)
 
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
@@ -285,7 +285,7 @@ func (as *ActionSuite) Test_CarriersDestroy() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			var name = fmt.Sprintf("carrier%s", test.username)
-			newCarrier := &models.Carrier{Name: name, Type: "Port", TenantID: firmino.TenantID, CreatedBy: firmino.ID}
+			newCarrier := &models.Carrier{Name: name, Type: models.CarrierTypeRail.String(), TenantID: firmino.TenantID, CreatedBy: firmino.ID}
 			v, err := as.DB.ValidateAndCreate(newCarrier)
 			as.Nil(err)
 			as.Equal(0, len(v.Errors))

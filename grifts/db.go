@@ -141,10 +141,10 @@ var _ = grift.Namespace("db", func() {
 			return err
 		}
 		container := &models.Container{
-			SerialNumber:    nulls.NewString("CANV2020127"),
+			SerialNumber:    "CANV2020127",
 			TenantID:        tenant.ID,
-			Type:            nulls.NewString("Incoming"),
-			Status:          nulls.NewString("Unassigned"),
+			Type:            "Incoming",
+			Status:          "Unassigned",
 			Origin:          nulls.NewString("Seattle"),
 			Destination:     nulls.NewString("Hope"),
 			Size:            nulls.NewString("40ST"),
@@ -156,10 +156,10 @@ var _ = grift.Namespace("db", func() {
 		}
 		err = models.DB.Create(container)
 		container = &models.Container{
-			SerialNumber:    nulls.NewString("CANV2020128"),
+			SerialNumber:    "CANV2020128",
 			TenantID:        tenant.ID,
-			Type:            nulls.NewString("Incoming"),
-			Status:          nulls.NewString("Assigned"),
+			Type:            "Incoming",
+			Status:          "Assigned",
 			Origin:          nulls.NewString("Seattle"),
 			Destination:     nulls.NewString("Whistler"),
 			Size:            nulls.NewString("20ST"),

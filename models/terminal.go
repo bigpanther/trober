@@ -42,7 +42,9 @@ func (t Terminals) String() string {
 func (t *Terminal) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: t.Name, Name: "Name"},
-		&validators.StringIsPresent{Field: t.Type, Name: "Type"},
+		&validators.FuncValidator{Fn: func() bool {
+			return IsValidTerminalType(t.Type)
+		}, Field: t.Type, Name: "Type"},
 	), nil
 }
 

@@ -50,7 +50,10 @@ func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 		&validators.StringIsPresent{Field: u.Name, Name: "Name"},
 		&validators.StringIsPresent{Field: u.Username, Name: "Username"},
 		&validators.StringIsPresent{Field: u.Role, Name: "Role"},
-		&validators.EmailIsPresent{Name: "Email", Field: u.Email, Message: "Email format not valid"},
+		&validators.EmailIsPresent{Name: "Email", Field: u.Email},
+		&validators.FuncValidator{Fn: func() bool {
+			return IsValidUserRole(u.Role)
+		}, Field: u.Role, Name: "Role"},
 	), nil
 }
 

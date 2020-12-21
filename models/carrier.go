@@ -45,7 +45,9 @@ func (c Carriers) String() string {
 func (c *Carrier) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: c.Name, Name: "Name"},
-		&validators.StringIsPresent{Field: c.Type, Name: "Type"},
+		&validators.FuncValidator{Fn: func() bool {
+			return IsValidCarrierType(c.Type)
+		}, Field: c.Type, Name: "Type"},
 	), nil
 }
 

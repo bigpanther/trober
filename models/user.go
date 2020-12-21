@@ -68,49 +68,40 @@ func (u *User) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 
 // IsSuperAdmin checks if a user can work across tenants
 func (u *User) IsSuperAdmin() bool {
-	return u.Role == userRoleSuperAdmin
+	return u.Role == UserRoleSuperAdmin.String()
 }
 
 // IsAdmin checks if a user can work across tenants
 func (u *User) IsAdmin() bool {
-	return u.Role == userRoleAdmin
+	return u.Role == UserRoleAdmin.String()
 }
 
 // IsBackOffice checks if a user can work across tenants
 func (u *User) IsBackOffice() bool {
-	return u.Role == userRoleBackOffice
+	return u.Role == UserRoleBackOffice.String()
 }
 
 // IsDriver checks if a user is a driver
 func (u *User) IsDriver() bool {
-	return u.Role == userRoleDriver
+	return u.Role == UserRoleDriver.String()
 }
 
 // IsCustomer checks if a user is a customer
 func (u *User) IsCustomer() bool {
-	return u.Role == userRoleCustomer
+	return u.Role == UserRoleCustomer.String()
 }
 
 // IsNotActive Mostly for newly created users who have not been assigned a tenant
 func (u *User) IsNotActive() bool {
-	return u.Role == userRoleNone || u.TenantID == uuid.Nil
+	return u.Role == UserRoleNone.String() || u.TenantID == uuid.Nil
 }
 
 // IsAtLeastBackOffice checks if a user has at least Back Office access
 func (u *User) IsAtLeastBackOffice() bool {
-	return u.Role == userRoleSuperAdmin || u.Role == userRoleAdmin || u.Role == userRoleBackOffice
+	return u.Role == UserRoleSuperAdmin.String() || u.Role == UserRoleAdmin.String() || u.Role == UserRoleBackOffice.String()
 }
 
 // IsAtLeastTenantBackOffice checks if a user has at least Back Office access
 func (u *User) IsAtLeastTenantBackOffice() bool {
-	return u.Role == userRoleAdmin || u.Role == userRoleBackOffice
+	return u.Role == UserRoleAdmin.String() || u.Role == UserRoleBackOffice.String()
 }
-
-const (
-	userRoleSuperAdmin = "SuperAdmin"
-	userRoleAdmin      = "Admin"
-	userRoleBackOffice = "BackOffice"
-	userRoleCustomer   = "Customer"
-	userRoleDriver     = "Driver"
-	userRoleNone       = "None"
-)

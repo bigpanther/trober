@@ -28,10 +28,6 @@ import (
 // customersList gets all Customers. This function is mapped to the path
 // GET /customers
 func customersList(c buffalo.Context) error {
-	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtLeastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -62,6 +58,12 @@ func customersList(c buffalo.Context) error {
 // customersShow gets the data for one Customer. This function is mapped to
 // the path GET /customers/{customer_id}
 func customersShow(c buffalo.Context) error {
+	var loggedInUser = loggedInUser(c)
+	customerID := c.Param("customer_id")
+	if loggedInUser.IsCustomer() && (!loggedInUser.CustomerID.Valid || loggedInUser.CustomerID.UUID.String() != customerID) {
+		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
+
+	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -72,7 +74,7 @@ func customersShow(c buffalo.Context) error {
 	customer := &models.Customer{}
 
 	// To find the Customer the parameter customer_id is used.
-	if err := tx.Scope(restrictedScope(c)).Find(customer, c.Param("customer_id")); err != nil {
+	if err := tx.Scope(restrictedScope(c)).Find(customer, customerID); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
@@ -84,9 +86,6 @@ func customersShow(c buffalo.Context) error {
 // path POST /customers
 func customersCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtLeastBackOffice() {
-		return models.ErrNotFound
-	}
 	// Allocate an empty Customer
 	customer := &models.Customer{}
 
@@ -105,8 +104,6 @@ func customersCreate(c buffalo.Context) error {
 		customer.TenantID = loggedInUser.TenantID
 	}
 	customer.CreatedBy = nulls.NewUUID(loggedInUser.ID)
-	customer.CreatedAt = time.Now().UTC()
-	customer.UpdatedAt = time.Now().UTC()
 
 	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(customer)
@@ -130,20 +127,22 @@ func customersUpdate(c buffalo.Context) error {
 	if !ok {
 		return models.ErrNotFound
 	}
-
 	// Allocate an empty Customer
 	customer := &models.Customer{}
-
 	if err := tx.Scope(restrictedScope(c)).Find(customer, c.Param("customer_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-
-	// Bind Customer to the html form elements
-	if err := c.Bind(customer); err != nil {
+	newCustomer := &models.Customer{}
+	// Bind customer to the html form elements
+	if err := c.Bind(newCustomer); err != nil {
 		return err
 	}
-	customer.UpdatedAt = time.Now().UTC()
-
+	if newCustomer.Name != customer.Name {
+		customer.UpdatedAt = time.Now().UTC()
+		customer.Name = newCustomer.Name
+	} else {
+		return c.Render(http.StatusOK, r.JSON(customer))
+	}
 	verrs, err := tx.ValidateAndUpdate(customer)
 	if err != nil {
 		return err
@@ -160,10 +159,6 @@ func customersUpdate(c buffalo.Context) error {
 // customersDestroy deletes a Customer from the DB. This function is mapped
 // to the path DELETE /customers/{customer_id}
 func customersDestroy(c buffalo.Context) error {
-	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtLeastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -181,7 +176,5 @@ func customersDestroy(c buffalo.Context) error {
 	if err := tx.Destroy(customer); err != nil {
 		return err
 	}
-
 	return c.Render(http.StatusOK, r.JSON(customer))
-
 }

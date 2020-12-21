@@ -60,8 +60,8 @@ func (as *ActionSuite) createOrder(serialNumber string, orderStatus string, eta 
 	return newOrder
 }
 
-func (as *ActionSuite) createUser(name string, role string, email string, tenantID uuid.UUID) *models.User {
-	newUser := &models.User{Name: name, Role: role, Username: name, Email: email, TenantID: tenantID}
+func (as *ActionSuite) createUser(name string, role models.UserRole, email string, tenantID uuid.UUID, customerID nulls.UUID) *models.User {
+	newUser := &models.User{Name: name, Role: string(role), Username: name, Email: email, TenantID: tenantID, CustomerID: customerID}
 	v, err := as.DB.ValidateAndCreate(newUser)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))

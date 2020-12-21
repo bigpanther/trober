@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/bigpanther/trober/models"
+	"github.com/gobuffalo/nulls"
 )
 
 func (as *ActionSuite) Test_UsersList() {
@@ -51,11 +52,11 @@ func (as *ActionSuite) Test_UsersListFilter() {
 	var prefixes = []string{"ਪੰਜਾਬੀ", "Test"}
 	for _, p := range prefixes {
 		for i := 0; i < 5; i++ {
-			userRole := "Driver"
+			userRole := models.UserRoleDriver
 			if i%2 == 0 {
-				userRole = "BackOffice"
+				userRole = models.UserRoleBackOffice
 			}
-			_ = as.createUser(fmt.Sprintf("%s-%d", p, i), userRole, fmt.Sprintf("%s-%d@bigpanther.ca", p, i), user.TenantID)
+			_ = as.createUser(fmt.Sprintf("%s-%d", p, i), userRole, fmt.Sprintf("%s-%d@bigpanther.ca", p, i), user.TenantID, nulls.UUID{})
 		}
 	}
 	req := as.setupRequest(user, "/users?name=ਪੰ&role=Driver")
@@ -175,7 +176,7 @@ func (as *ActionSuite) Test_UsersDestroy() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			var name = fmt.Sprintf("user%s", test.username)
-			newUser := as.createUser(name, "Driver", fmt.Sprintf("user%s@bigpanther.ca", test.username), firmino.TenantID)
+			newUser := as.createUser(name, models.UserRoleDriver, fmt.Sprintf("user%s@bigpanther.ca", test.username), firmino.TenantID, nulls.UUID{})
 			user := as.getLoggedInUser(test.username)
 			req := as.setupRequest(user, fmt.Sprintf("/users/%s", newUser.ID))
 			res := req.Delete()

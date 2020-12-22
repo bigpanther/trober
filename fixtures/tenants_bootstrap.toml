@@ -6,7 +6,7 @@ name = "Tenant bootstrap"
     [[scenario.table.row]]
       id = "<%= uuidNamed("systemTenant") %>"
       name = "Big Panther Test"
-      type = "system"
+      type = "System"
       created_at = "<%= now() %>"
       updated_at = "<%= now() %>"
       code = "1code"

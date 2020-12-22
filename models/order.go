@@ -50,15 +50,3 @@ func (o *Order) Validate(tx *pop.Connection) (*validate.Errors, error) {
 		}, Field: o.Status, Name: "Status"},
 	), nil
 }
-
-// ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.
-// This method is not required and may be deleted.
-func (o *Order) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.NewErrors(), nil
-}
-
-// ValidateUpdate gets run every time you call "pop.ValidateAndUpdate" method.
-// This method is not required and may be deleted.
-func (o *Order) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.NewErrors(), nil
-}

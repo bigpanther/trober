@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"encoding/base64"
@@ -14,12 +15,14 @@ import (
 	"firebase.google.com/go/v4/messaging"
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/envy"
 	forcessl "github.com/gobuffalo/mw-forcessl"
 	i18n "github.com/gobuffalo/mw-i18n"
 	paramlogger "github.com/gobuffalo/mw-paramlogger"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/validate/v3"
 	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
 	"github.com/unrolled/secure"
@@ -224,80 +227,99 @@ const currentUserKey = "current_user"
 func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 	userID := c.Request().Header.Get(xToken)
 	if userID == "" {
-		return nil, c.Render(403, r.JSON(models.NewCustomError("Access denied. Missing credentials", "403", nil)))
+		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("missing credentials", http.StatusText(http.StatusForbidden), nil)))
 	}
 	client, err := firebaseClient()
 	if err != nil {
-		return nil, c.Render(500, r.JSON(models.NewCustomError("error getting downstream client", "500", err)))
+		return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError("error getting downstream client", http.StatusText(http.StatusInternalServerError), err)))
 	}
 	token, err := client.authClient.VerifyIDToken(c.Request().Context(), userID)
 	if err != nil {
-		return nil, c.Render(403, r.JSON(models.NewCustomError("Access denied. Credential validation failed", "403", err)))
+		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("credential validation failed", http.StatusText(http.StatusForbidden), err)))
 	}
-
+	var username = token.Subject
 	u := &models.User{}
 	tx := c.Value("tx").(*pop.Connection)
-	err = tx.Where("username = ?", token.Subject).First(u)
+	err = tx.Where("username = ?", username).First(u)
 	if err != nil && errors.Cause(err) != sql.ErrNoRows {
-		return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
+		return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), err)))
 	}
 	if u.ID == uuid.Nil {
-		remoteUser, err := client.authClient.GetUser(c.Request().Context(), token.Subject)
+		remoteUser, err := client.authClient.GetUser(c.Request().Context(), username)
 		if err != nil {
-			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "error fetching user details"))))
+			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), errors.Wrap(err, "error fetching user details"))))
 		}
-		if !remoteUser.EmailVerified {
-			return nil, c.Render(403, r.JSON(models.NewCustomError("Access denied. Email not verified", "403", err)))
-		}
-		u.Name = remoteUser.DisplayName
-		u.Role = "None"
-		u.Username = remoteUser.UID
-		u.Email = remoteUser.Email
+		return createOrUpdateUserOnFirstLogin(c, remoteUser, sendMessage)
+	}
+	return u, nil
+}
+func createOrUpdateUserOnFirstLogin(c buffalo.Context, remoteUser *auth.UserRecord, notificationCallback func(adminUser *models.User, newUser *models.User, msg string)) (*models.User, error) {
+	if !remoteUser.EmailVerified {
+		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("email not verified", http.StatusText(http.StatusForbidden), nil)))
+	}
+	tx := c.Value("tx").(*pop.Connection)
+
+	u := &models.User{}
+	// Try to find by email
+	err := tx.Where("email = ?", remoteUser.Email).First(u)
+	if err != nil && errors.Cause(err) != sql.ErrNoRows {
+		log.Printf("error fetching user by email: %v\n", err)
+		return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), err)))
+	}
+	var valErrors *validate.Errors
+	if u.ID == uuid.Nil {
+		u = &models.User{Name: remoteUser.DisplayName, Role: models.UserRoleNone.String(), Username: remoteUser.UID, Email: remoteUser.Email}
 		t := &models.Tenant{}
-		err = tx.Where("name = ?", "system").Where("type = ?", "System").First(t)
+		err = tx.Where("type = ?", "System").First(t)
 		if err != nil {
-			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", errors.Wrap(err, "Failed to find user tenant"))))
+			log.Printf("error fetching system tenant: %v\n", err)
+			return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), errors.Wrap(err, "failed to find user tenant"))))
 		}
 		u.TenantID = t.ID
-		valErrors, err := tx.ValidateAndCreate(u)
+		valErrors, err = tx.ValidateAndCreate(u)
 		if err != nil {
 			log.Printf("error creating user on login: %v\n", err)
-			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
+			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
-		adminUser := &models.User{}
-		_ = tx.Where("tenant_id = ?", t.ID).First(adminUser)
-		if valErrors.HasAny() {
-			log.Printf("error creating user on login: %s\n", valErrors.String())
-			if adminUser != nil {
-				sendMessage(adminUser, u, "New user validation failed")
-			}
-			return nil, c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
+	} else {
+		u.Username = remoteUser.UID
+		u.Name = remoteUser.DisplayName
+		valErrors, err = tx.ValidateAndUpdate(u)
+		if err != nil {
+			log.Printf("error updating user on login: %v\n", err)
+			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
-
-		if adminUser != nil {
-			sendMessage(adminUser, u, "New user created")
+	}
+	adminUser := &models.User{}
+	_ = tx.Where("tenant_id = ?", u.TenantID).Where("role IN (?)", models.UserRoleSuperAdmin, models.UserRoleAdmin).First(adminUser)
+	if valErrors.HasAny() {
+		log.Printf("validation error on user login: %s\n", valErrors.String())
+		if adminUser.ID != uuid.Nil {
+			notificationCallback(adminUser, u, "New user validation failed")
 		}
+		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
+	}
+	if adminUser.ID != uuid.Nil {
+		notificationCallback(adminUser, u, "New user created")
 	}
 	return u, nil
 }
 
 func sendMessage(adminUser *models.User, newUser *models.User, msg string) {
 	if adminUser.DeviceID.String != "" {
-		message := &messaging.Message{
-			Data: map[string]string{
-				"email": newUser.Email,
-				"name":  newUser.Name,
+		app.Worker.Perform(worker.Job{
+			Queue:   "default",
+			Handler: "sendNotifications",
+			Args: worker.Args{
+				"to":            []string{adminUser.DeviceID.String},
+				"message.title": msg,
+				"message.body":  fmt.Sprintf("%s - %s", newUser.Name, newUser.Email),
+				"message.data": map[string]string{
+					"email": newUser.Email,
+					"name":  newUser.Name,
+				},
 			},
-			Notification: &messaging.Notification{
-				Title: msg,
-				Body:  fmt.Sprintf("%s just logged in", newUser.Name),
-			},
-			Token: adminUser.DeviceID.String,
-		}
-		_, err := client.messagingClient.Send(app.Context, message)
-		if err != nil {
-			log.Println("error sending message", err)
-		}
+		})
 	}
 }
 

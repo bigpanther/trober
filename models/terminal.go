@@ -47,15 +47,3 @@ func (t *Terminal) Validate(tx *pop.Connection) (*validate.Errors, error) {
 		}, Field: t.Type, Name: "Type"},
 	), nil
 }
-
-// ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.
-// This method is not required and may be deleted.
-func (t *Terminal) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.NewErrors(), nil
-}
-
-// ValidateUpdate gets run every time you call "pop.ValidateAndUpdate" method.
-// This method is not required and may be deleted.
-func (t *Terminal) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.NewErrors(), nil
-}

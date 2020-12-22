@@ -55,15 +55,3 @@ func (t *Tenant) Validate(tx *pop.Connection) (*validate.Errors, error) {
 		}, Field: t.Type, Name: "Type"},
 	), nil
 }
-
-// ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.
-// This method is not required and may be deleted.
-func (t *Tenant) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.NewErrors(), nil
-}
-
-// ValidateUpdate gets run every time you call "pop.ValidateAndUpdate" method.
-// This method is not required and may be deleted.
-func (t *Tenant) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.NewErrors(), nil
-}

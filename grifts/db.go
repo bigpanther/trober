@@ -189,7 +189,7 @@ func demoCreate() error {
 
 func demoDrop() error {
 	tenant := &models.Tenant{}
-	models.DB.Where("name=? and type=?", "Acme Enterprises", "Test").First(tenant)
+	models.DB.Where("name= ?", "Acme Enterprises").Where("type=?", "Test").First(tenant)
 
 	containers := &models.Containers{}
 	err := models.DB.Where("tenant_id=?", tenant.ID).All(containers)
@@ -228,7 +228,7 @@ func demoDrop() error {
 		return err
 	}
 	users := &models.Users{}
-	err = models.DB.Where("tenant_id=? and customer_id is not null", tenant.ID).All(users)
+	err = models.DB.Where("tenant_id= ?", tenant.ID).Where("customer_id IS NOT NULL").All(users)
 	if err != nil {
 		return err
 	}

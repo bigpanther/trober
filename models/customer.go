@@ -1,7 +1,6 @@
 package models
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/gobuffalo/nulls"
@@ -22,7 +21,6 @@ type Customer struct {
 	Tenant    *Tenant    `belongs_to:"tenant" json:"-"`
 	Orders    Orders     `has_many:"orders" json:"orders,omitempty"`
 }
-
 
 // Customers is not required by pop and may be deleted
 type Customers []Customer

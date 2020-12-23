@@ -3,6 +3,7 @@ package actions
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -94,16 +95,20 @@ func usersCreate(c buffalo.Context) error {
 	if user.IsSuperAdmin() {
 		return c.Render(http.StatusBadRequest, r.JSON(models.NewCustomError(http.StatusText(http.StatusBadRequest), fmt.Sprint(http.StatusBadRequest), errors.New("User Role value is not valid"))))
 	}
+
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
+	if err := checkCustomerUser(c, tx, user); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
 	if !loggedInUser.IsSuperAdmin() || user.TenantID == uuid.Nil {
 		user.TenantID = loggedInUser.TenantID
 	}
+	user.Username = fmt.Sprintf("invited-%d", rand.Int())
 	user.CreatedBy = nulls.NewUUID(loggedInUser.ID)
-	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(user)
 	if err != nil {
 		return err
@@ -123,28 +128,32 @@ func usersUpdate(c buffalo.Context) error {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty User
+	// Allocate an empty user
 	user := &models.User{}
-
 	if err := tx.Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-	//var originalRole = user.Role
-	// Bind User to the html form elements
-	if err := c.Bind(user); err != nil {
+	newUser := &models.User{}
+	// Bind user to the html form elements
+	if err := c.Bind(newUser); err != nil {
 		return err
 	}
-	var loggedInUser = loggedInUser(c)
-	user.UpdatedAt = time.Now().UTC()
-	var excludedColumns = excludeUpdateColumnsDefault()
-	if !loggedInUser.IsSuperAdmin() {
-		excludedColumns = append(excludedColumns, "tenant_id")
-	}
-	if user.ID == loggedInUser.ID {
+	if user.ID == loggedInUser(c).ID {
 		// Cannot change self role
-		excludedColumns = append(excludedColumns, "role")
+		return c.Error(http.StatusBadRequest, errors.New("role change for self not allowed"))
 	}
-	verrs, err := tx.ValidateAndUpdate(user, excludedColumns...)
+	if newUser.Name != user.Name || newUser.Role != user.Role {
+		user.UpdatedAt = time.Now().UTC()
+		user.Name = newUser.Name
+		user.Role = newUser.Role
+		if err := checkCustomerUser(c, tx, newUser); err != nil {
+			return c.Error(http.StatusBadRequest, err)
+		}
+	} else {
+		return c.Render(http.StatusOK, r.JSON(user))
+	}
+
+	verrs, err := tx.ValidateAndUpdate(user)
 	if err != nil {
 		return err
 	}
@@ -184,4 +193,18 @@ func usersDestroy(c buffalo.Context) error {
 
 	return c.Render(http.StatusOK, r.JSON(user))
 
+}
+
+func checkCustomerUser(c buffalo.Context, tx *pop.Connection, user *models.User) error {
+	if user.IsCustomer() {
+		customer := &models.Customer{}
+		// User must belong to a customer in the same tenant
+		err := tx.Scope(restrictedScope(c)).Where("tenant_id = ?", user.TenantID).Find(customer, user.CustomerID)
+		if err != nil || user.TenantID != customer.TenantID {
+			return errors.New("invalid customer association")
+		}
+	} else {
+		user.CustomerID = nulls.UUID{}
+	}
+	return nil
 }

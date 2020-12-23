@@ -22,20 +22,8 @@ type Terminal struct {
 	Tenant    *Tenant   `belongs_to:"tenant" json:"-"`
 }
 
-// String is not required by pop and may be deleted
-func (t Terminal) String() string {
-	jt, _ := json.Marshal(t)
-	return string(jt)
-}
-
 // Terminals is not required by pop and may be deleted
 type Terminals []Terminal
-
-// String is not required by pop and may be deleted
-func (t Terminals) String() string {
-	jt, _ := json.Marshal(t)
-	return string(jt)
-}
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 // This method is not required and may be deleted.

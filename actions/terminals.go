@@ -26,7 +26,6 @@ import (
 // terminalsList gets all Terminals. This function is mapped to the path
 // GET /terminals
 func terminalsList(c buffalo.Context) error {
-	var loggedInUser = loggedInUser(c)
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {

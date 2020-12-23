@@ -24,21 +24,8 @@ type Carrier struct {
 	Tenant     *Tenant    `belongs_to:"tenant" json:"-"`
 	Containers Containers `has_many:"containers" json:"containers,omitempty"`
 }
-
-// String is not required by pop and may be deleted
-func (c Carrier) String() string {
-	jc, _ := json.Marshal(c)
-	return string(jc)
-}
-
 // Carriers is not required by pop and may be deleted
 type Carriers []Carrier
-
-// String is not required by pop and may be deleted
-func (c Carriers) String() string {
-	jc, _ := json.Marshal(c)
-	return string(jc)
-}
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 // This method is not required and may be deleted.

@@ -37,20 +37,8 @@ type Container struct {
 	Driver          *User        `belongs_to:"user" json:"driver,omitempty"`
 }
 
-// String is not required by pop and may be deleted
-func (c Container) String() string {
-	jc, _ := json.Marshal(c)
-	return string(jc)
-}
-
 // Containers is not required by pop and may be deleted
 type Containers []Container
-
-// String is not required by pop and may be deleted
-func (c Containers) String() string {
-	jc, _ := json.Marshal(c)
-	return string(jc)
-}
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 // This method is not required and may be deleted.

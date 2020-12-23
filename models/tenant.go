@@ -28,20 +28,8 @@ type Tenant struct {
 	Customers  Customers  `has_many:"customers"  json:"customers,omitempty"`
 }
 
-// String is not required by pop and may be deleted
-func (t Tenant) String() string {
-	jt, _ := json.Marshal(t)
-	return string(jt)
-}
-
 // Tenants is not required by pop and may be deleted
 type Tenants []Tenant
-
-// String is not required by pop and may be deleted
-func (t Tenants) String() string {
-	jt, _ := json.Marshal(t)
-	return string(jt)
-}
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 // This method is not required and may be deleted.

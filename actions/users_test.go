@@ -168,7 +168,7 @@ func (as *ActionSuite) Test_UsersCreate() {
 			if i%2 == 0 {
 				userRole = models.UserRoleDriver
 			}
-			newUser := models.User{Name: test.username, Username: fmt.Sprintf("%stest", test.username), Email: fmt.Sprintf("%stest@bigpanther.ca", test.username), Role: userRole.String(), TenantID: firmino.TenantID}
+			newUser := models.User{Name: test.username, Username: "irrelevant", Email: fmt.Sprintf("%stest@bigpanther.ca", test.username), Role: userRole.String(), TenantID: firmino.TenantID}
 			req := as.setupRequest(user, "/users")
 			res := req.Post(newUser)
 			as.Equal(test.responseCode, res.Code)
@@ -177,14 +177,58 @@ func (as *ActionSuite) Test_UsersCreate() {
 				res.Bind(&u)
 				as.Equal(newUser.Name, u.Name)
 				as.Equal(newUser.Role, u.Role)
+				as.Equal(newUser.CustomerID, nulls.UUID{})
 				if user.IsSuperAdmin() {
 					as.Equal(firmino.TenantID, u.TenantID)
 				} else {
 					as.Equal(user.TenantID, u.TenantID)
 				}
-
+				as.Contains(u.Username, "invited-")
 				// try creating superadmin
-				newUser = models.User{Name: test.username, Username: fmt.Sprintf("%ssuperadmintest", test.username), Email: fmt.Sprintf("%ssuperadmintest@bigpanther.ca", test.username), Role: models.UserRoleSuperAdmin.String(), TenantID: firmino.TenantID}
+				newUser = models.User{Name: test.username, Username: "irrelevant", Email: fmt.Sprintf("%ssuperadmintest@bigpanther.ca", test.username), Role: models.UserRoleSuperAdmin.String(), TenantID: firmino.TenantID}
+				req := as.setupRequest(user, "/users")
+				res := req.Post(newUser)
+				as.Equal(http.StatusBadRequest, res.Code)
+			}
+		})
+	}
+}
+func (as *ActionSuite) Test_UsersCreateCustomerRole() {
+	as.LoadFixture("Tenant bootstrap")
+	customer := as.getCustomer("UEFA Liv")
+	var tests = []struct {
+		username     string
+		customerID   nulls.UUID
+		responseCode int
+	}{
+		{"firmino", nulls.UUID{}, http.StatusBadRequest},
+		{"firmino", nulls.NewUUID(customer.ID), http.StatusCreated},
+		{"klopp", nulls.NewUUID(customer.ID), http.StatusCreated},
+		{"rodriguez", nulls.NewUUID(customer.ID), http.StatusBadRequest},
+	}
+	var firmino = as.getLoggedInUser("firmino")
+	for i, test := range tests {
+		as.T().Run(fmt.Sprintf("%s%d", test.username, i), func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			userRole := models.UserRoleCustomer
+			newUser := models.User{Name: test.username, Username: "irrelevant", Email: fmt.Sprintf("%stest@bigpanther.ca", test.username), Role: userRole.String(), TenantID: firmino.TenantID, CustomerID: test.customerID}
+			req := as.setupRequest(user, "/users")
+			res := req.Post(newUser)
+			as.Equal(test.responseCode, res.Code)
+			if res.Code == http.StatusCreated {
+				var u = models.User{}
+				res.Bind(&u)
+				as.Equal(newUser.Name, u.Name)
+				as.Equal(models.UserRoleCustomer.String(), u.Role)
+				as.Equal(newUser.CustomerID, u.CustomerID)
+				if user.IsSuperAdmin() {
+					as.Equal(firmino.TenantID, u.TenantID)
+				} else {
+					as.Equal(user.TenantID, u.TenantID)
+				}
+				as.Contains(u.Username, "invited-")
+				// try creating superadmin
+				newUser = models.User{Name: test.username, Username: "irrelevant", Email: fmt.Sprintf("%ssuperadmintest@bigpanther.ca", test.username), Role: models.UserRoleSuperAdmin.String(), TenantID: firmino.TenantID}
 				req := as.setupRequest(user, "/users")
 				res := req.Post(newUser)
 				as.Equal(http.StatusBadRequest, res.Code)
@@ -194,7 +238,48 @@ func (as *ActionSuite) Test_UsersCreate() {
 }
 
 func (as *ActionSuite) Test_UsersUpdate() {
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusOK},
+		{"firmino", http.StatusOK},
+		{"rodriguez", http.StatusNotFound},
+		{"coutinho", http.StatusNotFound},
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusNotFound},
+		{"klopp", http.StatusOK},
+		{"adidas", http.StatusNotFound},
+		{"nike", http.StatusNotFound},
+	}
+	var firmino = as.getLoggedInUser("firmino")
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			role := models.UserRoleDriver
+			newUser := as.createUser(fmt.Sprintf("test%s", user.Username), role, fmt.Sprintf("test%s@bigpanther.ca", test.username), firmino.TenantID, nulls.UUID{})
+			req := as.setupRequest(user, fmt.Sprintf("/users/%s", newUser.ID))
+			// Try to update ID and tenant ID. Expect these calls to be excluded at update
+			updatedUser := models.User{Name: fmt.Sprintf("not%s", test.username), Role: models.UserRoleAdmin.String(), ID: user.ID, TenantID: user.ID}
+			res := req.Put(updatedUser)
+			as.Equal(test.responseCode, res.Code)
+			var dbUser = *newUser
+			err := as.DB.Reload(&dbUser)
+			as.Nil(err)
+			if res.Code == http.StatusOK {
+				var user = models.User{}
+				res.Bind(&user)
+				as.Equal(updatedUser.Name, user.Name)
+				as.Equal(updatedUser.Role, user.Role)
+				as.Equal(newUser.ID, user.ID)
+				as.Equal(dbUser.Name, user.Name)
+			} else {
+				// Ensure update did not succeed
+				as.Equal(dbUser.Name, newUser.Name)
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_UsersDestroy() {

@@ -133,6 +133,9 @@ func usersUpdate(c buffalo.Context) error {
 	if err := tx.Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
+	if user.IsSuperAdmin() {
+		return c.Render(http.StatusBadRequest, r.JSON(models.NewCustomError(http.StatusText(http.StatusBadRequest), fmt.Sprint(http.StatusBadRequest), errors.New("updating superuser not allowed"))))
+	}
 	newUser := &models.User{}
 	// Bind user to the html form elements
 	if err := c.Bind(newUser); err != nil {

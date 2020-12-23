@@ -8,13 +8,18 @@ jobs:
   build-linux:
     name: Test
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v2
-      - uses: harmon758/postgresql-action@v1
-        with:
-          postgresql version: "13"
-          postgresql user: postgres
-          postgresql password: postgres
       - run: |
           wget https://github.com/gobuffalo/buffalo/releases/download/v0.16.16/buffalo_0.16.16_Linux_x86_64.tar.gz
           tar -xvzf buffalo_0.16.16_Linux_x86_64.tar.gz

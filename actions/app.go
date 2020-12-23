@@ -270,7 +270,7 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, remoteUser *auth.UserReco
 	if u.ID == uuid.Nil {
 		u = &models.User{Name: remoteUser.DisplayName, Role: models.UserRoleNone.String(), Username: remoteUser.UID, Email: remoteUser.Email}
 		t := &models.Tenant{}
-		err = tx.Where("type = ?", "System").First(t)
+		err = tx.Where("type = ?", models.TenantTypeSystem).First(t)
 		if err != nil {
 			log.Printf("error fetching system tenant: %v\n", err)
 			return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), errors.Wrap(err, "failed to find user tenant"))))

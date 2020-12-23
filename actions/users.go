@@ -33,10 +33,6 @@ func excludeUpdateColumnsDefault() []string {
 // usersList gets all Users. This function is mapped to the path
 // GET /users
 func usersList(c buffalo.Context) error {
-	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtLeastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
 	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
@@ -89,16 +85,13 @@ func usersShow(c buffalo.Context) error {
 // path POST /users
 func usersCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtLeastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
 	// Allocate an empty User
 	user := &models.User{}
 	// Bind user to the html form elements
 	if err := c.Bind(user); err != nil {
 		return err
 	}
-	if !loggedInUser.IsSuperAdmin() && user.IsSuperAdmin() {
+	if user.IsSuperAdmin() {
 		return c.Render(http.StatusBadRequest, r.JSON(models.NewCustomError(http.StatusText(http.StatusBadRequest), fmt.Sprint(http.StatusBadRequest), errors.New("User Role value is not valid"))))
 	}
 	// Get the DB connection from the context

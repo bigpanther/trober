@@ -173,11 +173,21 @@ func (as *ActionSuite) Test_UsersCreate() {
 			res := req.Post(newUser)
 			as.Equal(test.responseCode, res.Code)
 			if res.Code == http.StatusCreated {
-				var user = models.User{}
-				res.Bind(&user)
-				as.Equal(newUser.Name, user.Name)
-				as.Equal(newUser.Role, user.Role)
-				as.Equal(user.TenantID, user.TenantID)
+				var u = models.User{}
+				res.Bind(&u)
+				as.Equal(newUser.Name, u.Name)
+				as.Equal(newUser.Role, u.Role)
+				if user.IsSuperAdmin() {
+					as.Equal(firmino.TenantID, u.TenantID)
+				} else {
+					as.Equal(user.TenantID, u.TenantID)
+				}
+
+				// try creating superadmin
+				newUser = models.User{Name: test.username, Username: fmt.Sprintf("%ssuperadmintest", test.username), Email: fmt.Sprintf("%ssuperadmintest@bigpanther.ca", test.username), Role: models.UserRoleSuperAdmin.String(), TenantID: firmino.TenantID}
+				req := as.setupRequest(user, "/users")
+				res := req.Post(newUser)
+				as.Equal(http.StatusBadRequest, res.Code)
 			}
 		})
 	}

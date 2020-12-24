@@ -218,8 +218,12 @@ func checkCustomerUser(c buffalo.Context, tx *pop.Connection, user *models.User)
 }
 
 func checkEscalation(self *models.User, user *models.User) error {
-	if self.IsBackOffice() && user.Role == models.UserRoleAdmin.String() {
-		return errors.New("cannot escalate priveleges beyond your own role")
+	var err = errors.New("cannot escalate priveleges beyond your own role")
+	if self.IsBackOffice() && (user.Role == models.UserRoleAdmin.String() || user.Role == models.UserRoleSuperAdmin.String()) {
+		return err
+	}
+	if self.IsAdmin() && user.Role == models.UserRoleSuperAdmin.String() {
+		return err
 	}
 	return nil
 }

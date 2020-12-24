@@ -11,7 +11,6 @@ require (
 	github.com/gobuffalo/buffalo-pop/v2 v2.3.0
 	github.com/gobuffalo/envy v1.9.0
 	github.com/gobuffalo/fizz v1.13.0 // indirect
-	github.com/gobuffalo/here v0.6.2 // indirect
 	github.com/gobuffalo/httptest v1.5.0
 	github.com/gobuffalo/mw-contenttype v0.0.0-20190224202710-36c73cc938f3
 	github.com/gobuffalo/mw-forcessl v0.0.0-20200131175327-94b2bd771862
@@ -28,22 +27,15 @@ require (
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/jackc/pgx/v4 v4.10.1 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
-	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/markbates/grift v1.5.0
 	github.com/microcosm-cc/bluemonday v1.0.4 // indirect
-	github.com/mitchellh/mapstructure v1.4.0 // indirect
 	github.com/monoculum/formam v0.0.0-20200923020755-6f187e4ffe27 // indirect
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rogpeppe/go-internal v1.6.2 // indirect
 	github.com/rs/cors v1.7.0
 	github.com/sirupsen/logrus v1.7.0 // indirect
-	github.com/spf13/afero v1.5.1 // indirect
-	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.1.1 // indirect
-	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/viper v1.7.1 // indirect
 	github.com/unrolled/secure v1.0.7
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
@@ -55,6 +47,5 @@ require (
 	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/tools v0.0.0-20201224043029-2b0845dc783e // indirect
 	google.golang.org/api v0.35.0
-	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

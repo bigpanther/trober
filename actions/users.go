@@ -34,7 +34,7 @@ func excludeUpdateColumnsDefault() []string {
 // usersList gets all Users. This function is mapped to the path
 // GET /users
 func usersList(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -67,15 +67,15 @@ func usersList(c buffalo.Context) error {
 // usersShow gets the data for one User. This function is mapped to
 // the path GET /users/{user_id}
 func usersShow(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
-	// Allocate an empty User
+
 	user := &models.User{}
 	var populatedFields = []string{"Customer"}
-	// To find the User the parameter user_id is used.
+
 	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
@@ -86,9 +86,9 @@ func usersShow(c buffalo.Context) error {
 // path POST /users
 func usersCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
-	// Allocate an empty User
+
 	user := &models.User{}
-	// Bind user to the html form elements
+	// Bind user to request body
 	if err := c.Bind(user); err != nil {
 		return err
 	}
@@ -96,7 +96,6 @@ func usersCreate(c buffalo.Context) error {
 		return c.Render(http.StatusBadRequest, r.JSON(models.NewCustomError(http.StatusText(http.StatusBadRequest), fmt.Sprint(http.StatusBadRequest), errors.New("User Role value is not valid"))))
 	}
 
-	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -122,13 +121,12 @@ func usersCreate(c buffalo.Context) error {
 // usersUpdate changes a User in the DB. This function is mapped to
 // the path PUT /users/{user_id}
 func usersUpdate(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty user
 	user := &models.User{}
 	if err := tx.Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
@@ -137,7 +135,7 @@ func usersUpdate(c buffalo.Context) error {
 		return c.Render(http.StatusBadRequest, r.JSON(models.NewCustomError(http.StatusText(http.StatusBadRequest), fmt.Sprint(http.StatusBadRequest), errors.New("updating superuser not allowed"))))
 	}
 	newUser := &models.User{}
-	// Bind user to the html form elements
+	// Bind user to request body
 	if err := c.Bind(newUser); err != nil {
 		return err
 	}
@@ -181,16 +179,14 @@ func usersDestroy(c buffalo.Context) error {
 	if !loggedInUser.IsAtLeastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty User
 	user := &models.User{}
 
-	// To find the User the parameter user_id is used.
 	if err := tx.Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}

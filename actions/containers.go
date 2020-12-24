@@ -31,7 +31,6 @@ import (
 func containersList(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 
-	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -71,17 +70,15 @@ func containersList(c buffalo.Context) error {
 // containersShow gets the data for one Container. This function is mapped to
 // the path GET /containers/{container_id}
 func containersShow(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Container
 	container := &models.Container{}
 	var populatedFields = []string{"Order", "Driver", "Terminal", "Carrier"}
 
-	// To find the Container the parameter container_id is used.
 	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
@@ -93,15 +90,14 @@ func containersShow(c buffalo.Context) error {
 // containersCreate adds a Container to the DB. This function is mapped to the
 // path POST /containers
 func containersCreate(c buffalo.Context) error {
-	// Allocate an empty Container
+
 	container := &models.Container{}
 
-	// Bind container to the html form elements
+	// Bind container to request body
 	if err := c.Bind(container); err != nil {
 		return err
 	}
 
-	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -113,7 +109,7 @@ func containersCreate(c buffalo.Context) error {
 	container.CreatedBy = loggedInUser.ID
 	container.CreatedAt = time.Now().UTC()
 	container.UpdatedAt = time.Now().UTC()
-	// Validate the data from the html form
+
 	verrs, err := tx.ValidateAndCreate(container)
 	if err != nil {
 		return err
@@ -130,20 +126,19 @@ func containersCreate(c buffalo.Context) error {
 // containersUpdate changes a Container in the DB. This function is mapped to
 // the path PUT /containers/{container_id}
 func containersUpdate(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Container
 	container := &models.Container{}
 
 	if err := tx.Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	// Bind Container to the html form elements
+	// Bind Container to request body
 	if err := c.Bind(container); err != nil {
 		return err
 	}
@@ -183,13 +178,12 @@ func containersUpdate(c buffalo.Context) error {
 
 // containersUpdateStatus of a container
 func containersUpdateStatus(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Container
 	container := &models.Container{}
 
 	if err := tx.Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {
@@ -203,7 +197,7 @@ func containersUpdateStatus(c buffalo.Context) error {
 	if loggedInUser.IsAtLeastBackOffice() {
 		var driverID nulls.UUID
 
-		// Bind driver to the html form elements
+		// Bind driver to request body
 		if err := c.Bind(&driverID); err != nil {
 			return err
 		}
@@ -239,16 +233,14 @@ func containersDestroy(c buffalo.Context) error {
 	if !loggedInUser.IsAtLeastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Container
 	container := &models.Container{}
 
-	// To find the Container the parameter container_id is used.
 	if err := tx.Scope(restrictedScope(c)).Find(container, c.Param("container_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}

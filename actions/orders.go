@@ -30,7 +30,7 @@ func ordersList(c buffalo.Context) error {
 	if !loggedInUser.IsAtLeastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -57,17 +57,15 @@ func ordersList(c buffalo.Context) error {
 // ordersShow gets the data for one Order. This function is mapped to
 // the path GET /orders/{order_id}
 func ordersShow(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Order
 	order := &models.Order{}
 	var populatedFields = []string{"Customer"}
 
-	// To find the Order the parameter order_id is used.
 	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(order, c.Param("order_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
@@ -81,15 +79,13 @@ func ordersShow(c buffalo.Context) error {
 func ordersCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 
-	// Allocate an empty Order
 	order := &models.Order{}
 
-	// Bind order to the html form elements
+	// Bind order to request body
 	if err := c.Bind(order); err != nil {
 		return err
 	}
 
-	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -102,7 +98,6 @@ func ordersCreate(c buffalo.Context) error {
 	order.CreatedAt = time.Now().UTC()
 	order.UpdatedAt = time.Now().UTC()
 
-	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(order)
 	if err != nil {
 		return err
@@ -119,20 +114,19 @@ func ordersCreate(c buffalo.Context) error {
 // ordersUpdate changes a Order in the DB. This function is mapped to
 // the path PUT /orders/{order_id}
 func ordersUpdate(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Order
 	order := &models.Order{}
 
 	if err := tx.Scope(restrictedScope(c)).Find(order, c.Param("order_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	// Bind Order to the html form elements
+	// Bind Order to request body
 	if err := c.Bind(order); err != nil {
 		return err
 	}
@@ -158,16 +152,14 @@ func ordersDestroy(c buffalo.Context) error {
 	if !loggedInUser.IsAtLeastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Order
 	order := &models.Order{}
 
-	// To find the Order the parameter order_id is used.
 	if err := tx.Scope(restrictedScope(c)).Find(order, c.Param("order_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}

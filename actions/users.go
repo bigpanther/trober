@@ -141,16 +141,21 @@ func usersUpdate(c buffalo.Context) error {
 	if err := c.Bind(newUser); err != nil {
 		return err
 	}
-	if user.ID == loggedInUser(c).ID {
+	var loggedInUser = loggedInUser(c)
+	if user.ID == loggedInUser.ID {
 		// Cannot change self role
 		newUser.Role = user.Role
 	}
+
 	if newUser.Name != user.Name || newUser.Role != user.Role {
 		user.UpdatedAt = time.Now().UTC()
 		user.Name = newUser.Name
 		user.Role = newUser.Role
 		if err := checkCustomerUser(c, tx, newUser); err != nil {
 			return c.Error(http.StatusBadRequest, err)
+		}
+		if err := checkEscalation(loggedInUser, newUser); err != nil {
+			return c.Error(http.StatusForbidden, err)
 		}
 	} else {
 		return c.Render(http.StatusOK, r.JSON(user))
@@ -208,6 +213,13 @@ func checkCustomerUser(c buffalo.Context, tx *pop.Connection, user *models.User)
 		}
 	} else {
 		user.CustomerID = nulls.UUID{}
+	}
+	return nil
+}
+
+func checkEscalation(self *models.User, user *models.User) error {
+	if self.IsBackOffice() && user.Role == models.UserRoleAdmin.String() {
+		return errors.New("cannot escalate priveleges beyond your own role")
 	}
 	return nil
 }

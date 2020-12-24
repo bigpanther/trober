@@ -284,22 +284,28 @@ func (as *ActionSuite) Test_UsersUpdate() {
 
 func (as *ActionSuite) Test_UsersUpdateEscalation() {
 	as.LoadFixture("Tenant bootstrap")
+	var mane = as.getLoggedInUser("mane")
+	var firmino = as.getLoggedInUser("firmino")
+	as.True(mane.IsBackOffice())
+	as.True(firmino.IsAdmin())
 	var tests = []struct {
+		user         *models.User
 		role         models.UserRole
 		responseCode int
 	}{
-		{models.UserRoleAdmin, http.StatusForbidden},
-		{models.UserRoleSuperAdmin, http.StatusBadRequest},
-		{models.UserRoleBackOffice, http.StatusOK},
+		{mane, models.UserRoleAdmin, http.StatusForbidden},
+		{mane, models.UserRoleSuperAdmin, http.StatusForbidden},
+		{mane, models.UserRoleBackOffice, http.StatusOK},
+		{firmino, models.UserRoleAdmin, http.StatusOK},
+		{firmino, models.UserRoleSuperAdmin, http.StatusForbidden},
+		{firmino, models.UserRoleBackOffice, http.StatusOK},
 	}
-	var mane = as.getLoggedInUser("mane")
-	as.True(mane.IsBackOffice())
 	for _, test := range tests {
-		as.T().Run(test.role.String(), func(t *testing.T) {
+		as.T().Run(fmt.Sprintf("%s-%s", test.user.Username, test.role.String()), func(t *testing.T) {
 			role := models.UserRoleDriver
-			newUser := as.createUser(fmt.Sprintf("test%s", test.role), role, fmt.Sprintf("test%s@bigpanther.ca", test.role), mane.TenantID, nulls.UUID{})
-			req := as.setupRequest(mane, fmt.Sprintf("/users/%s", newUser.ID))
-			updatedUser := models.User{Role: test.role.String(), ID: newUser.ID}
+			newUser := as.createUser(fmt.Sprintf("test%s%s", test.user.Username, test.role), role, fmt.Sprintf("test%s%s@bigpanther.ca", test.user.Username, test.role), test.user.TenantID, nulls.UUID{})
+			req := as.setupRequest(test.user, fmt.Sprintf("/users/%s", newUser.ID))
+			updatedUser := models.User{Name: fmt.Sprintf("not%s", test.user.Username), Role: test.role.String(), ID: newUser.ID}
 			res := req.Put(updatedUser)
 			as.Equal(test.responseCode, res.Code)
 			var dbUser = *newUser
@@ -317,7 +323,34 @@ func (as *ActionSuite) Test_UsersUpdateEscalation() {
 		})
 	}
 }
+func (as *ActionSuite) Test_UsersUpdateSuperAdmin() {
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username string
+	}{
+		{"mane"},
+		{"firmino"},
+		{"rodriguez"},
+		{"klopp"},
+	}
+	var klopp = as.getLoggedInUser("klopp")
+	as.True(klopp.IsSuperAdmin())
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			req := as.setupRequest(user, fmt.Sprintf("/users/%s", klopp.ID))
+			updatedUser := models.User{Role: models.UserRoleBackOffice.String()}
+			res := req.Put(updatedUser)
+			as.Equal(http.StatusBadRequest, res.Code)
+			var dbUser = models.User{}
+			err := as.DB.Find(&dbUser, klopp.ID)
+			as.Nil(err)
+			// Ensure update did not succeed
+			as.True(dbUser.IsSuperAdmin())
 
+		})
+	}
+}
 func (as *ActionSuite) Test_UsersDestroy() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {

@@ -261,7 +261,7 @@ func (as *ActionSuite) Test_UsersUpdate() {
 			newUser := as.createUser(fmt.Sprintf("test%s", user.Username), role, fmt.Sprintf("test%s@bigpanther.ca", test.username), firmino.TenantID, nulls.UUID{})
 			req := as.setupRequest(user, fmt.Sprintf("/users/%s", newUser.ID))
 			// Try to update ID and tenant ID. Expect these calls to be excluded at update
-			updatedUser := models.User{Name: fmt.Sprintf("not%s", test.username), Role: models.UserRoleAdmin.String(), ID: user.ID, TenantID: user.ID}
+			updatedUser := models.User{Name: fmt.Sprintf("not%s", test.username), Role: models.UserRoleBackOffice.String(), ID: user.ID, TenantID: user.ID}
 			res := req.Put(updatedUser)
 			as.Equal(test.responseCode, res.Code)
 			var dbUser = *newUser
@@ -277,6 +277,42 @@ func (as *ActionSuite) Test_UsersUpdate() {
 			} else {
 				// Ensure update did not succeed
 				as.Equal(dbUser.Name, newUser.Name)
+			}
+		})
+	}
+}
+
+func (as *ActionSuite) Test_UsersUpdateEscalation() {
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		role         models.UserRole
+		responseCode int
+	}{
+		{models.UserRoleAdmin, http.StatusForbidden},
+		{models.UserRoleSuperAdmin, http.StatusBadRequest},
+		{models.UserRoleBackOffice, http.StatusOK},
+	}
+	var mane = as.getLoggedInUser("mane")
+	as.True(mane.IsBackOffice())
+	for _, test := range tests {
+		as.T().Run(test.role.String(), func(t *testing.T) {
+			role := models.UserRoleDriver
+			newUser := as.createUser(fmt.Sprintf("test%s", test.role), role, fmt.Sprintf("test%s@bigpanther.ca", test.role), mane.TenantID, nulls.UUID{})
+			req := as.setupRequest(mane, fmt.Sprintf("/users/%s", newUser.ID))
+			updatedUser := models.User{Role: test.role.String(), ID: newUser.ID}
+			res := req.Put(updatedUser)
+			as.Equal(test.responseCode, res.Code)
+			var dbUser = *newUser
+			err := as.DB.Reload(&dbUser)
+			as.Nil(err)
+			if res.Code == http.StatusOK {
+				var user = models.User{}
+				res.Bind(&user)
+				as.Equal(updatedUser.Name, user.Name)
+				as.Equal(updatedUser.Role, user.Role)
+			} else {
+				// Ensure update did not succeed
+				as.Equal(dbUser.Role, newUser.Role)
 			}
 		})
 	}

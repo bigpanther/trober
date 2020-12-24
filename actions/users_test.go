@@ -326,12 +326,13 @@ func (as *ActionSuite) Test_UsersUpdateEscalation() {
 func (as *ActionSuite) Test_UsersUpdateSuperAdmin() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
-		username string
+		username     string
+		responseCode int
 	}{
-		{"mane"},
-		{"firmino"},
-		{"rodriguez"},
-		{"klopp"},
+		{"mane", http.StatusNotFound},
+		{"firmino", http.StatusNotFound},
+		{"rodriguez", http.StatusNotFound},
+		{"klopp", http.StatusBadRequest},
 	}
 	var klopp = as.getLoggedInUser("klopp")
 	as.True(klopp.IsSuperAdmin())
@@ -341,13 +342,12 @@ func (as *ActionSuite) Test_UsersUpdateSuperAdmin() {
 			req := as.setupRequest(user, fmt.Sprintf("/users/%s", klopp.ID))
 			updatedUser := models.User{Role: models.UserRoleBackOffice.String()}
 			res := req.Put(updatedUser)
-			as.Equal(http.StatusBadRequest, res.Code)
+			as.Equal(test.responseCode, res.Code)
 			var dbUser = models.User{}
 			err := as.DB.Find(&dbUser, klopp.ID)
 			as.Nil(err)
 			// Ensure update did not succeed
 			as.True(dbUser.IsSuperAdmin())
-
 		})
 	}
 }

@@ -143,7 +143,7 @@ func usersUpdate(c buffalo.Context) error {
 	}
 	if user.ID == loggedInUser(c).ID {
 		// Cannot change self role
-		return c.Error(http.StatusBadRequest, errors.New("role change for self not allowed"))
+		newUser.Role = user.Role
 	}
 	if newUser.Name != user.Name || newUser.Role != user.Role {
 		user.UpdatedAt = time.Now().UTC()

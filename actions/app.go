@@ -70,6 +70,8 @@ func App() *buffalo.App {
 			return c.Render(status, r.JSON(models.NewCustomError(err.Error(), fmt.Sprintf("%d", status), err)))
 		}
 		app.ErrorHandlers[500] = app.ErrorHandlers[0]
+		app.ErrorHandlers[404] = app.ErrorHandlers[0]
+
 		// Automatically redirect to SSL
 		app.Use(forceSSL())
 

@@ -26,7 +26,7 @@ import (
 // carriersList gets all Carriers. This function is mapped to the path
 // GET /carriers
 func carriersList(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -64,16 +64,14 @@ func carriersShow(c buffalo.Context) error {
 	if loggedInUser.IsNotActive() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Carrier
 	carrier := &models.Carrier{}
 
-	// To find the Carrier the parameter carrier_id is used.
 	if err := tx.Scope(restrictedScope(c)).Find(carrier, c.Param("carrier_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
@@ -90,15 +88,14 @@ func carriersCreate(c buffalo.Context) error {
 	if !loggedInUser.IsAtLeastBackOffice() {
 		return models.ErrNotFound
 	}
-	// Allocate an empty Carrier
+
 	carrier := &models.Carrier{}
 
-	// Bind carrier to the html form elements
+	// Bind carrier to request body
 	if err := c.Bind(carrier); err != nil {
 		return err
 	}
 
-	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -107,7 +104,6 @@ func carriersCreate(c buffalo.Context) error {
 	carrier.TenantID = loggedInUser.TenantID
 	carrier.CreatedBy = loggedInUser.ID
 
-	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(carrier)
 	if err != nil {
 		return err
@@ -128,19 +124,18 @@ func carriersUpdate(c buffalo.Context) error {
 	if !loggedInUser.IsAtLeastBackOffice() {
 		return models.ErrNotFound
 	}
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Carrier
 	carrier := &models.Carrier{}
 	if err := tx.Scope(restrictedScope(c)).Find(carrier, c.Param("carrier_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 	newCarrier := &models.Carrier{}
-	// Bind carrier to the html form elements
+	// Bind carrier to request body
 	if err := c.Bind(newCarrier); err != nil {
 		return err
 	}
@@ -173,16 +168,14 @@ func carriersDestroy(c buffalo.Context) error {
 	if !loggedInUser.IsAtLeastBackOffice() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Carrier
 	carrier := &models.Carrier{}
 
-	// To find the Carrier the parameter carrier_id is used.
 	if err := tx.Scope(restrictedScope(c)).Find(carrier, c.Param("carrier_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}

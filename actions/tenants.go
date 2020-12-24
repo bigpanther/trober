@@ -28,7 +28,7 @@ var errNotFound = errors.New(http.StatusText(http.StatusNotFound))
 // tenantsList gets all Tenants. This function is mapped to the path
 // GET /tenants
 func tenantsList(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -61,16 +61,13 @@ func tenantsList(c buffalo.Context) error {
 func tenantsShow(c buffalo.Context) error {
 	tenantID := c.Param("tenant_id")
 
-	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Tenant
 	tenant := &models.Tenant{}
 
-	// To find the Tenant the parameter tenant_id is used.
 	if err := tx.Find(tenant, tenantID); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
@@ -85,22 +82,20 @@ func tenantsCreate(c buffalo.Context) error {
 	if !loggedInUser(c).IsSuperAdmin() {
 		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
 	}
-	// Allocate an empty Tenant
+
 	tenant := &models.Tenant{}
 
-	// Bind tenant to the html form elements
+	// Bind tenant to request body
 	if err := c.Bind(tenant); err != nil {
 		return err
 	}
 	tenant.CreatedBy = nulls.NewUUID(loggedInUser(c).ID)
 
-	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Validate the data from the html form
 	verrs, err := tx.ValidateAndCreate(tenant)
 	if err != nil {
 		return err
@@ -116,18 +111,18 @@ func tenantsCreate(c buffalo.Context) error {
 // tenantsUpdate changes a Tenant in the DB. This function is mapped to
 // the path PUT /tenants/{tenant_id}
 func tenantsUpdate(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
-	// Allocate an empty Tenant
+
 	tenant := &models.Tenant{}
 	if err := tx.Scope(restrictedScope(c)).Find(tenant, c.Param("tenant_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 	newTenant := &models.Tenant{}
-	// Bind Tenant to the html form elements
+	// Bind Tenant to request body
 	if err := c.Bind(newTenant); err != nil {
 		return err
 	}
@@ -155,16 +150,14 @@ func tenantsUpdate(c buffalo.Context) error {
 // tenantsDestroy deletes a Tenant from the DB. This function is mapped
 // to the path DELETE /tenants/{tenant_id}
 func tenantsDestroy(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Tenant
 	tenant := &models.Tenant{}
 
-	// To find the Tenant the parameter tenant_id is used.
 	if err := tx.Find(tenant, c.Param("tenant_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}

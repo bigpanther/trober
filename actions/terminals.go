@@ -26,7 +26,7 @@ import (
 // terminalsList gets all Terminals. This function is mapped to the path
 // GET /terminals
 func terminalsList(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -60,15 +60,14 @@ func terminalsList(c buffalo.Context) error {
 // terminalsShow gets the data for one Terminal. This function is mapped to
 // the path GET /terminals/{terminal_id}
 func terminalsShow(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Terminal
 	terminal := &models.Terminal{}
-	// To find the Terminal the parameter terminal_id is used.
+
 	if err := tx.Scope(restrictedScope(c)).Find(terminal, c.Param("terminal_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
@@ -80,15 +79,13 @@ func terminalsShow(c buffalo.Context) error {
 func terminalsCreate(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 
-	// Allocate an empty Terminal
 	terminal := &models.Terminal{}
 
-	// Bind terminal to the html form elements
+	// Bind terminal to request body
 	if err := c.Bind(terminal); err != nil {
 		return err
 	}
 
-	// Get the DB connection from the context
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -96,7 +93,7 @@ func terminalsCreate(c buffalo.Context) error {
 
 	terminal.TenantID = loggedInUser.TenantID
 	terminal.CreatedBy = loggedInUser.ID
-	// Validate the data from the html form
+
 	verrs, err := tx.ValidateAndCreate(terminal)
 	if err != nil {
 		return err
@@ -113,19 +110,18 @@ func terminalsCreate(c buffalo.Context) error {
 // terminalsUpdate changes a Terminal in the DB. This function is mapped to
 // the path PUT /terminals/{terminal_id}
 func terminalsUpdate(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Terminal
 	terminal := &models.Terminal{}
 	if err := tx.Scope(restrictedScope(c)).Find(terminal, c.Param("terminal_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 	newTerminal := &models.Terminal{}
-	// Bind Terminal to the html form elements
+	// Bind Terminal to request body
 	if err := c.Bind(newTerminal); err != nil {
 		return err
 	}
@@ -150,16 +146,14 @@ func terminalsUpdate(c buffalo.Context) error {
 // terminalsDestroy deletes a Terminal from the DB. This function is mapped
 // to the path DELETE /terminals/{terminal_id}
 func terminalsDestroy(c buffalo.Context) error {
-	// Get the DB connection from the context
+
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
 	}
 
-	// Allocate an empty Terminal
 	terminal := &models.Terminal{}
 
-	// To find the Terminal the parameter terminal_id is used.
 	if err := tx.Scope(restrictedScope(c)).Find(terminal, c.Param("terminal_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}

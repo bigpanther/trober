@@ -6,11 +6,10 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://trober-test.herokuapp.com
 info:
-  version: "0.1.5"
+  version: "0.1.6"
   title: Trober API
   description: >-
     The trober API
-
 
 security:
   - ApiKeyAuth: []
@@ -20,7 +19,6 @@ paths:
       summary: List all tenants
       description: >-
         List all tenants
-
 
       parameters:
         - name: name
@@ -62,7 +60,6 @@ paths:
       description: >-
         Create a new tenant
 
-
       requestBody:
         content:
           application/json:
@@ -95,7 +92,6 @@ paths:
       description: >-
         Update an existing tenant
 
-
       requestBody:
         content:
           application/json:
@@ -127,7 +123,6 @@ paths:
       description: >-
         Get tenant details
 
-
       responses:
         "200":
           description: OK
@@ -146,7 +141,6 @@ paths:
       summary: List all Containers
       description: >-
         List all Containers
-
 
       parameters:
         - name: tenant_id
@@ -227,7 +221,6 @@ paths:
       description: >-
         Create a new Container
 
-
       requestBody:
         content:
           application/json:
@@ -259,7 +252,6 @@ paths:
       summary: Update an existing container
       description: >-
         Update an existing container
-
 
       requestBody:
         content:
@@ -299,7 +291,6 @@ paths:
       description: >-
         Get container details
 
-
       responses:
         "200":
           description: OK
@@ -334,7 +325,6 @@ paths:
       description: >-
         Update the status of an existing container
 
-
       requestBody:
         content:
           application/json:
@@ -362,7 +352,6 @@ paths:
       summary: List all Terminals
       description: >-
         List all Terminals
-
 
       parameters:
         - name: tenant_id
@@ -410,7 +399,6 @@ paths:
       description: >-
         Create a new Terminal
 
-
       requestBody:
         content:
           application/json:
@@ -442,7 +430,6 @@ paths:
       summary: Update an existing terminal
       description: >-
         Update an existing terminal
-
 
       requestBody:
         content:
@@ -482,7 +469,6 @@ paths:
       description: >-
         Get terminal details
 
-
       responses:
         "200":
           description: OK
@@ -501,7 +487,6 @@ paths:
       summary: List all Orders
       description: >-
         List all Orders
-
 
       parameters:
         - name: tenant_id
@@ -557,7 +542,6 @@ paths:
       description: >-
         Create a new Order
 
-
       requestBody:
         content:
           application/json:
@@ -589,7 +573,6 @@ paths:
       summary: Update an existing order
       description: >-
         Update an existing order
-
 
       requestBody:
         content:
@@ -629,7 +612,6 @@ paths:
       description: >-
         Get order details
 
-
       responses:
         "200":
           description: OK
@@ -648,7 +630,6 @@ paths:
       summary: List all Carriers
       description: >-
         List all Carriers
-
 
       parameters:
         - name: tenant_id
@@ -672,7 +653,7 @@ paths:
           schema:
             type: string
             format: int
-            - name: type
+        - name: type
           in: query
           required: false
           description: The type of the carrier.
@@ -695,7 +676,6 @@ paths:
       summary: Create a new Carrier
       description: >-
         Create a new Carrier
-
 
       requestBody:
         content:
@@ -728,7 +708,6 @@ paths:
       summary: Update an existing carrier
       description: >-
         Update an existing carrier
-
 
       requestBody:
         content:
@@ -768,7 +747,6 @@ paths:
       description: >-
         Get carrier details
 
-
       responses:
         "200":
           description: OK
@@ -787,7 +765,6 @@ paths:
       summary: List all Customers
       description: >-
         List all Customers
-
 
       parameters:
         - name: tenant_id
@@ -822,7 +799,6 @@ paths:
       description: >-
         Create a new Customer
 
-
       requestBody:
         content:
           application/json:
@@ -854,7 +830,6 @@ paths:
       summary: Update an existing customer
       description: >-
         Update an existing customer
-
 
       requestBody:
         content:
@@ -894,7 +869,6 @@ paths:
       description: >-
         Get customer details
 
-
       responses:
         "200":
           description: OK
@@ -914,7 +888,6 @@ paths:
       summary: List all users
       description: >-
         List all users
-
 
       parameters:
         - name: tenant_id
@@ -960,7 +933,6 @@ paths:
       description: >-
         Create a new user
 
-
       requestBody:
         content:
           application/json:
@@ -992,7 +964,6 @@ paths:
       summary: Update an existing user
       description: >-
         Update an existing user
-
 
       requestBody:
         content:
@@ -1032,7 +1003,6 @@ paths:
       description: >-
         Get user details
 
-
       responses:
         "200":
           description: OK
@@ -1059,7 +1029,6 @@ paths:
       description: >-
         Delete the user
 
-
       responses:
         "204":
           description: No Content
@@ -1074,7 +1043,6 @@ paths:
       summary: Get supported App info
       description: >-
         Get supported App info
-
 
       responses:
         "200":
@@ -1095,7 +1063,6 @@ paths:
       description: >-
         Get details of the logged in user
 
-
       responses:
         "200":
           description: OK
@@ -1115,7 +1082,6 @@ paths:
       description: >-
         Get tenant details of the logged in user
 
-
       responses:
         "200":
           description: OK
@@ -1134,7 +1100,6 @@ paths:
       summary: Get server health
       description: >-
         Get server health status
-
 
       security: []
       responses:

@@ -158,10 +158,10 @@ func (as *ActionSuite) Test_OrdersCreate() {
 	}{
 		{"mane", http.StatusCreated},
 		{"firmino", http.StatusCreated},
-		{"rodriguez", http.StatusBadRequest},
+		{"rodriguez", http.StatusBadRequest}, // customer id mismatch
 		{"allan", http.StatusNotFound},
 		{"salah", http.StatusNotFound},
-		{"klopp", http.StatusCreated},
+		{"klopp", http.StatusBadRequest},  // customer id mismatch
 		{"adidas", http.StatusBadRequest}, // customer id mismatch
 		{"adidas", http.StatusCreated},
 	}

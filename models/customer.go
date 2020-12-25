@@ -19,7 +19,7 @@ type Customer struct {
 	Name      string     `json:"name" db:"name"`
 	TenantID  uuid.UUID  `json:"tenant_id" db:"tenant_id"`
 	Tenant    *Tenant    `belongs_to:"tenant" json:"-"`
-	Orders    Orders     `has_many:"orders" json:"orders,omitempty"`
+	//Orders    Orders     `has_many:"orders" json:"orders,omitempty"`
 }
 
 // Customers is not required by pop and may be deleted

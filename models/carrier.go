@@ -12,16 +12,16 @@ import (
 
 // Carrier is used by pop to map your carriers database table to your go code.
 type Carrier struct {
-	ID         uuid.UUID  `json:"id" db:"id"`
-	CreatedAt  time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt  time.Time  `json:"updated_at" db:"updated_at"`
-	CreatedBy  uuid.UUID  `json:"created_by" db:"created_by"`
-	Name       string     `json:"name" db:"name"`
-	Type       string     `json:"type" db:"type"`
-	Eta        nulls.Time `json:"eta" db:"eta"`
-	TenantID   uuid.UUID  `json:"tenant_id" db:"tenant_id"`
-	Tenant     *Tenant    `belongs_to:"tenant" json:"-"`
-	Containers Containers `has_many:"containers" json:"containers,omitempty"`
+	ID        uuid.UUID  `json:"id" db:"id"`
+	CreatedAt time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at" db:"updated_at"`
+	CreatedBy uuid.UUID  `json:"created_by" db:"created_by"`
+	Name      string     `json:"name" db:"name"`
+	Type      string     `json:"type" db:"type"`
+	Eta       nulls.Time `json:"eta" db:"eta"`
+	TenantID  uuid.UUID  `json:"tenant_id" db:"tenant_id"`
+	Tenant    *Tenant    `belongs_to:"tenant" json:"-"`
+	//Containers Containers `has_many:"containers" json:"containers,omitempty"`
 }
 
 // Carriers is not required by pop and may be deleted

@@ -161,9 +161,9 @@ func (as *ActionSuite) Test_OrdersCreate() {
 		{"rodriguez", http.StatusBadRequest}, // customer id mismatch
 		{"allan", http.StatusNotFound},
 		{"salah", http.StatusNotFound},
-		{"klopp", http.StatusBadRequest},  // customer id mismatch
-		{"adidas", http.StatusBadRequest}, // customer id mismatch
+		{"klopp", http.StatusBadRequest}, // customer id mismatch
 		{"adidas", http.StatusCreated},
+		{"nike", http.StatusCreated},
 	}
 	var firmino = as.getLoggedInUser("firmino")
 	efaLiv := as.getCustomer("EFA Liv")
@@ -181,6 +181,11 @@ func (as *ActionSuite) Test_OrdersCreate() {
 				as.Equal(newOrder.SerialNumber, order.SerialNumber)
 				as.Equal(models.OrderStatusOpen.String(), order.Status)
 				as.Equal(user.TenantID, order.TenantID)
+				if user.IsCustomer() {
+					as.Equal(user.CustomerID.UUID, order.CustomerID)
+				} else {
+					as.Equal(efaLiv.ID, order.CustomerID)
+				}
 			}
 		})
 	}

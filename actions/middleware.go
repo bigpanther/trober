@@ -23,7 +23,7 @@ func setCurrentUser(next buffalo.Handler) buffalo.Handler {
 			var username = c.Request().Header.Get(xToken)
 			err = tx.Where("username = ?", username).First(user)
 			if err != nil {
-				return c.Render(403, r.JSON(models.NewCustomError(err.Error(), "403", err)))
+				return c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 			}
 		}
 		if err != nil {
@@ -62,7 +62,7 @@ func requireAtLeastBackOfficeUser(next buffalo.Handler) buffalo.Handler {
 		return next(c)
 	}
 }
-func requireAtCustomerUser(next buffalo.Handler) buffalo.Handler {
+func requireAtLeastCustomerUser(next buffalo.Handler) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		var loggedInUser = loggedInUser(c)
 		if !loggedInUser.IsAtLeastBackOffice() && !loggedInUser.IsCustomer() {

@@ -9,7 +9,7 @@ import (
 )
 
 func selfGet(c buffalo.Context) error {
-	return c.Render(200, r.JSON(loggedInUser(c)))
+	return c.Render(http.StatusOK, r.JSON(loggedInUser(c)))
 }
 
 func selfGetTenant(c buffalo.Context) error {
@@ -22,5 +22,5 @@ func selfGetTenant(c buffalo.Context) error {
 	if err := tx.Find(tenant, loggedInUser(c).TenantID); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-	return c.Render(200, r.JSON(tenant))
+	return c.Render(http.StatusOK, r.JSON(tenant))
 }

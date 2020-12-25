@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/bigpanther/trober/models"
@@ -25,7 +26,7 @@ func (as *ActionSuite) Test_SelfGetTenant() {
 			user := as.getLoggedInUser(test.username)
 			req := as.setupRequest(user, "/self/tenant")
 			res := req.Get()
-			as.Equal(200, res.Code)
+			as.Equal(http.StatusOK, res.Code)
 			var tenant = &models.Tenant{}
 			res.Bind(tenant)
 			as.Equal(test.tenantName, tenant.Name)
@@ -64,7 +65,7 @@ func (as *ActionSuite) Test_SelfGet() {
 			user := as.getLoggedInUser(test.username)
 			req := as.setupRequest(user, "/self")
 			res := req.Get()
-			as.Equal(200, res.Code)
+			as.Equal(http.StatusOK, res.Code)
 			var self = &models.User{}
 			res.Bind(self)
 			as.True(test.f(self))

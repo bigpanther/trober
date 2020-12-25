@@ -30,6 +30,13 @@ paths:
           schema:
             type: string
             minLength: 2
+        - name: page
+          in: query
+          required: false
+          description: The page number
+          schema:
+            type: string
+            format: int
         - name: type
           in: query
           required: false
@@ -163,6 +170,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: page
+          in: query
+          required: false
+          description: The page number
+          schema:
+            type: string
+            format: int
         - name: driver_id
           in: query
           required: false
@@ -358,6 +372,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: page
+          in: query
+          required: false
+          description: The page number
+          schema:
+            type: string
+            format: int
         - name: name
           in: query
           required: false
@@ -490,6 +511,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: page
+          in: query
+          required: false
+          description: The page number
+          schema:
+            type: string
+            format: int
         - name: customer_id
           in: query
           required: false
@@ -637,7 +665,14 @@ paths:
           schema:
             type: string
             minLength: 2
-        - name: type
+        - name: page
+          in: query
+          required: false
+          description: The page number
+          schema:
+            type: string
+            format: int
+            - name: type
           in: query
           required: false
           description: The type of the carrier.
@@ -889,6 +924,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: page
+          in: query
+          required: false
+          description: The page number
+          schema:
+            type: string
+            format: int
         - name: name
           in: query
           description: The name of the customer. Matches names that begin with the values

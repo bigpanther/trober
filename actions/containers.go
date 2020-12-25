@@ -63,7 +63,7 @@ func containersList(c buffalo.Context) error {
 		return err
 	}
 
-	return c.Render(200, r.JSON(containers))
+	return c.Render(http.StatusOK, r.JSON(containers))
 
 }
 
@@ -83,7 +83,7 @@ func containersShow(c buffalo.Context) error {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	return c.Render(200, r.JSON(container))
+	return c.Render(http.StatusOK, r.JSON(container))
 
 }
 

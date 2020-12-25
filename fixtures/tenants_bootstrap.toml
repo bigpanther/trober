@@ -34,7 +34,7 @@ name = "Tenant bootstrap"
       updated_at = "<%= now() %>"
       tenant_id = "<%= uuidNamed("livTenant") %>"
     [[scenario.table.row]]
-      id = "<%= uuidNamed("lifUefa") %>"
+      id = "<%= uuidNamed("livUefa") %>"
       name = "UEFA Liv"
       created_at = "<%= now() %>"
       updated_at = "<%= now() %>"

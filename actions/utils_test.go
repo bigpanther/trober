@@ -52,8 +52,8 @@ func (as *ActionSuite) createCustomer(name string, tenantID uuid.UUID, createdBy
 	as.Equal(0, len(v.Errors))
 	return newCustomer
 }
-func (as *ActionSuite) createOrder(serialNumber string, orderStatus string, eta nulls.Time, tenantID uuid.UUID, createdBy uuid.UUID) *models.Order {
-	newOrder := &models.Order{SerialNumber: serialNumber, Status: orderStatus, TenantID: tenantID, CreatedBy: createdBy}
+func (as *ActionSuite) createOrder(serialNumber string, orderStatus models.OrderStatus, tenantID uuid.UUID, createdBy uuid.UUID, customerID uuid.UUID) *models.Order {
+	newOrder := &models.Order{SerialNumber: serialNumber, Status: orderStatus.String(), TenantID: tenantID, CreatedBy: createdBy, CustomerID: customerID}
 	v, err := as.DB.ValidateAndCreate(newOrder)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))

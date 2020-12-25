@@ -61,7 +61,7 @@ func usersList(c buffalo.Context) error {
 	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(users); err != nil {
 		return err
 	}
-	return c.Render(200, r.JSON(users))
+	return c.Render(http.StatusOK, r.JSON(users))
 }
 
 // usersShow gets the data for one User. This function is mapped to
@@ -79,7 +79,7 @@ func usersShow(c buffalo.Context) error {
 	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-	return c.Render(200, r.JSON(user))
+	return c.Render(http.StatusOK, r.JSON(user))
 }
 
 // usersCreate adds a User to the DB. This function is mapped to the
@@ -175,11 +175,6 @@ func usersUpdate(c buffalo.Context) error {
 // usersDestroy deletes a User from the DB. This function is mapped
 // to the path DELETE /users/{user_id}
 func usersDestroy(c buffalo.Context) error {
-	var loggedInUser = loggedInUser(c)
-	if !loggedInUser.IsAtLeastBackOffice() {
-		return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
-	}
-
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound

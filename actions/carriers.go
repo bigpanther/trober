@@ -26,7 +26,6 @@ import (
 // carriersList gets all Carriers. This function is mapped to the path
 // GET /carriers
 func carriersList(c buffalo.Context) error {
-
 	tx, ok := c.Value("tx").(*pop.Connection)
 	if !ok {
 		return models.ErrNotFound
@@ -52,9 +51,7 @@ func carriersList(c buffalo.Context) error {
 	if err := q.Scope(restrictedScope(c)).Order(fmt.Sprintf("GREATEST(-(now()-eta),(now()-eta)), %s", orderByCreatedAtDesc)).All(carriers); err != nil {
 		return err
 	}
-
-	return c.Render(200, r.JSON(carriers))
-
+	return c.Render(http.StatusOK, r.JSON(carriers))
 }
 
 // carriersShow gets the data for one Carrier. This function is mapped to
@@ -76,7 +73,7 @@ func carriersShow(c buffalo.Context) error {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	return c.Render(200, r.JSON(carrier))
+	return c.Render(http.StatusOK, r.JSON(carrier))
 
 }
 

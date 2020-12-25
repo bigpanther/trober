@@ -53,7 +53,7 @@ func terminalsList(c buffalo.Context) error {
 		return err
 	}
 
-	return c.Render(200, r.JSON(terminals))
+	return c.Render(http.StatusOK, r.JSON(terminals))
 
 }
 
@@ -71,7 +71,7 @@ func terminalsShow(c buffalo.Context) error {
 	if err := tx.Scope(restrictedScope(c)).Find(terminal, c.Param("terminal_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-	return c.Render(200, r.JSON(terminal))
+	return c.Render(http.StatusOK, r.JSON(terminal))
 }
 
 // terminalsCreate adds a Terminal to the DB. This function is mapped to the

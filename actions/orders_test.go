@@ -158,7 +158,7 @@ func (as *ActionSuite) Test_OrdersCreate() {
 	}{
 		{"mane", http.StatusCreated},
 		{"firmino", http.StatusCreated},
-		{"rodriguez", http.StatusCreated},
+		{"rodriguez", http.StatusBadRequest},
 		{"allan", http.StatusNotFound},
 		{"salah", http.StatusNotFound},
 		{"klopp", http.StatusCreated},

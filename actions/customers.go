@@ -50,7 +50,7 @@ func customersList(c buffalo.Context) error {
 		return err
 	}
 
-	return c.Render(200, r.JSON(customers))
+	return c.Render(http.StatusOK, r.JSON(customers))
 
 }
 
@@ -75,7 +75,7 @@ func customersShow(c buffalo.Context) error {
 		return c.Error(http.StatusNotFound, err)
 	}
 
-	return c.Render(200, r.JSON(customer))
+	return c.Render(http.StatusOK, r.JSON(customer))
 
 }
 

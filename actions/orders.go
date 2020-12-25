@@ -164,7 +164,7 @@ func ordersUpdate(c buffalo.Context) error {
 	} else {
 		return c.Render(http.StatusOK, r.JSON(order))
 	}
-	verrs, err := tx.ValidateAndUpdate(order, excludeUpdateColumnsDefault()...)
+	verrs, err := tx.ValidateAndUpdate(order)
 	if err != nil {
 		return err
 	}

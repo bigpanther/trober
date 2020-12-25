@@ -12,19 +12,19 @@ import (
 
 // Tenant is used by pop to map your tenants database table to your go code.
 type Tenant struct {
-	ID         uuid.UUID  `json:"id" db:"id"`
-	CreatedAt  time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt  time.Time  `json:"updated_at" db:"updated_at"`
-	CreatedBy  nulls.UUID `json:"created_by" db:"created_by"`
-	Name       string     `json:"name" db:"name"`
-	Type       string     `json:"type" db:"type"`
-	Code       string     `json:"code" db:"code"`
-	Users      Users      `has_many:"users"  json:"users,omitempty"`
-	Carriers   Carriers   `has_many:"carriers"  json:"carriers,omitempty"`
-	Containers Containers `has_many:"containers"  json:"containers,omitempty"`
-	Terminals  Terminals  `has_many:"terminals"  json:"terminals,omitempty"`
-	Orders     Orders     `has_many:"orders"  json:"orders,omitempty"`
-	Customers  Customers  `has_many:"customers"  json:"customers,omitempty"`
+	ID        uuid.UUID  `json:"id" db:"id"`
+	CreatedAt time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at" db:"updated_at"`
+	CreatedBy nulls.UUID `json:"created_by" db:"created_by"`
+	Name      string     `json:"name" db:"name"`
+	Type      string     `json:"type" db:"type"`
+	Code      string     `json:"code" db:"code"`
+	// Users      Users      `has_many:"users"  json:"users,omitempty"`
+	// Carriers   Carriers   `has_many:"carriers"  json:"carriers,omitempty"`
+	// Containers Containers `has_many:"containers"  json:"containers,omitempty"`
+	// Terminals  Terminals  `has_many:"terminals"  json:"terminals,omitempty"`
+	// Orders     Orders     `has_many:"orders"  json:"orders,omitempty"`
+	// Customers  Customers  `has_many:"customers"  json:"customers,omitempty"`
 }
 
 // Tenants is not required by pop and may be deleted

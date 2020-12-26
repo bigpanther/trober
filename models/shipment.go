@@ -10,8 +10,8 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-// Container is used by pop to map your containers database table to your go code.
-type Container struct {
+// Shipment is used by pop to map your shipments database table to your go code.
+type Shipment struct {
 	ID              uuid.UUID    `json:"id" db:"id"`
 	CreatedAt       time.Time    `json:"created_at" db:"created_at"`
 	UpdatedAt       time.Time    `json:"updated_at" db:"updated_at"`
@@ -36,45 +36,45 @@ type Container struct {
 	Driver          *User        `belongs_to:"user" json:"driver,omitempty"`
 }
 
-// Containers is not required by pop and may be deleted
-type Containers []Container
+// Shipments is not required by pop and may be deleted
+type Shipments []Shipment
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 // This method is not required and may be deleted.
-func (c *Container) Validate(tx *pop.Connection) (*validate.Errors, error) {
+func (c *Shipment) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Field: c.SerialNumber, Name: "SerialNumber"},
 		&validators.FuncValidator{Fn: func() bool {
-			return IsValidContainerStatus(c.Status)
+			return IsValidShipmentStatus(c.Status)
 		}, Field: c.Status, Name: "Status"},
 		&validators.FuncValidator{Fn: func() bool {
 			// Value can be null
-			return !c.Size.Valid || IsValidContainerSize(c.Size.String)
+			return !c.Size.Valid || IsValidShipmentSize(c.Size.String)
 		}, Field: c.Size.String, Name: "Size"},
 		&validators.FuncValidator{Fn: func() bool {
-			return IsValidContainerType(c.Type)
+			return IsValidShipmentType(c.Type)
 		}, Field: c.Type, Name: "Type"},
 	), nil
 }
 
 // ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.
 // This method is not required and may be deleted.
-func (c *Container) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
+func (c *Shipment) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
 
 // ValidateUpdate gets run every time you call "pop.ValidateAndUpdate" method.
 // This method is not required and may be deleted.
-func (c *Container) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
+func (c *Shipment) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
 
-// IsAssigned checks if a container is assigned to a driver
-func (c *Container) IsAssigned() bool {
-	return ContainerStatus(c.Status) == ContainerStatusAssigned && c.DriverID.UUID != uuid.Nil
+// IsAssigned checks if a shipment is assigned to a driver
+func (c *Shipment) IsAssigned() bool {
+	return ShipmentStatus(c.Status) == ShipmentStatusAssigned && c.DriverID.UUID != uuid.Nil
 }
 
-// IsRejected checks if a container is assigned to a driver
-func (c *Container) IsRejected() bool {
-	return ContainerStatus(c.Status) == ContainerStatusRejected
+// IsRejected checks if a shipment is assigned to a driver
+func (c *Shipment) IsRejected() bool {
+	return ShipmentStatus(c.Status) == ShipmentStatusRejected
 }

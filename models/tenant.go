@@ -19,12 +19,6 @@ type Tenant struct {
 	Name      string     `json:"name" db:"name"`
 	Type      string     `json:"type" db:"type"`
 	Code      string     `json:"code" db:"code"`
-	// Users      Users      `has_many:"users"  json:"users,omitempty"`
-	// Carriers   Carriers   `has_many:"carriers"  json:"carriers,omitempty"`
-	// Containers Containers `has_many:"containers"  json:"containers,omitempty"`
-	// Terminals  Terminals  `has_many:"terminals"  json:"terminals,omitempty"`
-	// Orders     Orders     `has_many:"orders"  json:"orders,omitempty"`
-	// Customers  Customers  `has_many:"customers"  json:"customers,omitempty"`
 }
 
 // Tenants is not required by pop and may be deleted

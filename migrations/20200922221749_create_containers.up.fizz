@@ -1,4 +1,4 @@
-create_table("containers") {
+create_table("shipments") {
 	t.Column("id", "uuid", {primary: true})
 	t.Column("created_by", "uuid", {})
 	t.Column("tenant_id", "uuid", {})
@@ -19,43 +19,43 @@ create_table("containers") {
 	t.Timestamps()
 }
 
-add_foreign_key("containers", "created_by",  {"users": ["id"]}, {
-    "name": "fk_containers_created_by",
+add_foreign_key("shipments", "created_by",  {"users": ["id"]}, {
+    "name": "fk_shipments_created_by",
     "on_delete": "RESTRICT",
     "on_update": "RESTRICT",
 })
-add_foreign_key("containers", "tenant_id",  {"tenants": ["id"]}, {
-    "name": "fk_containers_tenant_id",
-    "on_delete": "RESTRICT",
-    "on_update": "RESTRICT",
-})
-
-add_foreign_key("containers", "carrier_id",  {"carriers": ["id"]}, {
-    "name": "fk_containers_carrier_id",
-    "on_delete": "RESTRICT",
-    "on_update": "RESTRICT",
-})
-add_foreign_key("containers", "order_id",  {"orders": ["id"]}, {
-    "name": "fk_containers_order_id",
-    "on_delete": "RESTRICT",
-    "on_update": "RESTRICT",
-})
-add_foreign_key("containers", "terminal_id",  {"terminals": ["id"]}, {
-    "name": "fk_containers_terminal_id",
+add_foreign_key("shipments", "tenant_id",  {"tenants": ["id"]}, {
+    "name": "fk_shipments_tenant_id",
     "on_delete": "RESTRICT",
     "on_update": "RESTRICT",
 })
 
-add_foreign_key("containers", "yard_id",  {"yards": ["id"]}, {
-    "name": "fk_containers_yard_id",
+add_foreign_key("shipments", "carrier_id",  {"carriers": ["id"]}, {
+    "name": "fk_shipments_carrier_id",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})
+add_foreign_key("shipments", "order_id",  {"orders": ["id"]}, {
+    "name": "fk_shipments_order_id",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})
+add_foreign_key("shipments", "terminal_id",  {"terminals": ["id"]}, {
+    "name": "fk_shipments_terminal_id",
     "on_delete": "RESTRICT",
     "on_update": "RESTRICT",
 })
 
-add_foreign_key("containers", "driver_id",  {"users": ["id"]}, {
-    "name": "fk_containers_driver_id",
+add_foreign_key("shipments", "yard_id",  {"yards": ["id"]}, {
+    "name": "fk_shipments_yard_id",
     "on_delete": "RESTRICT",
     "on_update": "RESTRICT",
 })
 
-add_index("containers", ["tenant_id", "serial_number"])
+add_foreign_key("shipments", "driver_id",  {"users": ["id"]}, {
+    "name": "fk_shipments_driver_id",
+    "on_delete": "RESTRICT",
+    "on_update": "RESTRICT",
+})
+
+add_index("shipments", ["tenant_id", "serial_number"])

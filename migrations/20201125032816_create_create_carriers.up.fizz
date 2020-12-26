@@ -19,11 +19,11 @@ add_foreign_key("carriers", "tenant_id",  {"tenants": ["id"]}, {
     "on_update": "RESTRICT",
 })
 
-drop_column("containers", "carrier_type")
-drop_column("containers", "eta")
-add_column("containers", "carrier_id", "uuid", {"null": true})
-add_foreign_key("containers", "carrier_id",  {"carriers": ["id"]}, {
-    "name": "fk_containers_carrier_id",
+drop_column("shipments", "carrier_type")
+drop_column("shipments", "eta")
+add_column("shipments", "carrier_id", "uuid", {"null": true})
+add_foreign_key("shipments", "carrier_id",  {"carriers": ["id"]}, {
+    "name": "fk_shipments_carrier_id",
     "on_delete": "RESTRICT",
     "on_update": "RESTRICT",
 })

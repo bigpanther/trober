@@ -150,7 +150,7 @@ func demoCreate() error {
 	if err != nil {
 		return err
 	}
-	container := &models.Container{
+	shipment := &models.Shipment{
 		SerialNumber:    "CANV2020127",
 		TenantID:        tenant.ID,
 		Type:            "Incoming",
@@ -164,8 +164,8 @@ func demoCreate() error {
 		TerminalID:      nulls.NewUUID(terminal.ID),
 		CreatedBy:       user.ID,
 	}
-	err = models.DB.Create(container)
-	container = &models.Container{
+	err = models.DB.Create(shipment)
+	shipment = &models.Shipment{
 		SerialNumber:    "CANV2020128",
 		TenantID:        tenant.ID,
 		Type:            "Incoming",
@@ -180,7 +180,7 @@ func demoCreate() error {
 		TerminalID:      nulls.NewUUID(terminal.ID),
 		DriverID:        nulls.NewUUID(driver.ID),
 	}
-	err = models.DB.Create(container)
+	err = models.DB.Create(shipment)
 	if err != nil {
 		return err
 	}
@@ -191,12 +191,12 @@ func demoDrop() error {
 	tenant := &models.Tenant{}
 	models.DB.Where("name= ?", "Acme Enterprises").Where("type=?", "Test").First(tenant)
 
-	containers := &models.Containers{}
-	err := models.DB.Where("tenant_id=?", tenant.ID).All(containers)
+	shipments := &models.Shipments{}
+	err := models.DB.Where("tenant_id=?", tenant.ID).All(shipments)
 	if err != nil {
 		return err
 	}
-	err = models.DB.Destroy(containers)
+	err = models.DB.Destroy(shipments)
 	if err != nil {
 		return err
 	}

@@ -27,7 +27,7 @@ func (as *ActionSuite) Test_ShipmentsList() {
 		{"rodriguez", http.StatusOK, 0},
 		{"lewin", http.StatusOK, 0},
 		{"allan", http.StatusNotFound, 0},
-		{"adidas", http.StatusOK, 0},
+		{"adidas", http.StatusBadRequest, 0},
 	}
 	firmino := as.getLoggedInUser("firmino")
 	salah := as.getLoggedInUser("salah")

@@ -124,8 +124,8 @@ func (as *ActionSuite) Test_OrdersShow() {
 	efaEve := as.getCustomer("EFA Eve")
 	as.Equal(efaEve.TenantID, richarlson.TenantID)
 
-	var orders = []*models.Order{as.createOrder("term1", models.OrderStatusOpen, firmino.TenantID, firmino.ID, efaLiv.ID),
-		as.createOrder("term2", models.OrderStatusAccepted, richarlson.TenantID, richarlson.ID, efaEve.ID)}
+	var orders = []*models.Order{as.createOrder("ord1", models.OrderStatusOpen, firmino.TenantID, firmino.ID, efaLiv.ID),
+		as.createOrder("ord2", models.OrderStatusAccepted, richarlson.TenantID, richarlson.ID, efaEve.ID)}
 	as.NotEqual(orders[0].TenantID, orders[1].TenantID)
 
 	for _, test := range tests {

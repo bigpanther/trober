@@ -21,7 +21,6 @@ type Carrier struct {
 	Eta       nulls.Time `json:"eta" db:"eta"`
 	TenantID  uuid.UUID  `json:"tenant_id" db:"tenant_id"`
 	Tenant    *Tenant    `belongs_to:"tenant" json:"-"`
-	//Containers Containers `has_many:"containers" json:"containers,omitempty"`
 }
 
 // Carriers is not required by pop and may be deleted

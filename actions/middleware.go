@@ -71,3 +71,12 @@ func requireAtLeastCustomerUser(next buffalo.Handler) buffalo.Handler {
 		return next(c)
 	}
 }
+func requireAtLeastDriverUser(next buffalo.Handler) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		var loggedInUser = loggedInUser(c)
+		if !loggedInUser.IsAtLeastBackOffice() && !loggedInUser.IsDriver() {
+			return c.Render(http.StatusNotFound, r.JSON(models.NewCustomError(http.StatusText(http.StatusNotFound), fmt.Sprint(http.StatusNotFound), errNotFound)))
+		}
+		return next(c)
+	}
+}

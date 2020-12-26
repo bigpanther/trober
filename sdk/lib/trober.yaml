@@ -136,11 +136,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /containers:
+  /shipments:
     get:
-      summary: List all Containers
+      summary: List all Shipments
       description: >-
-        List all Containers
+        List all Shipments
 
       parameters:
         - name: tenant_id
@@ -181,35 +181,35 @@ paths:
         - name: serial_number
           in: query
           required: false
-          description: The serialNumber of the container. Matches serialNumber that begin with the values
+          description: The serialNumber of the shipment. Matches serialNumber that begin with the values
           schema:
             type: string
             minLength: 2
         - name: type
           in: query
           required: false
-          description: The type of the container.
+          description: The type of the shipment.
           schema:
-            $ref: "#/components/schemas/ContainerType"
+            $ref: "#/components/schemas/ShipmentType"
         - name: status
           in: query
           required: false
-          description: The status of the container.
+          description: The status of the shipment.
           schema:
-            $ref: "#/components/schemas/ContainerStatus"
+            $ref: "#/components/schemas/ShipmentStatus"
         - name: size
           in: query
           required: false
-          description: The size of the container.
+          description: The size of the shipment.
           schema:
-            $ref: "#/components/schemas/ContainerSize"
+            $ref: "#/components/schemas/ShipmentSize"
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Containers"
+                $ref: "#/components/schemas/Shipments"
         default:
           description: error
           content:
@@ -217,54 +217,54 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
     post:
-      summary: Create a new Container
+      summary: Create a new Shipment
       description: >-
-        Create a new Container
+        Create a new Shipment
 
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Container"
+              $ref: "#/components/schemas/Shipment"
       responses:
         "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Container"
+                $ref: "#/components/schemas/Shipment"
         default:
           description: error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  "/containers/{id}":
+  "/shipments/{id}":
     put:
       parameters:
         - name: id
           in: path
           required: true
-          description: The id of the container
+          description: The id of the shipment
           schema:
             type: string
             format: uuid
-      summary: Update an existing container
+      summary: Update an existing shipment
       description: >-
-        Update an existing container
+        Update an existing shipment
 
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Container"
+              $ref: "#/components/schemas/Shipment"
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Container"
+                $ref: "#/components/schemas/Shipment"
         default:
           description: error
           content:
@@ -276,7 +276,7 @@ paths:
         - name: id
           in: path
           required: true
-          description: The id of the container
+          description: The id of the shipment
           schema:
             type: string
             format: uuid
@@ -287,9 +287,9 @@ paths:
           schema:
             type: string
             format: uuid
-      summary: Get container details
+      summary: Get shipment details
       description: >-
-        Get container details
+        Get shipment details
 
       responses:
         "200":
@@ -297,33 +297,33 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Container"
+                $ref: "#/components/schemas/Shipment"
         default:
           description: error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  "/containers/{id}/updateStatus/{status}":
+  "/shipments/{id}/updateStatus/{status}":
     patch:
       parameters:
         - name: id
           in: path
           required: true
-          description: The id of the container
+          description: The id of the shipment
           schema:
             type: string
             format: uuid
         - name: status
           in: path
           required: true
-          description: The status of the container
+          description: The status of the shipment
           schema:
             type: string
             format: uuid
-      summary: Update the status of an existing container
+      summary: Update the status of an existing shipment
       description: >-
-        Update the status of an existing container
+        Update the status of an existing shipment
 
       requestBody:
         content:
@@ -340,7 +340,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Container"
+                $ref: "#/components/schemas/Shipment"
         default:
           description: error
           content:
@@ -1322,15 +1322,15 @@ components:
           readOnly: true
         type:
           $ref: "#/components/schemas/CarrierType"
-        containers:
-          $ref: "#/components/schemas/Containers"
-      description: A carrier that ships the containers
-    Containers:
+        shipments:
+          $ref: "#/components/schemas/Shipments"
+      description: A carrier that ships the shipments
+    Shipments:
       type: array
       items:
-        $ref: "#/components/schemas/Container"
-      description: A list of Containers
-    Container:
+        $ref: "#/components/schemas/Shipment"
+      description: A list of Shipments
+    Shipment:
       type: object
       properties:
         id:
@@ -1380,11 +1380,11 @@ components:
           type: string
           format: date-time
         size:
-          $ref: "#/components/schemas/ContainerSize"
+          $ref: "#/components/schemas/ShipmentSize"
         type:
-          $ref: "#/components/schemas/ContainerType"
+          $ref: "#/components/schemas/ShipmentType"
         status:
-          $ref: "#/components/schemas/ContainerStatus"
+          $ref: "#/components/schemas/ShipmentStatus"
         driver_id:
           type: string
           format: uuid
@@ -1396,7 +1396,7 @@ components:
           $ref: "#/components/schemas/Terminal"
         carrier:
           $ref: "#/components/schemas/Carrier"
-      description: A container that is being shipped
+      description: A shipment that is being shipped
     Orders:
       type: array
       items:
@@ -1435,9 +1435,9 @@ components:
           $ref: "#/components/schemas/OrderStatus"
         customer:
           $ref: "#/components/schemas/Customer"
-        containers:
-          $ref: "#/components/schemas/Containers"
-      description: A container that is being shipped
+        shipments:
+          $ref: "#/components/schemas/Shipments"
+      description: A shipment that is being shipped
     TenantType:
       type: string
       enum:
@@ -1469,7 +1469,7 @@ components:
         - Driver
         - Customer
         - None
-    ContainerStatus:
+    ShipmentStatus:
       type: string
       enum:
         - Unassigned
@@ -1481,7 +1481,7 @@ components:
         - Loaded
         - Unloaded
         - Abandoned
-    ContainerSize:
+    ShipmentSize:
       type: string
       enum:
         - 40ST
@@ -1499,7 +1499,7 @@ components:
         - Delivered
         - Invoiced
         - PaymentReceived
-    ContainerType:
+    ShipmentType:
       type: string
       enum:
         - Incoming

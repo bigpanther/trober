@@ -21,7 +21,6 @@ type Order struct {
 	Status       string    `json:"status" db:"status"`
 	Tenant       *Tenant   `belongs_to:"tenant" json:"-"`
 	Customer     *Customer `belongs_to:"customer" json:"customer,omitempty"`
-	//Containers   Containers `has_many:"containers" json:"orders,omitempty"`
 }
 
 // Orders is not required by pop and may be deleted

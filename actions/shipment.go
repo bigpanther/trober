@@ -278,12 +278,9 @@ func checkOrderID(c buffalo.Context, tx *pop.Connection, loggedInUser *models.Us
 	if loggedInUser.IsCustomer() {
 		q = q.Where("customer_id = ?", loggedInUser.CustomerID.UUID)
 	}
-	if !loggedInUser.IsSuperAdmin() {
-		q = q.Where("tenant_id = ?", loggedInUser.TenantID)
-	}
 	// User must belong to a customer in the same tenant
 	err := q.Find(order, orderID)
-	if err != nil || order.ID != uuid.Nil {
+	if err != nil || order.ID == uuid.Nil {
 		return errors.New("invalid order association")
 	}
 	return nil

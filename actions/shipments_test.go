@@ -176,10 +176,10 @@ func (as *ActionSuite) Test_ShipmentsCreate() {
 	}{
 		{"mane", http.StatusCreated},
 		{"firmino", http.StatusCreated},
-		{"rodriguez", http.StatusBadRequest}, // customer id mismatch
+		{"rodriguez", http.StatusBadRequest},
 		{"allan", http.StatusNotFound},
 		{"salah", http.StatusCreated},
-		{"klopp", http.StatusBadRequest}, // customer id mismatch
+		{"klopp", http.StatusCreated},
 		{"adidas", http.StatusNotFound},
 		{"nike", http.StatusNotFound},
 	}

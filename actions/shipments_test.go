@@ -41,7 +41,11 @@ func (as *ActionSuite) Test_ShipmentsList() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			user := as.getLoggedInUser(test.username)
-			req := as.setupRequest(user, fmt.Sprintf("/shipments?order_id=%s", order.ID))
+			var orderIDQuery = ""
+			if user.IsCustomer() {
+				orderIDQuery = fmt.Sprintf("?order_id=%s", order.ID)
+			}
+			req := as.setupRequest(user, fmt.Sprintf("/shipments%s", orderIDQuery))
 			res := req.Get()
 			as.Equal(test.responseCode, res.Code)
 			if res.Code == http.StatusOK {
@@ -54,6 +58,61 @@ func (as *ActionSuite) Test_ShipmentsList() {
 			}
 		})
 	}
+}
+
+func (as *ActionSuite) Test_ShipmentsListFilter() {
+	as.LoadFixture("Tenant bootstrap")
+	firmino := as.getLoggedInUser("firmino")
+	efaLiv := as.getCustomer("EFA Liv")
+	as.Equal(efaLiv.TenantID, firmino.TenantID)
+	var order = as.createOrder("ord1", models.OrderStatusOpen, firmino.TenantID, firmino.ID, efaLiv.ID)
+
+	var prefixes = []string{"ਪੰਜਾਬੀ", "Test"}
+	for _, p := range prefixes {
+		for i := 0; i < 5; i++ {
+			shipmentStatus := models.ShipmentStatusAbandoned
+			if i%2 == 0 {
+				shipmentStatus = models.ShipmentStatusAccepted
+			}
+			s := models.Shipment{
+				SerialNumber: fmt.Sprintf("%s-%d", p, i), Type: models.ShipmentTypeIncoming.String(), Status: shipmentStatus.String(),
+				OrderID: nulls.NewUUID(order.ID), CreatedBy: firmino.ID, TenantID: firmino.TenantID,
+			}
+			_ = as.createShipment(s)
+		}
+	}
+	nike := as.getLoggedInUser("nike")
+	req := as.setupRequest(nike, fmt.Sprintf("/shipments?serial_number=ਪੰ&status=Accepted&order_id=%s", order.ID))
+	res := req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	var shipments = models.Shipments{}
+	res.Bind(&shipments)
+	as.Equal(2, len(shipments))
+	for _, v := range shipments {
+		as.Contains(v.SerialNumber, "ਪੰਜਾਬੀ")
+		as.Equal(models.ShipmentStatusAccepted.String(), v.Status)
+	}
+	klopp := as.getLoggedInUser("klopp")
+	as.NotEqual(klopp.TenantID, firmino.TenantID)
+
+	as.False(firmino.IsSuperAdmin())
+	req = as.setupRequest(firmino, fmt.Sprintf("/shipments?tenant_id=%s", klopp.TenantID))
+	res = req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	shipments = models.Shipments{}
+	res.Bind(&shipments)
+	as.Equal(0, len(shipments))
+
+	lewin := as.getLoggedInUser("lewin")
+	as.NotEqual(klopp.TenantID, lewin.TenantID)
+	as.NotEqual(lewin.TenantID, firmino.TenantID)
+	as.True(klopp.IsSuperAdmin())
+	req = as.setupRequest(klopp, fmt.Sprintf("/shipments?tenant_id=%s", lewin.TenantID))
+	res = req.Get()
+	as.Equal(http.StatusOK, res.Code)
+	shipments = models.Shipments{}
+	res.Bind(&shipments)
+	as.Equal(0, len(shipments))
 }
 
 func (as *ActionSuite) Test_ShipmentsShow() {

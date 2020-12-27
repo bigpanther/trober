@@ -42,6 +42,7 @@ type Shipments []Shipment
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 // This method is not required and may be deleted.
 func (c *Shipment) Validate(tx *pop.Connection) (*validate.Errors, error) {
+	c.truncateReservationTime()
 	return validate.Validate(
 		&validators.StringIsPresent{Field: c.SerialNumber, Name: "SerialNumber"},
 		&validators.FuncValidator{Fn: func() bool {
@@ -77,4 +78,11 @@ func (c *Shipment) IsAssigned() bool {
 // IsRejected checks if a shipment is assigned to a driver
 func (c *Shipment) IsRejected() bool {
 	return ShipmentStatus(c.Status) == ShipmentStatusRejected
+}
+
+// truncateReservationTime converts eta to with a minute precision
+func (c *Shipment) truncateReservationTime() {
+	if c.ReservationTime.Valid {
+		c.ReservationTime = nulls.NewTime(truncateToMinute(c.ReservationTime.Time))
+	}
 }

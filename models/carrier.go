@@ -41,6 +41,10 @@ func (c *Carrier) Validate(tx *pop.Connection) (*validate.Errors, error) {
 // truncateEta converts eta to with a minute precision
 func (c *Carrier) truncateEta() {
 	if c.Eta.Valid {
-		c.Eta = nulls.NewTime(c.Eta.Time.UTC().Truncate(time.Minute))
+		c.Eta = nulls.NewTime(truncateToMinute(c.Eta.Time))
 	}
+}
+
+func truncateToMinute(t time.Time) time.Time {
+	return t.UTC().Truncate(time.Minute)
 }

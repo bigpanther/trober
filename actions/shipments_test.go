@@ -169,7 +169,41 @@ func (as *ActionSuite) Test_ShipmentsShow() {
 }
 
 func (as *ActionSuite) Test_ShipmentsCreate() {
-	as.False(false)
+	as.LoadFixture("Tenant bootstrap")
+	var tests = []struct {
+		username     string
+		responseCode int
+	}{
+		{"mane", http.StatusCreated},
+		{"firmino", http.StatusCreated},
+		{"rodriguez", http.StatusBadRequest}, // customer id mismatch
+		{"allan", http.StatusNotFound},
+		{"salah", http.StatusCreated},
+		{"klopp", http.StatusBadRequest}, // customer id mismatch
+		{"adidas", http.StatusNotFound},
+		{"nike", http.StatusNotFound},
+	}
+	var firmino = as.getLoggedInUser("firmino")
+	efaLiv := as.getCustomer("EFA Liv")
+	order := as.createOrder("ord1", models.OrderStatusOpen, firmino.TenantID, firmino.ID, efaLiv.ID)
+	for _, test := range tests {
+		as.T().Run(test.username, func(t *testing.T) {
+			user := as.getLoggedInUser(test.username)
+			newShipment := models.Shipment{SerialNumber: user.Username, Type: models.ShipmentTypeIncoming.String(), Status: models.ShipmentStatusAbandoned.String(), TenantID: firmino.TenantID, OrderID: nulls.NewUUID(order.ID)}
+			req := as.setupRequest(user, "/shipments")
+			res := req.Post(newShipment)
+			as.Equal(test.responseCode, res.Code)
+			if res.Code == http.StatusCreated {
+				var shipment = models.Shipment{}
+				res.Bind(&shipment)
+				as.Equal(newShipment.SerialNumber, shipment.SerialNumber)
+				as.Equal(models.ShipmentStatusUnassigned.String(), shipment.Status)
+				as.Equal(models.ShipmentTypeIncoming.String(), shipment.Type)
+				as.Equal(user.TenantID, shipment.TenantID)
+				as.Equal(order.ID, shipment.OrderID.UUID)
+			}
+		})
+	}
 }
 
 func (as *ActionSuite) Test_ShipmentsUpdate() {

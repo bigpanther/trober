@@ -107,28 +107,37 @@ func shipmentsShow(c buffalo.Context) error {
 // shipmentsCreate adds a Shipment to the DB. This function is mapped to the
 // path POST /shipments
 func shipmentsCreate(c buffalo.Context) error {
-
 	shipment := &models.Shipment{}
-
 	// Bind shipment to request body
 	if err := c.Bind(shipment); err != nil {
 		return err
 	}
-
 	tx := c.Value("tx").(*pop.Connection)
 	var loggedInUser = loggedInUser(c)
+	shipment.Status = models.ShipmentStatusUnassigned.String()
 	shipment.TenantID = loggedInUser.TenantID
 	shipment.CreatedBy = loggedInUser.ID
-
+	if err := checkOrderID(c, tx, loggedInUser, shipment.OrderID.UUID.String()); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
+	if loggedInUser.IsDriver() {
+		shipment.DriverID = nulls.NewUUID(loggedInUser.ID)
+	} else if err := checkDriverID(c, tx, loggedInUser, shipment.DriverID); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
+	if err := checkTerminalID(c, tx, loggedInUser, shipment.TerminalID); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
+	if err := checkCarrierID(c, tx, loggedInUser, shipment.CarrierID); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
 	verrs, err := tx.ValidateAndCreate(shipment)
 	if err != nil {
 		return err
 	}
-
 	if verrs.HasAny() {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
-
 	return c.Render(http.StatusCreated, r.JSON(shipment))
 
 }
@@ -249,15 +258,54 @@ func shipmentsDestroy(c buffalo.Context) error {
 }
 
 func checkOrderID(c buffalo.Context, tx *pop.Connection, loggedInUser *models.User, orderID string) error {
-	order := &models.Order{}
 	q := tx.Scope(restrictedScope(c))
 	if loggedInUser.IsCustomer() {
 		q = q.Where("customer_id = ?", loggedInUser.CustomerID.UUID)
+	} else if orderID == uuid.Nil.String() {
+		return nil
 	}
+	order := &models.Order{}
 	// User must belong to a customer in the same tenant
 	err := q.Find(order, orderID)
 	if err != nil || order.ID == uuid.Nil {
 		return errors.New("invalid order association")
+	}
+	return nil
+}
+
+func checkDriverID(c buffalo.Context, tx *pop.Connection, loggedInUser *models.User, ID nulls.UUID) error {
+	if !ID.Valid {
+		return nil
+	}
+	driver := &models.User{}
+	// User must belong to the same tenant
+	err := tx.Scope(restrictedScope(c)).Find(driver, ID)
+	if err != nil || driver.ID == uuid.Nil {
+		return errors.New("invalid driver association")
+	}
+	return nil
+}
+func checkTerminalID(c buffalo.Context, tx *pop.Connection, loggedInUser *models.User, ID nulls.UUID) error {
+	if !ID.Valid {
+		return nil
+	}
+	terminal := &models.Terminal{}
+	// Terminal must belong to the same tenant
+	err := tx.Scope(restrictedScope(c)).Find(terminal, ID)
+	if err != nil || terminal.ID == uuid.Nil {
+		return errors.New("invalid terminal association")
+	}
+	return nil
+}
+func checkCarrierID(c buffalo.Context, tx *pop.Connection, loggedInUser *models.User, ID nulls.UUID) error {
+	if !ID.Valid {
+		return nil
+	}
+	carrier := &models.Carrier{}
+	// Carrier must belong to the same tenant
+	err := tx.Scope(restrictedScope(c)).Find(carrier, ID)
+	if err != nil || carrier.ID == uuid.Nil {
+		return errors.New("invalid carrier association")
 	}
 	return nil
 }

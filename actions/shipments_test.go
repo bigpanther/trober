@@ -87,7 +87,7 @@ func (as *ActionSuite) Test_ShipmentsListFilter() {
 	as.Equal(http.StatusOK, res.Code)
 	var shipments = models.Shipments{}
 	res.Bind(&shipments)
-	as.Equal(2, len(shipments))
+	as.Equal(3, len(shipments))
 	for _, v := range shipments {
 		as.Contains(v.SerialNumber, "ਪੰਜਾਬੀ")
 		as.Equal(models.ShipmentStatusAccepted.String(), v.Status)

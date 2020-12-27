@@ -38,6 +38,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: cedx/setup-dart@v2
+        with:
+          release-channel: beta
       - uses: actions/setup-java@v1
         with:
           java-version: "13"

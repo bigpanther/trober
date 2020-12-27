@@ -5,9 +5,9 @@ description: >-
 
 
 environment:
-  sdk: ">=2.10.0 <3.0.0"
+  sdk: ">=2.12.0-0 <3.0.0"
 dependencies:
-  openapi_generator: ^1.1.0
-  build_runner:
-  openapi_generator_annotations: ^1.0.8
+  openapi_generator: ^2.0.0
+  build_runner: ^1.10.11
+  openapi_generator_annotations: ^2.0.0
   cider: ^0.0.5

@@ -13,10 +13,7 @@ func selfGet(c buffalo.Context) error {
 }
 
 func selfGetTenant(c buffalo.Context) error {
-	tx, ok := c.Value("tx").(*pop.Connection)
-	if !ok {
-		return models.ErrNotFound
-	}
+	tx := c.Value("tx").(*pop.Connection)
 	tenant := &models.Tenant{}
 
 	if err := tx.Find(tenant, loggedInUser(c).TenantID); err != nil {

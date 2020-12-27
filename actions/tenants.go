@@ -18,7 +18,7 @@ import (
 // DB Table: Plural (tenants)
 // Resource: Plural (Tenants)
 // Path: Plural (/tenants)
-// View Template Folder: Plural (/templates/tenants/)
+
 const (
 	orderByCreatedAtDesc = "created_at DESC"
 )
@@ -29,10 +29,7 @@ var errNotFound = errors.New(http.StatusText(http.StatusNotFound))
 // GET /tenants
 func tenantsList(c buffalo.Context) error {
 
-	tx, ok := c.Value("tx").(*pop.Connection)
-	if !ok {
-		return models.ErrNotFound
-	}
+	tx := c.Value("tx").(*pop.Connection)
 	tenantName := strings.Trim(c.Param("name"), " '")
 	tenantType := c.Param("type")
 	tenants := &models.Tenants{}
@@ -61,10 +58,7 @@ func tenantsList(c buffalo.Context) error {
 func tenantsShow(c buffalo.Context) error {
 	tenantID := c.Param("tenant_id")
 
-	tx, ok := c.Value("tx").(*pop.Connection)
-	if !ok {
-		return models.ErrNotFound
-	}
+	tx := c.Value("tx").(*pop.Connection)
 
 	tenant := &models.Tenant{}
 
@@ -91,10 +85,7 @@ func tenantsCreate(c buffalo.Context) error {
 	}
 	tenant.CreatedBy = nulls.NewUUID(loggedInUser(c).ID)
 
-	tx, ok := c.Value("tx").(*pop.Connection)
-	if !ok {
-		return models.ErrNotFound
-	}
+	tx := c.Value("tx").(*pop.Connection)
 
 	verrs, err := tx.ValidateAndCreate(tenant)
 	if err != nil {
@@ -112,10 +103,7 @@ func tenantsCreate(c buffalo.Context) error {
 // the path PUT /tenants/{tenant_id}
 func tenantsUpdate(c buffalo.Context) error {
 
-	tx, ok := c.Value("tx").(*pop.Connection)
-	if !ok {
-		return models.ErrNotFound
-	}
+	tx := c.Value("tx").(*pop.Connection)
 
 	tenant := &models.Tenant{}
 	if err := tx.Scope(restrictedScope(c)).Find(tenant, c.Param("tenant_id")); err != nil {
@@ -151,10 +139,7 @@ func tenantsUpdate(c buffalo.Context) error {
 // to the path DELETE /tenants/{tenant_id}
 func tenantsDestroy(c buffalo.Context) error {
 
-	tx, ok := c.Value("tx").(*pop.Connection)
-	if !ok {
-		return models.ErrNotFound
-	}
+	tx := c.Value("tx").(*pop.Connection)
 
 	tenant := &models.Tenant{}
 

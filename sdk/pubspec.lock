@@ -287,21 +287,21 @@ packages:
       name: openapi_generator
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "3.0.0-nullsafety.1"
   openapi_generator_annotations:
     dependency: "direct main"
     description:
       name: openapi_generator_annotations
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "3.0.0-nullsafety.1"
   openapi_generator_cli:
     dependency: transitive
     description:
       name: openapi_generator_cli
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "3.0.0-nullsafety.1"
   package_config:
     dependency: transitive
     description:
@@ -315,7 +315,7 @@ packages:
       name: path
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.0"
+    version: "1.8.0-nullsafety.3"
   pedantic:
     dependency: transitive
     description:
@@ -464,4 +464,4 @@ packages:
     source: hosted
     version: "1.0.3"
 sdks:
-  dart: ">=2.12.0-0 <3.0.0"
+  dart: ">=2.12.0-133.2.beta <3.0.0"

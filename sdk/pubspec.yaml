@@ -7,7 +7,7 @@ description: >-
 environment:
   sdk: ">=2.12.0-0 <3.0.0"
 dependencies:
-  openapi_generator: ^2.0.0
+  openapi_generator: ^3.0.0-nullsafety.1
   build_runner: ^1.10.11
-  openapi_generator_annotations: ^2.0.0
+  openapi_generator_annotations: ^3.0.0-nullsafety.1
   cider: ^0.0.5

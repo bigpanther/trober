@@ -28,7 +28,6 @@ var errNotFound = errors.New(http.StatusText(http.StatusNotFound))
 // tenantsList gets all Tenants. This function is mapped to the path
 // GET /tenants
 func tenantsList(c buffalo.Context) error {
-
 	tx := c.Value("tx").(*pop.Connection)
 	tenantName := strings.Trim(c.Param("name"), " '")
 	tenantType := c.Param("type")

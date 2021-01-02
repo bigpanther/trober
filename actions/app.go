@@ -1,18 +1,12 @@
 package actions
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
-	"encoding/base64"
-
-	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
-	"firebase.google.com/go/v4/messaging"
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
@@ -26,7 +20,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
 	"github.com/unrolled/secure"
-	"google.golang.org/api/option"
 
 	"github.com/gobuffalo/buffalo-pop/v2/pop/popmw"
 	contenttype "github.com/gobuffalo/mw-contenttype"
@@ -185,43 +178,6 @@ func restrictedScope(c buffalo.Context) pop.ScopeFunc {
 		}
 		return q
 	}
-}
-
-type firebaseSdkClient struct {
-	authClient      *auth.Client
-	messagingClient *messaging.Client
-}
-
-var client *firebaseSdkClient
-
-func firebaseClient() (*firebaseSdkClient, error) {
-	if client != nil {
-		return client, nil
-	}
-	var credsJSONEncoded = os.Getenv("FIREBASE_SERVICE_ACCOUNT_JSON_ENCODED")
-	credJSON, err := base64.StdEncoding.DecodeString(credsJSONEncoded)
-	if err != nil {
-		return nil, err
-	}
-	opt := option.WithCredentialsJSON(credJSON)
-	ctx := context.Background()
-	client = &firebaseSdkClient{}
-	app, err := firebase.NewApp(ctx, nil, opt)
-	if err != nil {
-		client = nil
-		return nil, err
-	}
-	client.authClient, err = app.Auth(ctx)
-	if err != nil {
-		client = nil
-		return nil, err
-	}
-	client.messagingClient, err = app.Messaging(ctx)
-	if err != nil {
-		client = nil
-		return nil, err
-	}
-	return client, err
 }
 
 const currentUserKey = "current_user"

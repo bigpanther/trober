@@ -1,6 +1,6 @@
 module github.com/bigpanther/trober
 
-go 1.15
+go 1.16
 
 require (
 	firebase.google.com/go/v4 v4.1.0
@@ -22,7 +22,7 @@ require (
 	github.com/gobuffalo/suite/v3 v3.0.0
 	github.com/gobuffalo/validate/v3 v3.3.0
 	github.com/gobuffalo/x v0.1.0
-	github.com/gofrs/uuid v3.3.0+incompatible
+	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
@@ -36,16 +36,15 @@ require (
 	github.com/rs/cors v1.7.0
 	github.com/sirupsen/logrus v1.7.0 // indirect
 	github.com/spf13/cobra v1.1.1 // indirect
-	github.com/unrolled/secure v1.0.7
+	github.com/unrolled/secure v1.0.8
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
 	golang.org/x/mod v0.4.0 // indirect
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a // indirect
-	golang.org/x/sys v0.0.0-20201223074533-0d417f636930 // indirect
+	golang.org/x/sys v0.0.0-20201231184435-2d18734c6014 // indirect
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
-	golang.org/x/text v0.3.4 // indirect
-	golang.org/x/tools v0.0.0-20201224043029-2b0845dc783e // indirect
-	google.golang.org/api v0.35.0
+	golang.org/x/tools v0.0.0-20210102185154-773b96fafca2 // indirect
+	google.golang.org/api v0.36.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

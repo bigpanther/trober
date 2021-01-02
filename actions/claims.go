@@ -61,7 +61,7 @@ func SetClaims(c context.Context, u *models.User) error {
 		"bpCustomerId": u.CustomerID.UUID.String(),
 	}
 	if !u.CustomerID.Valid {
-		claims["bpCustomerId"] = "nil"
+		claims["bpCustomerId"] = nil
 	}
 	err = client.authClient.SetCustomUserClaims(c, u.Username, claims)
 	if err != nil {

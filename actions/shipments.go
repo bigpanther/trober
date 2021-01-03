@@ -169,24 +169,22 @@ func shipmentsUpdate(c buffalo.Context) error {
 	if verrs.HasAny() {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
-	if (shipment.Status == "Assigned" && shipment.DriverID != nulls.UUID{}) {
+	if shipment.Status == "Assigned" && shipment.DriverID.Valid {
 		u := &models.User{}
 		_ = tx.Where("id = ?", shipment.DriverID.UUID).First(u)
-		if u.DeviceID.String != "" {
-			app.Worker.Perform(worker.Job{
-				Queue:   "default",
-				Handler: "sendNotifications",
-				Args: worker.Args{
-					"topics":        []string{firebase.GetTopic(u)},
-					"message.title": fmt.Sprintf("You have been assigned a pickup - %s", shipment.SerialNumber),
-					"message.body":  shipment.SerialNumber,
-					"message.data": map[string]string{
-						"shipment.id":           shipment.ID.String(),
-						"shipment.serialNumber": shipment.SerialNumber,
-					},
+		app.Worker.Perform(worker.Job{
+			Queue:   "default",
+			Handler: "sendNotifications",
+			Args: worker.Args{
+				"topics":        []string{firebase.GetTopic(u)},
+				"message.title": fmt.Sprintf("You have been assigned a pickup - %s", shipment.SerialNumber),
+				"message.body":  shipment.SerialNumber,
+				"message.data": map[string]string{
+					"shipment.id":           shipment.ID.String(),
+					"shipment.serialNumber": shipment.SerialNumber,
 				},
-			})
-		}
+			},
+		})
 	}
 
 	return c.Render(http.StatusOK, r.JSON(shipment))

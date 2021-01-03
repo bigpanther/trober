@@ -32,7 +32,7 @@ type appInfo struct {
 
 func appInfoHandler(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.JSON(appInfo{
-		CurrentVersion: "0.0.7",
-		MinVersion:     "0.0.6",
+		CurrentVersion: "0.0.8",
+		MinVersion:     "0.0.8",
 	}))
 }

@@ -208,7 +208,7 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 	}
 	return u, nil
 }
-func createOrUpdateUserOnFirstLogin(c buffalo.Context, remoteUser *auth.UserRecord, notificationCallback func(adminUser *models.User, newUser *models.User, msg string)) (*models.User, error) {
+func createOrUpdateUserOnFirstLogin(c buffalo.Context, remoteUser *auth.UserRecord, notificationCallback func(topics []string, newUser *models.User, msg string)) (*models.User, error) {
 	if !remoteUser.EmailVerified {
 		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("email not verified", http.StatusText(http.StatusForbidden), nil)))
 	}
@@ -245,37 +245,29 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, remoteUser *auth.UserReco
 			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
 	}
-	adminUser := &models.User{}
-	_ = tx.Where("tenant_id = ?", u.TenantID).Where("role IN (?)", models.UserRoleSuperAdmin, models.UserRoleAdmin).First(adminUser)
 	if valErrors.HasAny() {
 		log.Printf("validation error on user login: %s\n", valErrors.String())
-		if adminUser.ID != uuid.Nil {
-			notificationCallback(adminUser, u, "New user validation failed")
-		}
-		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
-	}
-	if adminUser.ID != uuid.Nil {
-		notificationCallback(adminUser, u, "New user created")
+		notificationCallback([]string{firebase.GetSuperAdminTopic(), firebase.GetAdminTopic(u)}, u, "New user validation failed")
+	} else {
+		notificationCallback([]string{firebase.GetSuperAdminTopic(), firebase.GetAdminTopic(u)}, u, "New user created")
 	}
 	return u, nil
 }
 
-func sendMessage(adminUser *models.User, newUser *models.User, msg string) {
-	if adminUser.DeviceID.String != "" {
-		app.Worker.Perform(worker.Job{
-			Queue:   "default",
-			Handler: "sendNotifications",
-			Args: worker.Args{
-				"to":            []string{adminUser.DeviceID.String},
-				"message.title": msg,
-				"message.body":  fmt.Sprintf("%s - %s", newUser.Name, newUser.Email),
-				"message.data": map[string]string{
-					"email": newUser.Email,
-					"name":  newUser.Name,
-				},
+func sendMessage(topics []string, newUser *models.User, msg string) {
+	app.Worker.Perform(worker.Job{
+		Queue:   "default",
+		Handler: "sendNotifications",
+		Args: worker.Args{
+			"to":            topics,
+			"message.title": msg,
+			"message.body":  fmt.Sprintf("Name: %s", newUser.Name),
+			"message.data": map[string]string{
+				"name": newUser.Name,
+				"id":   newUser.ID.String(),
 			},
-		})
-	}
+		},
+	})
 }
 
 func loggedInUser(c buffalo.Context) *models.User {

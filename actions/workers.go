@@ -1,9 +1,11 @@
 package actions
 
 import (
+	"context"
 	"log"
 
 	"firebase.google.com/go/v4/messaging"
+	"github.com/bigpanther/trober/firebase"
 	"github.com/gobuffalo/buffalo/worker"
 )
 
@@ -20,16 +22,12 @@ func sendNotifications(args worker.Args) error {
 				Title: msgTitle,
 				Body:  msgBody,
 			},
-			Token: to,
+			Topic: to,
 		}
 		messages = append(messages, message)
 	}
-
-	_, err := client.messagingClient.SendAll(app.Context, messages)
-	if err != nil {
-		log.Println("error sending message", err)
-	}
-	return nil
+	// TODO: Add a timeout here
+	return firebase.SendAll(context.Background(), messages)
 }
 func testWorker(args worker.Args) error {
 	log.Println(args)

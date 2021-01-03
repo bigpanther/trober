@@ -3,6 +3,7 @@ package firebase
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -20,6 +21,7 @@ type firebaseSdkClient struct {
 }
 
 var client *firebaseSdkClient
+var errMissingToken = errors.New("missing token")
 
 func firebaseClient() (*firebaseSdkClient, error) {
 	if client != nil {
@@ -106,6 +108,9 @@ func SendAll(c context.Context, messages []*messaging.Message) error {
 
 // SubscribeToTopics create subscription topics for a user
 func SubscribeToTopics(c context.Context, user *models.User, token string) error {
+	if token == "" {
+		return errMissingToken
+	}
 	client, err := firebaseClient()
 	if err != nil {
 		return err
@@ -126,6 +131,9 @@ func SubscribeToTopics(c context.Context, user *models.User, token string) error
 
 // UnSubscribeToTopics removes subscription topics for a user
 func UnSubscribeToTopics(c context.Context, user *models.User, token string) error {
+	if token == "" {
+		return errMissingToken
+	}
 	client, err := firebaseClient()
 	if err != nil {
 		return err

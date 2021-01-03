@@ -139,10 +139,10 @@ func UnSubscribeToTopics(c context.Context, user *models.User, token string) err
 		return err
 	}
 	topics := []string{GetSuperAdminTopic(), GetAdminTopic(user),
-		GetBackOfficeTopic(user), fmt.Sprintf("%s/driver/%s", user.TenantID, user.ID),
+		GetBackOfficeTopic(user), fmt.Sprintf("%s_driver_%s", user.TenantID, user.ID),
 	}
 	if user.IsCustomer() {
-		topics = append(topics, fmt.Sprintf("%s/customer/%s", user.TenantID, user.CustomerID.UUID.String()))
+		topics = append(topics, fmt.Sprintf("%s_customer_%s", user.TenantID, user.CustomerID.UUID.String()))
 	}
 	for _, t := range topics {
 		r, err := client.messagingClient.UnsubscribeFromTopic(c, []string{token}, t)
@@ -168,25 +168,25 @@ func GetTopic(user *models.User) string {
 		return GetBackOfficeTopic(user)
 	}
 	if user.IsCustomer() {
-		return fmt.Sprintf("%s/customer/%s", user.TenantID, user.CustomerID.UUID.String())
+		return fmt.Sprintf("%s_customer_%s", user.TenantID, user.CustomerID.UUID.String())
 	}
 	if user.IsDriver() {
-		return fmt.Sprintf("%s/driver/%s", user.TenantID, user.ID)
+		return fmt.Sprintf("%s_driver_%s", user.TenantID, user.ID)
 	}
-	return fmt.Sprintf("%s/none/%s", user.TenantID, user.ID)
+	return fmt.Sprintf("%s_none_%s", user.TenantID, user.ID)
 }
 
 // GetSuperAdminTopic returns the topic for superuser
 func GetSuperAdminTopic() string {
-	return fmt.Sprint("/superadmin")
+	return fmt.Sprint("superadmin")
 }
 
 // GetAdminTopic returns the topic for the admin user
 func GetAdminTopic(user *models.User) string {
-	return fmt.Sprintf("%s/admin", user.TenantID)
+	return fmt.Sprintf("%s_admin", user.TenantID)
 }
 
 // GetBackOfficeTopic returns the topic for the back office user
 func GetBackOfficeTopic(user *models.User) string {
-	return fmt.Sprintf("%s/backoffice", user.TenantID)
+	return fmt.Sprintf("%s_backoffice", user.TenantID)
 }

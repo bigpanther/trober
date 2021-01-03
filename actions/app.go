@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"firebase.google.com/go/v4/auth"
+	"github.com/bigpanther/trober/firebase"
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
@@ -187,11 +188,7 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 	if userID == "" {
 		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("missing credentials", http.StatusText(http.StatusForbidden), nil)))
 	}
-	client, err := firebaseClient()
-	if err != nil {
-		return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError("error getting downstream client", http.StatusText(http.StatusInternalServerError), err)))
-	}
-	token, err := client.authClient.VerifyIDToken(c.Request().Context(), userID)
+	token, err := firebase.VerifyIDToken(c.Request().Context(), userID)
 	if err != nil {
 		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("credential validation failed", http.StatusText(http.StatusForbidden), err)))
 	}
@@ -203,7 +200,7 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 		return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), err)))
 	}
 	if u.ID == uuid.Nil {
-		remoteUser, err := client.authClient.GetUser(c.Request().Context(), username)
+		remoteUser, err := firebase.GetUser(c.Request().Context(), username)
 		if err != nil {
 			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), errors.Wrap(err, "error fetching user details"))))
 		}

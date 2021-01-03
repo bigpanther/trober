@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"firebase.google.com/go/v4/auth"
+	"github.com/bigpanther/trober/firebase"
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/httptest"
@@ -21,17 +22,13 @@ func TestTokenVerify(t *testing.T) {
 	// cat filename | base64
 	var encodedJSON = ""
 	os.Setenv("FIREBASE_SERVICE_ACCOUNT_JSON_ENCODED", encodedJSON)
-	client, err := firebaseClient()
-	if err != nil {
-		t.Fatalf("error getting firebase client: %v\n", err)
-	}
 	ctx := context.Background()
 	var tokenToVerify = "..---"
-	token, err := client.authClient.VerifyIDToken(ctx, tokenToVerify)
+	token, err := firebase.VerifyIDToken(ctx, tokenToVerify)
 	if err != nil {
 		t.Fatalf("error validating token: %v\n", err)
 	}
-	user, err := client.authClient.GetUser(ctx, token.Subject)
+	user, err := firebase.GetUser(ctx, token.Subject)
 	if err != nil {
 		t.Fatalf("error getting user: %v\n", err)
 	}

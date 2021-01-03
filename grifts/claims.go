@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/bigpanther/trober/actions"
+	"github.com/bigpanther/trober/firebase"
 	"github.com/bigpanther/trober/models"
 	"github.com/markbates/grift/grift"
 )
@@ -18,7 +18,7 @@ var _ = grift.Namespace("claims", func() {
 			return err
 		}
 		for _, u := range users {
-			if err := actions.SetClaims(c, &u); err != nil {
+			if err := firebase.SetClaims(c, &u); err != nil {
 				return err
 			}
 		}
@@ -39,11 +39,11 @@ var _ = grift.Namespace("claims", func() {
 			return err
 		}
 
-		claims, err := actions.GetClaims(c, &user)
+		u, err := firebase.GetUser(c, user.Username)
 		if err != nil {
 			return err
 		}
-		log.Println(claims)
+		log.Println(u.CustomClaims)
 		return nil
 	})
 })

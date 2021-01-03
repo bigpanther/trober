@@ -88,7 +88,8 @@ func App() *buffalo.App {
 		var selfGroup = app.Group("/self")
 		selfGroup.GET("/", selfGet)
 		selfGroup.GET("/tenant", selfGetTenant)
-
+		selfGroup.POST("/device-register", selfPostDeviceRegister)
+		selfGroup.DELETE("/device-remove", selfDeleteDeviceRemove)
 		var tenantGroup = app.Group("/tenants")
 		tenantGroup.GET("/", requireSuperAdminUser(tenantsList))
 		tenantGroup.GET("/{tenant_id}", requireSuperAdminUser(tenantsShow))

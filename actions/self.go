@@ -23,7 +23,7 @@ func selfGetTenant(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.JSON(tenant))
 }
 
-func selfDeviceRegister(c buffalo.Context) error {
+func selfPostDeviceRegister(c buffalo.Context) error {
 	deviceB := deviceBody{}
 	if err := c.Bind(&deviceB); err != nil {
 		return err
@@ -35,7 +35,7 @@ func selfDeviceRegister(c buffalo.Context) error {
 	return nil
 }
 
-func selfDeviceRemove(c buffalo.Context) error {
+func selfDeleteDeviceRemove(c buffalo.Context) error {
 	deviceB := deviceBody{}
 	if err := c.Bind(&deviceB); err != nil {
 		return err

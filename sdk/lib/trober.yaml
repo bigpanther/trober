@@ -1108,7 +1108,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   /self/device-remove:
-    post:
+    delete:
       summary: Remove the device for the user
       description: >-
         Remove the device for the user

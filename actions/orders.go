@@ -172,8 +172,8 @@ func ordersDestroy(c buffalo.Context) error {
 	if err := tx.Destroy(order); err != nil {
 		return err
 	}
-
-	return c.Render(http.StatusOK, r.JSON(order))
+	c.Response().WriteHeader(http.StatusNoContent)
+	return nil
 
 }
 func checkCustomerID(c buffalo.Context, tx *pop.Connection, loggedInUser *models.User, order *models.Order) error {

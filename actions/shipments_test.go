@@ -216,9 +216,9 @@ func (as *ActionSuite) Test_ShipmentsDestroy() {
 		username     string
 		responseCode int
 	}{
-		{"klopp", http.StatusOK},
-		{"firmino", http.StatusOK},
-		{"mane", http.StatusOK},
+		{"klopp", http.StatusNoContent},
+		{"firmino", http.StatusNoContent},
+		{"mane", http.StatusNoContent},
 		{"salah", http.StatusNotFound},
 		{"nike", http.StatusNotFound},
 		{"coutinho", http.StatusNotFound},

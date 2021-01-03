@@ -243,9 +243,9 @@ func (as *ActionSuite) Test_OrdersDestroy() {
 		username     string
 		responseCode int
 	}{
-		{"klopp", http.StatusOK},
-		{"firmino", http.StatusOK},
-		{"mane", http.StatusOK},
+		{"klopp", http.StatusNoContent},
+		{"firmino", http.StatusNoContent},
+		{"mane", http.StatusNoContent},
 		{"salah", http.StatusNotFound},
 		{"nike", http.StatusNotFound},
 		{"coutinho", http.StatusNotFound},
@@ -271,12 +271,9 @@ func (as *ActionSuite) Test_OrdersDestroy() {
 			req := as.setupRequest(user, fmt.Sprintf("/orders/%s", neworder.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if res.Code == http.StatusOK {
-				var order = models.Order{}
-				res.Bind(&order)
-				as.Equal(name, order.SerialNumber)
+			if res.Code == http.StatusNoContent {
 				// Check if actually deleted
-				order = models.Order{}
+				order := models.Order{}
 				err = as.DB.Where("serial_number=?", name).First(&order)
 				as.Equal(err, sql.ErrNoRows)
 			} else {

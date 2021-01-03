@@ -252,8 +252,8 @@ func shipmentsDestroy(c buffalo.Context) error {
 	if err := tx.Destroy(shipment); err != nil {
 		return err
 	}
-
-	return c.Render(http.StatusOK, r.JSON(shipment))
+	c.Response().WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func checkOrderID(c buffalo.Context, tx *pop.Connection, loggedInUser *models.User, orderID string) error {

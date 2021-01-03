@@ -164,8 +164,8 @@ func usersDestroy(c buffalo.Context) error {
 	if err := tx.Destroy(user); err != nil {
 		return err
 	}
-
-	return c.Render(http.StatusOK, r.JSON(user))
+	c.Response().WriteHeader(http.StatusNoContent)
+	return nil
 
 }
 

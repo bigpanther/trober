@@ -241,12 +241,9 @@ func (as *ActionSuite) Test_ShipmentsDestroy() {
 			req := as.setupRequest(user, fmt.Sprintf("/shipments/%s", newShipment.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if res.Code == http.StatusOK {
-				var shipment = models.Shipment{}
-				res.Bind(&shipment)
-				as.Equal(name, shipment.SerialNumber)
+			if res.Code == http.StatusNoContent {
 				// Check if actually deleted
-				shipment = models.Shipment{}
+				shipment := models.Shipment{}
 				err := as.DB.Where("serial_number = ?", name).First(&shipment)
 				as.Equal(err, sql.ErrNoRows)
 			} else {

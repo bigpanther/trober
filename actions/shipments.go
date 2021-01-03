@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bigpanther/trober/firebase"
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/worker"
@@ -176,7 +177,7 @@ func shipmentsUpdate(c buffalo.Context) error {
 				Queue:   "default",
 				Handler: "sendNotifications",
 				Args: worker.Args{
-					"to":            []string{u.DeviceID.String},
+					"topics":        []string{firebase.GetTopic(u)},
 					"message.title": fmt.Sprintf("You have been assigned a pickup - %s", shipment.SerialNumber),
 					"message.body":  shipment.SerialNumber,
 					"message.data": map[string]string{

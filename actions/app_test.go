@@ -62,7 +62,7 @@ func (as *ActionSuite) Test_CreateUserOnFirstLogin() {
 	)
 	message := make(chan string, 2)
 	defer close(message)
-	callback := func(adminUser *models.User, newUser *models.User, msg string) {
+	callback := func(topics []string, newUser *models.User, msg string) {
 		message <- msg
 	}
 	app := as.App
@@ -99,7 +99,7 @@ func (as *ActionSuite) Test_UpdateUserOnFirstLogin() {
 	var firmino = as.getLoggedInUser("firmino")
 	as.createUser("placeholder", models.UserRoleBackOffice, email, firmino.TenantID, nulls.UUID{})
 	defer close(message)
-	callback := func(adminUser *models.User, newUser *models.User, msg string) {
+	callback := func(topics []string, newUser *models.User, msg string) {
 		message <- msg
 	}
 	app := as.App
@@ -127,7 +127,7 @@ func (as *ActionSuite) Test_UpdateUserOnFirstLogin() {
 	}, time.Second*3, time.Second)
 }
 
-func testCreateOrUpdateUserOnFirstLoginHandler(remoteUser *auth.UserRecord, notificationCallback func(adminUser *models.User, newUser *models.User, msg string)) buffalo.Handler {
+func testCreateOrUpdateUserOnFirstLoginHandler(remoteUser *auth.UserRecord, notificationCallback func(topics []string, newUser *models.User, msg string)) buffalo.Handler {
 	return func(c buffalo.Context) error {
 		u, err := createOrUpdateUserOnFirstLogin(c, remoteUser, notificationCallback)
 		if err != nil {

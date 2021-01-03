@@ -90,28 +90,27 @@ func GetUser(c context.Context, token string) (*auth.UserRecord, error) {
 	return client.authClient.GetUser(c, token)
 }
 
+// SendAll sends all messages to FCM topics
+func SendAll(c context.Context, messages []*messaging.Message) error {
+	client, err := firebaseClient()
+	if err != nil {
+		return err
+	}
+	r, err := client.messagingClient.SendAll(c, messages)
+	if err != nil {
+		log.Println("error sending messages", err, r)
+		return err
+	}
+	return nil
+}
+
 // SubscribeToTopics create subscription topics for a user
 func SubscribeToTopics(c context.Context, user *models.User, token string) error {
 	client, err := firebaseClient()
 	if err != nil {
 		return err
 	}
-	var t string
-	if user.IsSuperAdmin() {
-		t = fmt.Sprintf("%s/superadmin", user.TenantID)
-	}
-	if user.IsAdmin() {
-		t = fmt.Sprintf("%s/admin", user.TenantID)
-	}
-	if user.IsBackOffice() {
-		t = fmt.Sprintf("%s/backoffice", user.TenantID)
-	}
-	if user.IsCustomer() {
-		t = fmt.Sprintf("%s/customer/%s", user.TenantID, user.CustomerID.UUID.String())
-	}
-	if user.IsDriver() {
-		t = fmt.Sprintf("%s/driver", user.TenantID)
-	}
+	var t = GetTopic(user)
 	var topics = []string{t}
 	for _, t := range topics {
 
@@ -131,8 +130,8 @@ func UnSubscribeToTopics(c context.Context, user *models.User, token string) err
 	if err != nil {
 		return err
 	}
-	topics := []string{fmt.Sprintf("%s/superadmin", user.TenantID), fmt.Sprintf("%s/admin", user.TenantID),
-		fmt.Sprintf("%s/backoffice", user.TenantID), fmt.Sprintf("%s/driver", user.TenantID),
+	topics := []string{GetSuperAdminTopic(), GetAdminTopic(user),
+		GetBackOfficeTopic(user), fmt.Sprintf("%s/driver/%s", user.TenantID, user.ID),
 	}
 	if user.IsCustomer() {
 		topics = append(topics, fmt.Sprintf("%s/customer/%s", user.TenantID, user.CustomerID.UUID.String()))
@@ -141,9 +140,45 @@ func UnSubscribeToTopics(c context.Context, user *models.User, token string) err
 		r, err := client.messagingClient.UnsubscribeFromTopic(c, []string{token}, t)
 		if err != nil {
 			log.Println(user.ID, " role=", user.Role, " unsubscription failed to topic", t, r)
-			return err
+			// Don't fail here
+			continue
 		}
 		log.Println(user.ID, " role=", user.Role, " unsubscribed to topic", t, r)
 	}
 	return nil
+}
+
+// GetTopic returns the topic name for the user
+func GetTopic(user *models.User) string {
+	if user.IsSuperAdmin() {
+		return GetSuperAdminTopic()
+	}
+	if user.IsAdmin() {
+		return GetAdminTopic(user)
+	}
+	if user.IsBackOffice() {
+		return GetBackOfficeTopic(user)
+	}
+	if user.IsCustomer() {
+		return fmt.Sprintf("%s/customer/%s", user.TenantID, user.CustomerID.UUID.String())
+	}
+	if user.IsDriver() {
+		return fmt.Sprintf("%s/driver/%s", user.TenantID, user.ID)
+	}
+	return fmt.Sprintf("%s/none/%s", user.TenantID, user.ID)
+}
+
+// GetSuperAdminTopic returns the topic for superuser
+func GetSuperAdminTopic() string {
+	return fmt.Sprint("/superadmin")
+}
+
+// GetAdminTopic returns the topic for the admin user
+func GetAdminTopic(user *models.User) string {
+	return fmt.Sprintf("%s/admin", user.TenantID)
+}
+
+// GetBackOfficeTopic returns the topic for the back office user
+func GetBackOfficeTopic(user *models.User) string {
+	return fmt.Sprintf("%s/backoffice", user.TenantID)
 }

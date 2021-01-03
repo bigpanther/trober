@@ -146,5 +146,6 @@ func customersDestroy(c buffalo.Context) error {
 	if err := tx.Destroy(customer); err != nil {
 		return err
 	}
-	return c.Render(http.StatusOK, r.JSON(customer))
+	c.Response().WriteHeader(http.StatusNoContent)
+	return nil
 }

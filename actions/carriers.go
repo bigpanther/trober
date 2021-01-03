@@ -159,7 +159,6 @@ func carriersDestroy(c buffalo.Context) error {
 	if err := tx.Destroy(carrier); err != nil {
 		return err
 	}
-
-	return c.Render(http.StatusOK, r.JSON(carrier))
-
+	c.Response().WriteHeader(http.StatusNoContent)
+	return nil
 }

@@ -269,9 +269,9 @@ func (as *ActionSuite) Test_CarriersDestroy() {
 		username     string
 		responseCode int
 	}{
-		{"klopp", http.StatusOK},
-		{"firmino", http.StatusOK},
-		{"mane", http.StatusOK},
+		{"klopp", http.StatusNoContent},
+		{"firmino", http.StatusNoContent},
+		{"mane", http.StatusNoContent},
 		{"salah", http.StatusNotFound},
 		{"nike", http.StatusNotFound},
 		{"coutinho", http.StatusNotFound},
@@ -295,12 +295,9 @@ func (as *ActionSuite) Test_CarriersDestroy() {
 			req := as.setupRequest(user, fmt.Sprintf("/carriers/%s", newCarrier.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if res.Code == http.StatusOK {
-				var carrier = models.Carrier{}
-				res.Bind(&carrier)
-				as.Equal(name, carrier.Name)
+			if res.Code == http.StatusNoContent {
 				// Check if actually deleted
-				carrier = models.Carrier{}
+				carrier := models.Carrier{}
 				err = as.DB.Where("name=?", name).First(&carrier)
 				as.Equal(err, sql.ErrNoRows)
 			} else {

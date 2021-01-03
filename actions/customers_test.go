@@ -218,9 +218,9 @@ func (as *ActionSuite) Test_CustomersDestroy() {
 		username     string
 		responseCode int
 	}{
-		{"klopp", http.StatusOK},
-		{"firmino", http.StatusOK},
-		{"mane", http.StatusOK},
+		{"klopp", http.StatusNoContent},
+		{"firmino", http.StatusNoContent},
+		{"mane", http.StatusNoContent},
 		{"salah", http.StatusNotFound},
 		{"nike", http.StatusNotFound},
 		{"coutinho", http.StatusNotFound},
@@ -244,12 +244,9 @@ func (as *ActionSuite) Test_CustomersDestroy() {
 			req := as.setupRequest(user, fmt.Sprintf("/customers/%s", newCustomer.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if res.Code == http.StatusOK {
-				var customer = models.Customer{}
-				res.Bind(&customer)
-				as.Equal(name, customer.Name)
+			if res.Code == http.StatusNoContent {
 				// Check if actually deleted
-				customer = models.Customer{}
+				customer := models.Customer{}
 				err = as.DB.Where("name=?", name).First(&customer)
 				as.Equal(err, sql.ErrNoRows)
 			} else {

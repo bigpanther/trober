@@ -227,9 +227,9 @@ func (as *ActionSuite) Test_TerminalsDestroy() {
 		username     string
 		responseCode int
 	}{
-		{"klopp", http.StatusOK},
-		{"firmino", http.StatusOK},
-		{"mane", http.StatusOK},
+		{"klopp", http.StatusNoContent},
+		{"firmino", http.StatusNoContent},
+		{"mane", http.StatusNoContent},
 		{"salah", http.StatusNotFound},
 		{"nike", http.StatusNotFound},
 		{"coutinho", http.StatusNotFound},
@@ -250,12 +250,9 @@ func (as *ActionSuite) Test_TerminalsDestroy() {
 			req := as.setupRequest(user, fmt.Sprintf("/terminals/%s", newTerminal.ID))
 			res := req.Delete()
 			as.Equal(test.responseCode, res.Code)
-			if res.Code == http.StatusOK {
-				var terminal = models.Terminal{}
-				res.Bind(&terminal)
-				as.Equal(name, terminal.Name)
+			if res.Code == http.StatusNoContent {
 				// Check if actually deleted
-				terminal = models.Terminal{}
+				terminal := models.Terminal{}
 				err := as.DB.Where("name=?", name).First(&terminal)
 				as.Equal(err, sql.ErrNoRows)
 			} else {

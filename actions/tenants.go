@@ -149,5 +149,6 @@ func tenantsDestroy(c buffalo.Context) error {
 	if err := tx.Destroy(tenant); err != nil {
 		return err
 	}
-	return c.Render(http.StatusOK, r.JSON(tenant))
+	c.Response().WriteHeader(http.StatusNoContent)
+	return nil
 }

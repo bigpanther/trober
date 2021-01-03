@@ -1092,12 +1092,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                device-id:
-                  type: string
-              required:
-                - device-id
+              $ref: "#/components/schemas/DeviceId"
       responses:
         "204":
           description: No Content
@@ -1108,7 +1103,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   /self/device-remove:
-    delete:
+    post:
       summary: Remove the device for the user
       description: >-
         Remove the device for the user
@@ -1116,12 +1111,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                device-id:
-                  type: string
-              required:
-                - device-id
+              $ref: "#/components/schemas/DeviceId"
       responses:
         "204":
           description: No Content
@@ -1215,6 +1205,13 @@ components:
         minVersion:
           type: string
           readOnly: true
+    DeviceId:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+        - token
     User:
       type: object
       required:

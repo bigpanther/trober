@@ -24,29 +24,29 @@ func selfGetTenant(c buffalo.Context) error {
 }
 
 func selfPostDeviceRegister(c buffalo.Context) error {
-	deviceB := deviceBody{}
+	deviceB := deviceID{}
 	if err := c.Bind(&deviceB); err != nil {
 		return err
 	}
-	if err := firebase.SubscribeToTopics(c, loggedInUser(c), deviceB.DeviceID); err != nil {
+	if err := firebase.SubscribeToTopics(c, loggedInUser(c), deviceB.Token); err != nil {
 		return err
 	}
 	c.Response().WriteHeader(http.StatusNoContent)
 	return nil
 }
 
-func selfDeleteDeviceRemove(c buffalo.Context) error {
-	deviceB := deviceBody{}
+func selfPostDeviceRemove(c buffalo.Context) error {
+	deviceB := deviceID{}
 	if err := c.Bind(&deviceB); err != nil {
 		return err
 	}
-	if err := firebase.UnSubscribeToTopics(c, loggedInUser(c), deviceB.DeviceID); err != nil {
+	if err := firebase.UnSubscribeToTopics(c, loggedInUser(c), deviceB.Token); err != nil {
 		return err
 	}
 	c.Response().WriteHeader(http.StatusNoContent)
 	return nil
 }
 
-type deviceBody struct {
-	DeviceID string `json:"device_id"`
+type deviceID struct {
+	Token string `json:"token"`
 }

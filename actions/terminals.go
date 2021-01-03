@@ -140,7 +140,7 @@ func terminalsDestroy(c buffalo.Context) error {
 	if err := tx.Destroy(terminal); err != nil {
 		return err
 	}
-
-	return c.Render(http.StatusOK, r.JSON(terminal))
+	c.Response().WriteHeader(http.StatusNoContent)
+	return nil
 
 }

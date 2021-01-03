@@ -19,7 +19,7 @@ type User struct {
 	Name       string       `json:"name" db:"name"`
 	Username   string       `json:"username" db:"username"`
 	Email      string       `json:"email" db:"email"`
-	DeviceID   nulls.String `json:"device_id" db:"device_id"`
+	DeviceID   nulls.String `json:"-" db:"device_id"`
 	Role       string       `json:"role" db:"role"`
 	TenantID   uuid.UUID    `json:"tenant_id" db:"tenant_id"`
 	CustomerID nulls.UUID   `json:"customer_id" db:"customer_id"`

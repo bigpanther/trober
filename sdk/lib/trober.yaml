@@ -6,7 +6,7 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://trober-test.herokuapp.com
 info:
-  version: "0.1.6"
+  version: "0.1.7"
   title: Trober API
   description: >-
     The trober API
@@ -1083,6 +1083,54 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /self/device-register:
+    post:
+      summary: Register the device for the user
+      description: >-
+        Register the device for the user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                device-id:
+                  type: string
+              required:
+                - device-id
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /self/device-remove:
+    post:
+      summary: Remove the device for the user
+      description: >-
+        Remove the device for the user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                device-id:
+                  type: string
+              required:
+                - device-id
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /self/tenant:
     get:
       summary: Get tenant details of the logged in user
@@ -1208,10 +1256,6 @@ components:
           minLength: 3
           maxLength: 50
         email:
-          type: string
-          minLength: 3
-          maxLength: 50
-        device_id:
           type: string
           minLength: 3
           maxLength: 50

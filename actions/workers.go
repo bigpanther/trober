@@ -10,7 +10,7 @@ import (
 )
 
 func sendNotifications(args worker.Args) error {
-	var tos = args["to"].([]string)
+	var tos = args["topics"].([]string)
 	msgTitle := args["message.title"].(string)
 	msgBody := args["message.body"].(string)
 	msgData := args["message.data"].(map[string]string)

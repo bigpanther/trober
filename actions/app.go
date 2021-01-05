@@ -260,7 +260,7 @@ func sendMessage(topics []string, newUser *models.User, msg string) {
 		Queue:   "default",
 		Handler: "sendNotifications",
 		Args: worker.Args{
-			"to":            topics,
+			"topics":        topics,
 			"message.title": msg,
 			"message.body":  fmt.Sprintf("Name: %s", newUser.Name),
 			"message.data": map[string]string{

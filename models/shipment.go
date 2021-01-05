@@ -20,6 +20,7 @@ type Shipment struct {
 	CarrierID       nulls.UUID   `json:"carrier_id" db:"carrier_id"`
 	TerminalID      nulls.UUID   `json:"terminal_id" db:"terminal_id"`
 	OrderID         nulls.UUID   `json:"order_id" db:"order_id"`
+	CustomerID      nulls.UUID   `json:"customer_id" db:"customer_id"`
 	SerialNumber    string       `json:"serial_number" db:"serial_number"`
 	Origin          nulls.String `json:"origin" db:"origin"`
 	Destination     nulls.String `json:"destination" db:"destination"`
@@ -33,6 +34,7 @@ type Shipment struct {
 	Terminal        *Terminal    `belongs_to:"terminal"  json:"terminal,omitempty"`
 	Carrier         *Carrier     `belongs_to:"carrier" json:"carrier,omitempty"`
 	Order           *Order       `belongs_to:"order" json:"order,omitempty"`
+	Customer        *Customer    `belongs_to:"customer" json:"customer,omitempty"`
 	Driver          *User        `belongs_to:"user" json:"driver,omitempty"`
 }
 
@@ -42,7 +44,7 @@ type Shipments []Shipment
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 // This method is not required and may be deleted.
 func (c *Shipment) Validate(tx *pop.Connection) (*validate.Errors, error) {
-	c.truncateReservationTime()
+	c.TruncateReservationTime()
 	return validate.Validate(
 		&validators.StringIsPresent{Field: c.SerialNumber, Name: "SerialNumber"},
 		&validators.FuncValidator{Fn: func() bool {
@@ -80,8 +82,8 @@ func (c *Shipment) IsRejected() bool {
 	return ShipmentStatus(c.Status) == ShipmentStatusRejected
 }
 
-// truncateReservationTime converts eta to with a minute precision
-func (c *Shipment) truncateReservationTime() {
+// TruncateReservationTime converts eta to with a minute precision
+func (c *Shipment) TruncateReservationTime() {
 	if c.ReservationTime.Valid {
 		c.ReservationTime = nulls.NewTime(truncateToMinute(c.ReservationTime.Time))
 	}

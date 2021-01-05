@@ -20,13 +20,11 @@ const (
 	ShipmentStatusRejected ShipmentStatus = "Rejected"
 	// ShipmentStatusLoaded represents Loaded ShipmentStatus
 	ShipmentStatusLoaded ShipmentStatus = "Loaded"
-	// ShipmentStatusUnloaded represents Unloaded ShipmentStatus
-	ShipmentStatusUnloaded ShipmentStatus = "Unloaded"
-	// ShipmentStatusAbandoned represents Abandoned ShipmentStatus
-	ShipmentStatusAbandoned ShipmentStatus = "Abandoned"
+	// ShipmentStatusDelivered represents Delivered ShipmentStatus
+	ShipmentStatusDelivered ShipmentStatus = "Delivered"
 )
 
-var allowedShipmentStatus [9]ShipmentStatus = [9]ShipmentStatus{
+var allowedShipmentStatus [8]ShipmentStatus = [8]ShipmentStatus{
 	ShipmentStatusUnassigned,
 	ShipmentStatusInTransit,
 	ShipmentStatusArrived,
@@ -34,8 +32,7 @@ var allowedShipmentStatus [9]ShipmentStatus = [9]ShipmentStatus{
 	ShipmentStatusAccepted,
 	ShipmentStatusRejected,
 	ShipmentStatusLoaded,
-	ShipmentStatusUnloaded,
-	ShipmentStatusAbandoned,
+	ShipmentStatusDelivered,
 }
 
 // String returns the string representation of
@@ -46,5 +43,5 @@ func (k ShipmentStatus) String() string {
 // IsValidShipmentStatus validates if the input is a ShipmentStatus
 func IsValidShipmentStatus(s string) bool {
 	t := ShipmentStatus(s)
-	return ShipmentStatusUnassigned == t || ShipmentStatusInTransit == t || ShipmentStatusArrived == t || ShipmentStatusAssigned == t || ShipmentStatusAccepted == t || ShipmentStatusRejected == t || ShipmentStatusLoaded == t || ShipmentStatusUnloaded == t || ShipmentStatusAbandoned == t
+	return ShipmentStatusUnassigned == t || ShipmentStatusInTransit == t || ShipmentStatusArrived == t || ShipmentStatusAssigned == t || ShipmentStatusAccepted == t || ShipmentStatusRejected == t || ShipmentStatusLoaded == t || ShipmentStatusDelivered == t
 }

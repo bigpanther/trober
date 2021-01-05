@@ -70,7 +70,7 @@ func (as *ActionSuite) Test_ShipmentsListFilter() {
 	var prefixes = []string{"ਪੰਜਾਬੀ", "Test"}
 	for _, p := range prefixes {
 		for i := 0; i < 5; i++ {
-			shipmentStatus := models.ShipmentStatusAbandoned
+			shipmentStatus := models.ShipmentStatusDelivered
 			if i%2 == 0 {
 				shipmentStatus = models.ShipmentStatusAccepted
 			}
@@ -189,7 +189,7 @@ func (as *ActionSuite) Test_ShipmentsCreate() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			user := as.getLoggedInUser(test.username)
-			newShipment := models.Shipment{SerialNumber: user.Username, Type: models.ShipmentTypeIncoming.String(), Status: models.ShipmentStatusAbandoned.String(), TenantID: firmino.TenantID, OrderID: nulls.NewUUID(order.ID)}
+			newShipment := models.Shipment{SerialNumber: user.Username, Type: models.ShipmentTypeIncoming.String(), Status: models.ShipmentStatusDelivered.String(), TenantID: firmino.TenantID, OrderID: nulls.NewUUID(order.ID)}
 			req := as.setupRequest(user, "/shipments")
 			res := req.Post(newShipment)
 			as.Equal(test.responseCode, res.Code)

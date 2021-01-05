@@ -1527,8 +1527,7 @@ components:
         - Accepted
         - Rejected
         - Loaded
-        - Unloaded
-        - Abandoned
+        - Delivered
     ShipmentSize:
       type: string
       enum:

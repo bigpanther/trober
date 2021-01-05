@@ -169,7 +169,7 @@ func shipmentsUpdate(c buffalo.Context) error {
 	if verrs.HasAny() {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
-	if shipment.Status == "Assigned" && shipment.DriverID.Valid {
+	if shipment.Status == models.ShipmentStatusAssigned.String() && shipment.DriverID.Valid {
 		u := &models.User{}
 		_ = tx.Where("id = ?", shipment.DriverID.UUID).First(u)
 		app.Worker.Perform(worker.Job{

@@ -58,7 +58,7 @@ func shipmentsList(c buffalo.Context) error {
 
 	orderID := c.Param("order_id")
 	if orderID != "" || loggedInUser.IsCustomer() {
-		if err := checkOrderID(c, tx, loggedInUser, orderID); err != nil {
+		if _, err := checkOrderID(c, tx, loggedInUser, orderID); err != nil {
 			return c.Error(http.StatusBadRequest, err)
 		}
 		q = q.Where("order_id = ?", orderID)
@@ -118,9 +118,12 @@ func shipmentsCreate(c buffalo.Context) error {
 	shipment.Status = models.ShipmentStatusUnassigned.String()
 	shipment.TenantID = loggedInUser.TenantID
 	shipment.CreatedBy = loggedInUser.ID
-	if err := checkOrderID(c, tx, loggedInUser, shipment.OrderID.UUID.String()); err != nil {
+
+	order, err := checkOrderID(c, tx, loggedInUser, shipment.OrderID.UUID.String())
+	if err != nil {
 		return c.Error(http.StatusBadRequest, err)
 	}
+	shipment.CustomerID = nulls.NewUUID(order.CustomerID)
 	if loggedInUser.IsDriver() {
 		shipment.DriverID = nulls.NewUUID(loggedInUser.ID)
 	} else if err := checkDriverID(c, tx, loggedInUser, shipment.DriverID); err != nil {
@@ -169,73 +172,114 @@ func shipmentsUpdate(c buffalo.Context) error {
 	if verrs.HasAny() {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
-	if shipment.Status == models.ShipmentStatusAssigned.String() && shipment.DriverID.Valid {
-		u := &models.User{}
-		_ = tx.Where("id = ?", shipment.DriverID.UUID).First(u)
-		app.Worker.Perform(worker.Job{
-			Queue:   "default",
-			Handler: "sendNotifications",
-			Args: worker.Args{
-				"topics":        []string{firebase.GetTopic(u)},
-				"message.title": fmt.Sprintf("You have been assigned a pickup - %s", shipment.SerialNumber),
-				"message.body":  shipment.SerialNumber,
-				"message.data": map[string]string{
-					"shipment.id":           shipment.ID.String(),
-					"shipment.serialNumber": shipment.SerialNumber,
-				},
-			},
-		})
-	}
-
 	return c.Render(http.StatusOK, r.JSON(shipment))
-
 }
 
 // shipmentsUpdateStatus of a shipment
 func shipmentsUpdateStatus(c buffalo.Context) error {
-
 	tx := c.Value("tx").(*pop.Connection)
-
 	shipment := &models.Shipment{}
-
-	if err := tx.Scope(restrictedScope(c)).Find(shipment, c.Param("shipment_id")); err != nil {
+	q := tx.Scope(restrictedScope(c))
+	var loggedInUser = loggedInUser(c)
+	if loggedInUser.IsDriver() {
+		q = q.Where("driver_id = ?", loggedInUser.ID)
+	}
+	if err := q.Find(shipment, c.Param("shipment_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
 	status := c.Param("status")
-	if models.IsValidShipmentStatus(status) {
+	if !models.IsValidShipmentStatus(status) {
 		return c.Error(http.StatusBadRequest, errors.New("invalid status"))
 	}
-	var loggedInUser = loggedInUser(c)
-	if loggedInUser.IsAtLeastBackOffice() {
-		var driverID nulls.UUID
-
-		// Bind driver to request body
-		if err := c.Bind(&driverID); err != nil {
-			return err
-		}
-		shipment.DriverID = driverID
-		shipment.Status = status
+	newShipment := &models.Shipment{}
+	if err := c.Bind(newShipment); err != nil {
+		return err
 	}
 	if loggedInUser.IsDriver() {
-		if shipment.IsAssigned() {
-			shipment.Status = status
-		}
-		//notify backoffice
+		newShipment.DriverID = nulls.NewUUID(loggedInUser.ID)
 	}
-
-	shipment.UpdatedAt = time.Now().UTC()
-
+	switch models.ShipmentStatus(status) {
+	case models.ShipmentStatusUnassigned:
+		fallthrough
+	case models.ShipmentStatusInTransit:
+		newShipment.DriverID = nulls.UUID{}
+		fallthrough
+	case models.ShipmentStatusArrived:
+		if !loggedInUser.IsBackOffice() {
+			return c.Error(http.StatusBadRequest, errors.New("invalid status"))
+		}
+	}
+	newShipment.Status = status
+	if loggedInUser.IsDriver() {
+		newShipment.ReservationTime = shipment.ReservationTime
+	}
+	shouldNotifyCustomer := shipment.Status != newShipment.Status && newShipment.Status == models.ShipmentStatusDelivered.String()
+	if shipment.Status != newShipment.Status || shipment.DriverID != newShipment.DriverID || shipment.ReservationTime != newShipment.ReservationTime {
+		shipment.UpdatedAt = time.Now().UTC()
+		shipment.Status = newShipment.Status
+		shipment.DriverID = newShipment.DriverID
+		shipment.ReservationTime = newShipment.ReservationTime
+	} else {
+		return c.Render(http.StatusOK, r.JSON(shipment))
+	}
 	verrs, err := tx.ValidateAndUpdate(shipment)
 	if err != nil {
 		return err
 	}
-
 	if verrs.HasAny() {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
-
+	if shouldNotifyCustomer {
+		if shipment.CustomerID.Valid {
+			app.Worker.Perform(worker.Job{
+				Queue:   "default",
+				Handler: "sendNotifications",
+				Args: worker.Args{
+					"topics":        []string{firebase.GetCustomerTopic(loggedInUser.TenantID.String(), shipment.CustomerID.UUID.String())},
+					"message.title": fmt.Sprintf("Your shipment has been delivered - %s", shipment.SerialNumber),
+					"message.body":  shipment.SerialNumber,
+					"message.data": map[string]string{
+						"shipment.id":           shipment.ID.String(),
+						"shipment.serialNumber": shipment.SerialNumber,
+					},
+				},
+			})
+		}
+	}
+	if loggedInUser.IsDriver() {
+		app.Worker.Perform(worker.Job{
+			Queue:   "default",
+			Handler: "sendNotifications",
+			Args: worker.Args{
+				"topics":        []string{firebase.GetBackOfficeTopic(loggedInUser)},
+				"message.title": fmt.Sprintf("Shipment updated by driver - %s: %s", shipment.SerialNumber, shipment.Status),
+				"message.body":  shipment.SerialNumber,
+				"message.data": map[string]string{
+					"shipment.id":           shipment.ID.String(),
+					"shipment.serialNumber": shipment.SerialNumber,
+					"shipment.status":       shipment.Status,
+				},
+			},
+		})
+	}
+	if loggedInUser.IsAtLeastBackOffice() {
+		if shipment.DriverID.Valid {
+			app.Worker.Perform(worker.Job{
+				Queue:   "default",
+				Handler: "sendNotifications",
+				Args: worker.Args{
+					"topics":        []string{firebase.GetDriverTopic(loggedInUser.TenantID.String(), shipment.DriverID.UUID.String())},
+					"message.title": fmt.Sprintf("You have been assigned a pickup - %s", shipment.SerialNumber),
+					"message.body":  shipment.SerialNumber,
+					"message.data": map[string]string{
+						"shipment.id":           shipment.ID.String(),
+						"shipment.serialNumber": shipment.SerialNumber,
+					},
+				},
+			})
+		}
+	}
 	return c.Render(http.StatusOK, r.JSON(shipment))
-
 }
 
 // shipmentsDestroy deletes a Shipment from the DB. This function is mapped
@@ -256,20 +300,20 @@ func shipmentsDestroy(c buffalo.Context) error {
 	return nil
 }
 
-func checkOrderID(c buffalo.Context, tx *pop.Connection, loggedInUser *models.User, orderID string) error {
+func checkOrderID(c buffalo.Context, tx *pop.Connection, loggedInUser *models.User, orderID string) (order *models.Order, err error) {
 	q := tx.Scope(restrictedScope(c))
+	order = &models.Order{}
 	if loggedInUser.IsCustomer() {
 		q = q.Where("customer_id = ?", loggedInUser.CustomerID.UUID)
 	} else if orderID == uuid.Nil.String() {
-		return nil
+		return order, nil
 	}
-	order := &models.Order{}
 	// User must belong to a customer in the same tenant
-	err := q.Find(order, orderID)
+	err = q.Find(order, orderID)
 	if err != nil || order.ID == uuid.Nil {
-		return errors.New("invalid order association")
+		return nil, errors.New("invalid order association")
 	}
-	return nil
+	return order, nil
 }
 
 func checkDriverID(c buffalo.Context, tx *pop.Connection, loggedInUser *models.User, ID nulls.UUID) error {

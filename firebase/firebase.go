@@ -168,10 +168,10 @@ func GetTopic(user *models.User) string {
 		return GetBackOfficeTopic(user)
 	}
 	if user.IsCustomer() {
-		return fmt.Sprintf("%s_customer_%s", user.TenantID, user.CustomerID.UUID.String())
+		return GetCustomerTopic(user.TenantID.String(), user.CustomerID.UUID.String())
 	}
 	if user.IsDriver() {
-		return fmt.Sprintf("%s_driver_%s", user.TenantID, user.ID)
+		return GetDriverTopic(user.TenantID.String(), user.ID.String())
 	}
 	return fmt.Sprintf("%s_none_%s", user.TenantID, user.ID)
 }
@@ -179,6 +179,16 @@ func GetTopic(user *models.User) string {
 // GetSuperAdminTopic returns the topic for superuser
 func GetSuperAdminTopic() string {
 	return fmt.Sprint("superadmin")
+}
+
+// GetCustomerTopic returns the topic for superuser
+func GetCustomerTopic(tenantID string, customerID string) string {
+	return fmt.Sprintf("%s_customer_%s", tenantID, customerID)
+}
+
+// GetDriverTopic returns the topic for superuser
+func GetDriverTopic(tenantID string, driverID string) string {
+	return fmt.Sprintf("%s_driver_%s", tenantID, driverID)
 }
 
 // GetAdminTopic returns the topic for the admin user

@@ -233,7 +233,7 @@ func (as *ActionSuite) Test_ShipmentsUpdate() {
 			newShipment := as.createShipment(models.Shipment{SerialNumber: "s1", Status: models.ShipmentStatusAssigned.String(), CreatedBy: firmino.ID, TenantID: firmino.TenantID, Type: models.ShipmentTypeIncoming.String(), DriverID: nulls.NewUUID(salah.ID)}, order)
 			req := as.setupRequest(user, fmt.Sprintf("/shipments/%s", newShipment.ID))
 			// Try to update ID and tenant ID. Expect these calls to be excluded at update
-			updatedShipment := models.Shipment{SerialNumber: fmt.Sprintf("not%s", test.username), Status: models.ShipmentStatusDelivered.String(), ID: user.ID, TenantID: user.ID}
+			updatedShipment := models.Shipment{SerialNumber: fmt.Sprintf("not%s", test.username), Status: models.ShipmentStatusDelivered.String(), Type: models.ShipmentTypeIncoming.String(), ID: user.ID, TenantID: user.ID}
 			res := req.Put(updatedShipment)
 			as.Equal(test.responseCode, res.Code)
 			var dbShipment = *newShipment

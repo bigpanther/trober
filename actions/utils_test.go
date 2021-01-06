@@ -79,3 +79,6 @@ func (as *ActionSuite) createUser(name string, role models.UserRole, email strin
 	return newUser
 }
 func fakeSendNotification(args worker.Args) error { return nil }
+func init() {
+	sendNotifications = fakeSendNotification
+}

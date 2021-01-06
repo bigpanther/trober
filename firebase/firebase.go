@@ -24,6 +24,7 @@ var client *firebaseSdkClient
 var errMissingToken = errors.New("missing token")
 
 func firebaseClient() (*firebaseSdkClient, error) {
+	//TODO: Eliminate race condition here.
 	if client != nil {
 		return client, nil
 	}

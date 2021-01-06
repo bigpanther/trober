@@ -208,7 +208,7 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 	}
 	return u, nil
 }
-func createOrUpdateUserOnFirstLogin(c buffalo.Context, remoteUser *auth.UserRecord, notificationCallback func(topics []string, newUser *models.User, msg string)) (*models.User, error) {
+func createOrUpdateUserOnFirstLogin(c buffalo.Context, remoteUser *auth.UserRecord, notificationCallback func(topics []string, messageTitle string, messageBody string, data map[string]string)) (*models.User, error) {
 	if !remoteUser.EmailVerified {
 		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("email not verified", http.StatusText(http.StatusForbidden), nil)))
 	}
@@ -245,27 +245,31 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, remoteUser *auth.UserReco
 			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
 	}
+	var message = "New user created"
+	var topics = []string{firebase.GetSuperAdminTopic()}
+
 	if valErrors.HasAny() {
 		log.Printf("validation error on user login: %s\n", valErrors.String())
-		notificationCallback([]string{firebase.GetSuperAdminTopic(), firebase.GetAdminTopic(u)}, u, "New user validation failed")
-	} else {
-		notificationCallback([]string{firebase.GetSuperAdminTopic(), firebase.GetAdminTopic(u)}, u, "New user created")
+		message = "New user validation failed"
+		topics = []string{firebase.GetSuperAdminTopic(), firebase.GetAdminTopic(u)}
+
 	}
+	notificationCallback(topics, message, fmt.Sprintf("Name: %s", u.Name), map[string]string{
+		"name": u.Name,
+		"id":   u.ID.String(),
+	})
 	return u, nil
 }
 
-func sendMessage(topics []string, newUser *models.User, msg string) {
+func sendMessage(topics []string, messageTitle string, messageBody string, data map[string]string) {
 	app.Worker.Perform(worker.Job{
 		Queue:   "default",
 		Handler: "sendNotifications",
 		Args: worker.Args{
 			"topics":        topics,
-			"message.title": msg,
-			"message.body":  fmt.Sprintf("Name: %s", newUser.Name),
-			"message.data": map[string]string{
-				"name": newUser.Name,
-				"id":   newUser.ID.String(),
-			},
+			"message.title": messageTitle,
+			"message.body":  messageBody,
+			"message.data":  data,
 		},
 	})
 }

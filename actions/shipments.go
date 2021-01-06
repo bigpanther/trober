@@ -149,34 +149,6 @@ func shipmentsCreate(c buffalo.Context) error {
 // shipmentsUpdate changes a Shipment in the DB. This function is mapped to
 // the path PUT /shipments/{shipment_id}
 func shipmentsUpdate(c buffalo.Context) error {
-
-	tx := c.Value("tx").(*pop.Connection)
-
-	shipment := &models.Shipment{}
-
-	if err := tx.Scope(restrictedScope(c)).Find(shipment, c.Param("shipment_id")); err != nil {
-		return c.Error(http.StatusNotFound, err)
-	}
-
-	// Bind Shipment to request body
-	if err := c.Bind(shipment); err != nil {
-		return err
-	}
-	shipment.UpdatedAt = time.Now().UTC()
-
-	verrs, err := tx.ValidateAndUpdate(shipment)
-	if err != nil {
-		return err
-	}
-
-	if verrs.HasAny() {
-		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
-	}
-	return c.Render(http.StatusOK, r.JSON(shipment))
-}
-
-// shipmentsUpdateStatus of a shipment
-func shipmentsUpdateStatus(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
 	shipment := &models.Shipment{}
 	q := tx.Scope(restrictedScope(c))
@@ -187,10 +159,6 @@ func shipmentsUpdateStatus(c buffalo.Context) error {
 	if err := q.Find(shipment, c.Param("shipment_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-	status := c.Param("status")
-	if !models.IsValidShipmentStatus(status) {
-		return c.Error(http.StatusBadRequest, errors.New("invalid status"))
-	}
 	newShipment := &models.Shipment{}
 	if err := c.Bind(newShipment); err != nil {
 		return err
@@ -198,7 +166,7 @@ func shipmentsUpdateStatus(c buffalo.Context) error {
 	if loggedInUser.IsDriver() {
 		newShipment.DriverID = nulls.NewUUID(loggedInUser.ID)
 	}
-	switch models.ShipmentStatus(status) {
+	switch models.ShipmentStatus(newShipment.Status) {
 	case models.ShipmentStatusUnassigned:
 		fallthrough
 	case models.ShipmentStatusInTransit:
@@ -209,16 +177,61 @@ func shipmentsUpdateStatus(c buffalo.Context) error {
 			return c.Error(http.StatusBadRequest, errors.New("invalid status"))
 		}
 	}
-	newShipment.Status = status
 	if loggedInUser.IsDriver() {
+		//readonly fields
 		newShipment.ReservationTime = shipment.ReservationTime
+		newShipment.TerminalID = shipment.TerminalID
+		newShipment.CarrierID = shipment.CarrierID
+		newShipment.OrderID = shipment.OrderID
+		newShipment.CustomerID = shipment.CustomerID
+		newShipment.DriverID = shipment.DriverID
+		newShipment.Lfd = shipment.Lfd
+		newShipment.Type = shipment.Type
+		newShipment.SerialNumber = newShipment.SerialNumber
 	}
 	shouldNotifyCustomer := shipment.Status != newShipment.Status && newShipment.Status == models.ShipmentStatusDelivered.String()
-	if shipment.Status != newShipment.Status || shipment.DriverID != newShipment.DriverID || shipment.ReservationTime != newShipment.ReservationTime {
+	var changed bool
+	if shipment.OrderID != newShipment.OrderID || newShipment.CustomerID != shipment.CustomerID {
+		changed = true
+		order, err := checkOrderID(c, tx, loggedInUser, newShipment.OrderID.UUID.String())
+		if err != nil {
+			return c.Error(http.StatusBadRequest, err)
+		}
+		newShipment.CustomerID = nulls.NewUUID(order.CustomerID)
+	}
+	if shipment.DriverID != newShipment.DriverID {
+		changed = true
+		if err := checkDriverID(c, tx, loggedInUser, newShipment.DriverID); err != nil {
+			return c.Error(http.StatusBadRequest, err)
+		}
+	}
+	if shipment.TerminalID != newShipment.TerminalID {
+		changed = true
+		if err := checkTerminalID(c, tx, loggedInUser, newShipment.TerminalID); err != nil {
+			return c.Error(http.StatusBadRequest, err)
+		}
+
+	}
+	if shipment.CarrierID != newShipment.CarrierID {
+		changed = true
+		if err := checkCarrierID(c, tx, loggedInUser, newShipment.CarrierID); err != nil {
+			return c.Error(http.StatusBadRequest, err)
+		}
+	}
+	if changed || shipment.SerialNumber != newShipment.SerialNumber || shipment.Status != newShipment.Status || shipment.DriverID != newShipment.DriverID || shipment.ReservationTime != newShipment.ReservationTime {
 		shipment.UpdatedAt = time.Now().UTC()
 		shipment.Status = newShipment.Status
 		shipment.DriverID = newShipment.DriverID
 		shipment.ReservationTime = newShipment.ReservationTime
+		shipment.SerialNumber = newShipment.SerialNumber
+		shipment.TerminalID = newShipment.TerminalID
+		shipment.CarrierID = newShipment.CarrierID
+		shipment.OrderID = newShipment.OrderID
+		shipment.CustomerID = newShipment.CustomerID
+		shipment.DriverID = newShipment.DriverID
+		shipment.Lfd = newShipment.Lfd
+		shipment.Type = newShipment.Type
+		shipment.SerialNumber = newShipment.SerialNumber
 	} else {
 		return c.Render(http.StatusOK, r.JSON(shipment))
 	}

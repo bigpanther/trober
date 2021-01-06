@@ -220,7 +220,7 @@ func shipmentsUpdate(c buffalo.Context) error {
 			return c.Error(http.StatusBadRequest, err)
 		}
 	}
-	if changed || shipment.SerialNumber != newShipment.SerialNumber || shipment.Status != newShipment.Status || shipment.DriverID != newShipment.DriverID || shipment.ReservationTime != newShipment.ReservationTime {
+	if changed || shipment.SerialNumber != newShipment.SerialNumber || shipment.Status != newShipment.Status || shipment.Type != newShipment.Type || shipment.ReservationTime != newShipment.ReservationTime {
 		shipment.UpdatedAt = time.Now().UTC()
 		shipment.Status = newShipment.Status
 		shipment.DriverID = newShipment.DriverID

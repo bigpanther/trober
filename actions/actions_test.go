@@ -12,6 +12,8 @@ type ActionSuite struct {
 }
 
 func Test_ActionSuite(t *testing.T) {
+	//Important! mock callback
+	sendNotifications = fakeSendNotification
 	action, err := suite.NewActionWithFixtures(App(), packr.New("Test_ActionSuite", "../fixtures"))
 	if err != nil {
 		t.Fatal(err)

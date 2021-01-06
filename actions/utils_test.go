@@ -2,6 +2,7 @@ package actions
 
 import (
 	"github.com/bigpanther/trober/models"
+	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/httptest"
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
@@ -36,7 +37,11 @@ func (as *ActionSuite) createTerminal(name string, terminalType models.TerminalT
 	as.Equal(0, len(v.Errors))
 	return newTerminal
 }
-func (as *ActionSuite) createShipment(shipment models.Shipment) *models.Shipment {
+func (as *ActionSuite) createShipment(shipment models.Shipment, order *models.Order) *models.Shipment {
+	if order != nil {
+		shipment.OrderID = nulls.NewUUID(order.ID)
+		shipment.CustomerID = nulls.NewUUID(order.CustomerID)
+	}
 	v, err := as.DB.ValidateAndCreate(&shipment)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))
@@ -73,3 +78,4 @@ func (as *ActionSuite) createUser(name string, role models.UserRole, email strin
 	as.Equal(0, len(v.Errors))
 	return newUser
 }
+func fakeSendNotification(args worker.Args) error { return nil }

@@ -319,8 +319,7 @@ paths:
           required: true
           description: The status of the shipment
           schema:
-            type: string
-            format: uuid
+            $ref: "#/components/schemas/ShipmentStatus"
       summary: Update the status of an existing shipment
       description: >-
         Update the status of an existing shipment

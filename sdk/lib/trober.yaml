@@ -304,44 +304,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  "/shipments/{id}/updateStatus/{status}":
-    patch:
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The id of the shipment
-          schema:
-            type: string
-            format: uuid
-        - name: status
-          in: path
-          required: true
-          description: The status of the shipment
-          schema:
-            $ref: "#/components/schemas/ShipmentStatus"
-      summary: Update the status of an existing shipment
-      description: >-
-        Update the status of an existing shipment
-
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Shipment"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Shipment"
-        default:
-          description: error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
   /terminals:
     get:
       summary: List all Terminals

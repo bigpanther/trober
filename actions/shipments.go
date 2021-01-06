@@ -170,6 +170,8 @@ func shipmentsUpdate(c buffalo.Context) error {
 	case models.ShipmentStatusUnassigned:
 		fallthrough
 	case models.ShipmentStatusInTransit:
+		fallthrough
+	case models.ShipmentStatusRejected:
 		newShipment.DriverID = nulls.UUID{}
 		fallthrough
 	case models.ShipmentStatusArrived:
@@ -187,7 +189,7 @@ func shipmentsUpdate(c buffalo.Context) error {
 		newShipment.DriverID = shipment.DriverID
 		newShipment.Lfd = shipment.Lfd
 		newShipment.Type = shipment.Type
-		newShipment.SerialNumber = newShipment.SerialNumber
+		newShipment.SerialNumber = shipment.SerialNumber
 	}
 	shouldNotifyCustomer := shipment.Status != newShipment.Status && newShipment.Status == models.ShipmentStatusDelivered.String()
 	var changed bool
@@ -276,13 +278,17 @@ func shipmentsUpdate(c buffalo.Context) error {
 		})
 	}
 	if loggedInUser.IsAtLeastBackOffice() {
-		if shipment.DriverID.Valid {
+		if shipment.DriverID.Valid && (shipment.Status != models.ShipmentStatusAssigned.String() || shipment.Status != models.ShipmentStatusAccepted.String()) {
+			message := fmt.Sprintf("You have been assigned a pickup - %s", shipment.SerialNumber)
+			if shipment.Status != models.ShipmentStatusAccepted.String() {
+				message = fmt.Sprintf("Your assignment has been updated - %s", shipment.SerialNumber)
+			}
 			app.Worker.Perform(worker.Job{
 				Queue:   "default",
 				Handler: "sendNotifications",
 				Args: worker.Args{
 					"topics":        []string{firebase.GetDriverTopic(loggedInUser.TenantID.String(), shipment.DriverID.UUID.String())},
-					"message.title": fmt.Sprintf("You have been assigned a pickup - %s", shipment.SerialNumber),
+					"message.title": message,
 					"message.body":  shipment.SerialNumber,
 					"message.data": map[string]string{
 						"shipment.id":           shipment.ID.String(),

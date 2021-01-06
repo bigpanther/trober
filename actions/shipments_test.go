@@ -207,7 +207,7 @@ func (as *ActionSuite) Test_ShipmentsCreate() {
 
 func (as *ActionSuite) Test_ShipmentsUpdate() {
 	as.LoadFixture("Tenant bootstrap")
-	as.App.Worker.Register("sendNotifications", fakeSendNotification)
+	//as.App.Worker.Register("sendNotifications", fakeSendNotification)
 	var tests = []struct {
 		username     string
 		responseCode int

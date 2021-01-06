@@ -1409,6 +1409,9 @@ components:
         order_id:
           type: string
           format: uuid
+        customer_id:
+          type: string
+          format: uuid
         serial_number:
           type: string
           minLength: 5
@@ -1440,6 +1443,8 @@ components:
           $ref: "#/components/schemas/User"
         order:
           $ref: "#/components/schemas/Order"
+        customer:
+          $ref: "#/components/schemas/Customer"
         terminal:
           $ref: "#/components/schemas/Terminal"
         carrier:

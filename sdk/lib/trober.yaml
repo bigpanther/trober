@@ -329,11 +329,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
+              $ref: "#/components/schemas/Shipment"
       responses:
         "200":
           description: OK

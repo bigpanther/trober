@@ -9,7 +9,7 @@ import (
 	"github.com/gobuffalo/buffalo/worker"
 )
 
-func sendNotifications(args worker.Args) error {
+var sendNotifications = func(args worker.Args) error {
 	var tos = args["topics"].([]string)
 	msgTitle := args["message.title"].(string)
 	msgBody := args["message.body"].(string)
@@ -29,6 +29,7 @@ func sendNotifications(args worker.Args) error {
 	// TODO: Add a timeout here
 	return firebase.SendAll(context.Background(), messages)
 }
+
 func testWorker(args worker.Args) error {
 	log.Println(args)
 	return nil

@@ -207,6 +207,7 @@ func (as *ActionSuite) Test_ShipmentsCreate() {
 
 func (as *ActionSuite) Test_ShipmentsUpdate() {
 	as.LoadFixture("Tenant bootstrap")
+	as.App.Worker.Register("sendNotifications", fakeSendNotification)
 	var tests = []struct {
 		username     string
 		responseCode int
@@ -232,8 +233,8 @@ func (as *ActionSuite) Test_ShipmentsUpdate() {
 			newShipment := as.createShipment(models.Shipment{SerialNumber: "s1", Status: models.ShipmentStatusAssigned.String(), CreatedBy: firmino.ID, TenantID: firmino.TenantID, Type: models.ShipmentTypeIncoming.String(), DriverID: nulls.NewUUID(salah.ID)}, order)
 			req := as.setupRequest(user, fmt.Sprintf("/shipments/%s", newShipment.ID))
 			// Try to update ID and tenant ID. Expect these calls to be excluded at update
-			updatedOrder := models.Shipment{SerialNumber: fmt.Sprintf("not%s", test.username), Status: models.OrderStatusDelivered.String(), ID: user.ID, TenantID: user.ID}
-			res := req.Put(updatedOrder)
+			updatedShipment := models.Shipment{SerialNumber: fmt.Sprintf("not%s", test.username), Status: models.ShipmentStatusDelivered.String(), ID: user.ID, TenantID: user.ID}
+			res := req.Put(updatedShipment)
 			as.Equal(test.responseCode, res.Code)
 			var dbShipment = *newShipment
 			err := as.DB.Reload(&dbShipment)
@@ -242,9 +243,9 @@ func (as *ActionSuite) Test_ShipmentsUpdate() {
 				var shipment = models.Shipment{}
 				res.Bind(&shipment)
 				if user.IsAtLeastBackOffice() {
-					as.Equal(updatedOrder.SerialNumber, shipment.SerialNumber)
+					as.Equal(updatedShipment.SerialNumber, shipment.SerialNumber)
 				}
-				as.Equal(updatedOrder.Status, shipment.Status)
+				as.Equal(updatedShipment.Status, shipment.Status)
 				as.Equal(newShipment.ID, shipment.ID)
 				as.Equal(dbShipment.SerialNumber, shipment.SerialNumber)
 			} else {
@@ -258,7 +259,6 @@ func (as *ActionSuite) Test_ShipmentsUpdate() {
 
 func (as *ActionSuite) Test_ShipmentsDestroy() {
 	as.LoadFixture("Tenant bootstrap")
-	as.App.Worker.Register("sendNotifications", fakeSendNotification)
 	var tests = []struct {
 		username     string
 		responseCode int

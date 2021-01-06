@@ -78,7 +78,7 @@ func (as *ActionSuite) createUser(name string, role models.UserRole, email strin
 	as.Equal(0, len(v.Errors))
 	return newUser
 }
-func fakeSendNotification(args worker.Args) error { return nil }
-func init() {
-	sendNotifications = fakeSendNotification
+func fakeSendNotification(args worker.Args) error {
+	//TODO: make assertable
+	return nil
 }

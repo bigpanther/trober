@@ -223,7 +223,7 @@ func shipmentsUpdate(c buffalo.Context) error {
 			return c.Error(http.StatusBadRequest, err)
 		}
 	}
-	if changed || shipment.SerialNumber != newShipment.SerialNumber || shipment.Status != newShipment.Status || shipment.DriverID != newShipment.DriverID || shipment.ReservationTime != newShipment.ReservationTime || shipment.Origin != newShipment.Origin || shipment.Destination != newShipment.Destination {
+	if changed || shipment.SerialNumber != newShipment.SerialNumber || shipment.Status != newShipment.Status || shipment.Type != newShipment.Type || shipment.ReservationTime != newShipment.ReservationTime || shipment.Origin != newShipment.Origin || shipment.Destination != newShipment.Destination {
 		shipment.UpdatedAt = time.Now().UTC()
 		shipment.Status = newShipment.Status
 		shipment.DriverID = newShipment.DriverID

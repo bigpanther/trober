@@ -96,12 +96,13 @@ func shipmentsShow(c buffalo.Context) error {
 	if loggedInUser.IsDriver() {
 		q = q.Where("driver_id = ?", loggedInUser.ID)
 	}
+	if loggedInUser.IsCustomer() {
+		q = q.Where("customer_id = ?", loggedInUser.CustomerID)
+	}
 	if err := q.Find(shipment, c.Param("shipment_id")); err != nil {
 		return c.Error(http.StatusNotFound, err)
 	}
-	if loggedInUser.IsCustomer() && shipment.Order.CustomerID != loggedInUser.CustomerID.UUID {
-		return c.Error(http.StatusNotFound, errNotFound)
-	}
+
 	return c.Render(http.StatusOK, r.JSON(shipment))
 }
 
@@ -190,6 +191,8 @@ func shipmentsUpdate(c buffalo.Context) error {
 		newShipment.Lfd = shipment.Lfd
 		newShipment.Type = shipment.Type
 		newShipment.SerialNumber = shipment.SerialNumber
+		newShipment.Origin = shipment.Origin
+		newShipment.Destination = shipment.Destination
 	}
 	shouldNotifyCustomer := shipment.Status != newShipment.Status && newShipment.Status == models.ShipmentStatusDelivered.String()
 	var changed bool
@@ -220,7 +223,11 @@ func shipmentsUpdate(c buffalo.Context) error {
 			return c.Error(http.StatusBadRequest, err)
 		}
 	}
+<<<<<<< HEAD
 	if changed || shipment.SerialNumber != newShipment.SerialNumber || shipment.Status != newShipment.Status || shipment.Type != newShipment.Type || shipment.ReservationTime != newShipment.ReservationTime {
+=======
+	if changed || shipment.SerialNumber != newShipment.SerialNumber || shipment.Status != newShipment.Status || shipment.DriverID != newShipment.DriverID || shipment.ReservationTime != newShipment.ReservationTime || shipment.Origin != newShipment.Origin || shipment.Destination != newShipment.Destination {
+>>>>>>> Fix shipment fields update
 		shipment.UpdatedAt = time.Now().UTC()
 		shipment.Status = newShipment.Status
 		shipment.DriverID = newShipment.DriverID
@@ -234,6 +241,8 @@ func shipmentsUpdate(c buffalo.Context) error {
 		shipment.Lfd = newShipment.Lfd
 		shipment.Type = newShipment.Type
 		shipment.SerialNumber = newShipment.SerialNumber
+		shipment.Origin = newShipment.Origin
+		shipment.Destination = newShipment.Destination
 	} else {
 		return c.Render(http.StatusOK, r.JSON(shipment))
 	}

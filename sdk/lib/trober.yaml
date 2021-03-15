@@ -1156,9 +1156,6 @@ components:
     AppInfo:
       type: object
       properties:
-        currentVersion:
-          type: string
-          readOnly: true
         minVersion:
           type: string
           readOnly: true

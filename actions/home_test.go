@@ -19,6 +19,5 @@ func (as *ActionSuite) Test_AppInfoHandler() {
 	as.Equal(http.StatusOK, res.Code)
 	var appInfo = &appInfo{}
 	res.Bind(appInfo)
-	as.Contains(appInfo.CurrentVersion, ".")
-	as.Contains(appInfo.MinVersion, ".")
+	as.Equal(appInfo.MinVersion, "0.0.1")
 }

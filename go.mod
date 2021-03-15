@@ -3,7 +3,7 @@ module github.com/bigpanther/trober
 go 1.16
 
 require (
-	firebase.google.com/go/v4 v4.1.0
+	firebase.google.com/go/v4 v4.2.0
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
@@ -18,15 +18,14 @@ require (
 	github.com/gobuffalo/mw-paramlogger v1.0.0
 	github.com/gobuffalo/nulls v0.4.0
 	github.com/gobuffalo/packr/v2 v2.8.1
-	github.com/gobuffalo/pop/v5 v5.3.1
-	github.com/gobuffalo/suite/v3 v3.0.0
+	github.com/gobuffalo/pop/v5 v5.3.3
+	github.com/gobuffalo/suite/v3 v3.0.2
 	github.com/gobuffalo/validate/v3 v3.3.0
 	github.com/gobuffalo/x v0.1.0
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
-	github.com/jackc/pgx/v4 v4.10.1 // indirect
 	github.com/markbates/grift v1.5.0
 	github.com/microcosm-cc/bluemonday v1.0.4 // indirect
 	github.com/monoculum/formam v0.0.0-20200923020755-6f187e4ffe27 // indirect
@@ -38,13 +37,7 @@ require (
 	github.com/spf13/cobra v1.1.1 // indirect
 	github.com/unrolled/secure v1.0.8
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
-	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
-	golang.org/x/mod v0.4.0 // indirect
-	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
-	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a // indirect
-	golang.org/x/sys v0.0.0-20201231184435-2d18734c6014 // indirect
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf // indirect
-	golang.org/x/tools v0.0.0-20210102185154-773b96fafca2 // indirect
-	google.golang.org/api v0.36.0
+	google.golang.org/api v0.42.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

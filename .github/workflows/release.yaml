@@ -24,7 +24,7 @@ jobs:
         env:
           TROBER_VERSION: ${API_VERSION}
           TROBER_COMMIT: ${GITHUB_SHA}
-      - uses: akhileshns/heroku-deploy@v3.7.8
+      - uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "trober"

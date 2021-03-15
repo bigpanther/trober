@@ -7,14 +7,16 @@ import (
 )
 
 var (
-	version = "dev"
-	commit  = "dev"
+	version                 = "dev"
+	commit                  = "dev"
+	minimumSupportedVersion = "0.0.1"
 )
 
 type home struct {
-	Message string `json:"message"`
-	Version string `json:"version"`
-	Commit  string `json:"commit"`
+	Message                 string `json:"message"`
+	Version                 string `json:"version"`
+	MinimumSupportedVersion string `json:"minimum_supported_version"`
+	Commit                  string `json:"commit"`
 }
 
 func homeHandler(c buffalo.Context) error {
@@ -26,13 +28,11 @@ func homeHandler(c buffalo.Context) error {
 }
 
 type appInfo struct {
-	CurrentVersion string `json:"currentVersion"`
-	MinVersion     string `json:"minVersion"`
+	MinVersion string `json:"minVersion"`
 }
 
 func appInfoHandler(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.JSON(appInfo{
-		CurrentVersion: "0.0.8",
-		MinVersion:     "0.0.8",
+		MinVersion: minimumSupportedVersion,
 	}))
 }

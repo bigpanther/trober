@@ -11,8 +11,8 @@ jobs:
     name: release
     steps:
       - uses: actions/checkout@v2
-      - run: echo "API_VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
-      - run: echo ${API_VERSION}
+      - run: echo "TROBER_VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      - run: echo "TROBER_MIN_VERSION=0.0.11" >> $GITHUB_ENV
       - uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
@@ -22,9 +22,11 @@ jobs:
           docker_build_args: |
             TROBER_VERSION
             TROBER_COMMIT
+            TROBER_MIN_VERSION
         env:
           TROBER_VERSION: ${API_VERSION}
           TROBER_COMMIT: ${GITHUB_SHA}
+          TROBER_MIN_VERSION: ${TROBER_MIN_VERSION}
       - uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
@@ -34,9 +36,11 @@ jobs:
           docker_build_args: |
             TROBER_VERSION
             TROBER_COMMIT
+            TROBER_MIN_VERSION
         env:
-          TROBER_VERSION: ${API_VERSION}
+          TROBER_VERSION: ${TROBER_VERSION}
           TROBER_COMMIT: ${GITHUB_SHA}
+          TROBER_MIN_VERSION: ${TROBER_MIN_VERSION}
   publish-sdk:
     runs-on: ubuntu-latest
     steps:
@@ -47,8 +51,8 @@ jobs:
           java-version: "13"
       - name: Create & Publish package
         run: |
-          export API_VERSION=${GITHUB_REF##*/v}
-          cd sdk; rm -rf trober_sdk; dart pub get; dart pub run build_runner clean; dart pub run build_runner build --delete-conflicting-outputs; dart pub run cider --project-root=trober_sdk version $API_VERSION; dart format .; cp LICENSE trober_sdk/LICENSE; echo "The trober SDK for dart. It provides a dio client for the trober API." > trober_sdk/README.md; echo "See https://github.com/bigpanther/trober/releases/tag/v$API_VERSION" > trober_sdk/CHANGELOG.md
+          export TROBER_VERSION=${GITHUB_REF##*/v}
+          cd sdk; rm -rf trober_sdk; dart pub get; dart pub run build_runner clean; dart pub run build_runner build --delete-conflicting-outputs; dart pub run cider --project-root=trober_sdk version $TROBER_VERSION; dart format .; cp LICENSE trober_sdk/LICENSE; echo "The trober SDK for dart. It provides a dio client for the trober API." > trober_sdk/README.md; echo "See https://github.com/bigpanther/trober/releases/tag/v$TROBER_VERSION" > trober_sdk/CHANGELOG.md
           mkdir -p ~/.pub-cache
           cat <<EOF > ~/.pub-cache/credentials.json
           {

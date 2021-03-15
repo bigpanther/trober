@@ -1,6 +1,6 @@
 ARG TROBER_VERSION=dev
 ARG TROBER_COMMIT=dev
-FROM gobuffalo/buffalo:v0.16.18 as builder
+FROM gobuffalo/buffalo:v0.16.21 as builder
 ARG TROBER_VERSION
 ARG TROBER_COMMIT
 ENV GO111MODULE on

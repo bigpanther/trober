@@ -13,10 +13,9 @@ var (
 )
 
 type home struct {
-	Message                 string `json:"message"`
-	Version                 string `json:"version"`
-	MinimumSupportedVersion string `json:"minimum_supported_version"`
-	Commit                  string `json:"commit"`
+	Message string `json:"message"`
+	Version string `json:"version"`
+	Commit  string `json:"commit"`
 }
 
 func homeHandler(c buffalo.Context) error {

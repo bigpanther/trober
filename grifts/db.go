@@ -153,7 +153,7 @@ func demoCreate() error {
 	shipment := &models.Shipment{
 		SerialNumber:    "CANV2020127",
 		TenantID:        tenant.ID,
-		Type:            "Incoming",
+		Type:            "Inbound",
 		Status:          "Unassigned",
 		Origin:          nulls.NewString("Seattle"),
 		Destination:     nulls.NewString("Hope"),
@@ -168,7 +168,7 @@ func demoCreate() error {
 	shipment = &models.Shipment{
 		SerialNumber:    "CANV2020128",
 		TenantID:        tenant.ID,
-		Type:            "Incoming",
+		Type:            "Inbound",
 		Status:          "Assigned",
 		Origin:          nulls.NewString("Seattle"),
 		Destination:     nulls.NewString("Whistler"),

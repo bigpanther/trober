@@ -33,7 +33,7 @@ func (as *ActionSuite) Test_ShipmentsList() {
 	salah := as.getLoggedInUser("salah")
 	efaLiv := as.getCustomer("EFA Liv")
 	order := as.createOrder("ord1", models.OrderStatusOpen, firmino.TenantID, firmino.ID, efaLiv.ID)
-	newShipment := as.createShipment(models.Shipment{SerialNumber: "acb123", Status: models.ShipmentStatusAccepted.String(), Type: models.ShipmentTypeIncoming.String(),
+	newShipment := as.createShipment(models.Shipment{SerialNumber: "acb123", Status: models.ShipmentStatusAccepted.String(), Type: models.ShipmentTypeInbound.String(),
 		CreatedBy: firmino.ID, TenantID: firmino.TenantID,
 		DriverID: nulls.NewUUID(salah.ID)}, order)
 
@@ -74,7 +74,7 @@ func (as *ActionSuite) Test_ShipmentsListFilter() {
 				shipmentStatus = models.ShipmentStatusAccepted
 			}
 			s := models.Shipment{
-				SerialNumber: fmt.Sprintf("%s-%d", p, i), Type: models.ShipmentTypeIncoming.String(), Status: shipmentStatus.String(),
+				SerialNumber: fmt.Sprintf("%s-%d", p, i), Type: models.ShipmentTypeInbound.String(), Status: shipmentStatus.String(),
 				CreatedBy: firmino.ID, TenantID: firmino.TenantID,
 			}
 			_ = as.createShipment(s, order)
@@ -142,8 +142,8 @@ func (as *ActionSuite) Test_ShipmentsShow() {
 		as.createOrder("ord2", models.OrderStatusAccepted, richarlson.TenantID, richarlson.ID, efaEve.ID)}
 	as.NotEqual(orders[0].TenantID, orders[1].TenantID)
 	var shipments = []*models.Shipment{
-		as.createShipment(models.Shipment{SerialNumber: "s1", Status: models.ShipmentStatusUnassigned.String(), CreatedBy: firmino.ID, TenantID: firmino.TenantID, Type: models.ShipmentTypeIncoming.String(), DriverID: nulls.NewUUID(salah.ID)}, orders[0]),
-		as.createShipment(models.Shipment{SerialNumber: "s2", Status: models.ShipmentStatusUnassigned.String(), CreatedBy: richarlson.ID, TenantID: richarlson.TenantID, Type: models.ShipmentTypeIncoming.String()}, orders[1]),
+		as.createShipment(models.Shipment{SerialNumber: "s1", Status: models.ShipmentStatusUnassigned.String(), CreatedBy: firmino.ID, TenantID: firmino.TenantID, Type: models.ShipmentTypeInbound.String(), DriverID: nulls.NewUUID(salah.ID)}, orders[0]),
+		as.createShipment(models.Shipment{SerialNumber: "s2", Status: models.ShipmentStatusUnassigned.String(), CreatedBy: richarlson.ID, TenantID: richarlson.TenantID, Type: models.ShipmentTypeInbound.String()}, orders[1]),
 	}
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
@@ -188,7 +188,7 @@ func (as *ActionSuite) Test_ShipmentsCreate() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			user := as.getLoggedInUser(test.username)
-			newShipment := models.Shipment{SerialNumber: user.Username, Type: models.ShipmentTypeIncoming.String(), Status: models.ShipmentStatusDelivered.String(), TenantID: firmino.TenantID, OrderID: nulls.NewUUID(order.ID)}
+			newShipment := models.Shipment{SerialNumber: user.Username, Type: models.ShipmentTypeInbound.String(), Status: models.ShipmentStatusDelivered.String(), TenantID: firmino.TenantID, OrderID: nulls.NewUUID(order.ID)}
 			req := as.setupRequest(user, "/shipments")
 			res := req.Post(newShipment)
 			as.Equal(test.responseCode, res.Code)
@@ -197,7 +197,7 @@ func (as *ActionSuite) Test_ShipmentsCreate() {
 				res.Bind(&shipment)
 				as.Equal(newShipment.SerialNumber, shipment.SerialNumber)
 				as.Equal(models.ShipmentStatusUnassigned.String(), shipment.Status)
-				as.Equal(models.ShipmentTypeIncoming.String(), shipment.Type)
+				as.Equal(models.ShipmentTypeInbound.String(), shipment.Type)
 				as.Equal(user.TenantID, shipment.TenantID)
 				as.Equal(order.ID, shipment.OrderID.UUID)
 			}
@@ -230,10 +230,10 @@ func (as *ActionSuite) Test_ShipmentsUpdate() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			user := as.getLoggedInUser(test.username)
-			newShipment := as.createShipment(models.Shipment{SerialNumber: "s1", Status: models.ShipmentStatusAssigned.String(), CreatedBy: firmino.ID, TenantID: firmino.TenantID, Type: models.ShipmentTypeIncoming.String(), DriverID: nulls.NewUUID(salah.ID)}, order)
+			newShipment := as.createShipment(models.Shipment{SerialNumber: "s1", Status: models.ShipmentStatusAssigned.String(), CreatedBy: firmino.ID, TenantID: firmino.TenantID, Type: models.ShipmentTypeInbound.String(), DriverID: nulls.NewUUID(salah.ID)}, order)
 			req := as.setupRequest(user, fmt.Sprintf("/shipments/%s", newShipment.ID))
 			// Try to update ID and tenant ID. Expect these calls to be excluded at update
-			updatedShipment := models.Shipment{SerialNumber: fmt.Sprintf("not%s", test.username), Status: models.ShipmentStatusDelivered.String(), Type: models.ShipmentTypeIncoming.String(), ID: user.ID, TenantID: user.ID}
+			updatedShipment := models.Shipment{SerialNumber: fmt.Sprintf("not%s", test.username), Status: models.ShipmentStatusDelivered.String(), Type: models.ShipmentTypeInbound.String(), ID: user.ID, TenantID: user.ID}
 			res := req.Put(updatedShipment)
 			as.Equal(test.responseCode, res.Code)
 			var dbShipment = *newShipment
@@ -280,7 +280,7 @@ func (as *ActionSuite) Test_ShipmentsDestroy() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			var name = fmt.Sprintf("shipment%s", test.username)
-			s := models.Shipment{SerialNumber: name, Type: models.ShipmentTypeIncoming.String(), Status: models.ShipmentStatusAccepted.String(),
+			s := models.Shipment{SerialNumber: name, Type: models.ShipmentTypeInbound.String(), Status: models.ShipmentStatusAccepted.String(),
 				CreatedBy: firmino.ID, TenantID: firmino.TenantID}
 			newShipment := as.createShipment(s, nil)
 

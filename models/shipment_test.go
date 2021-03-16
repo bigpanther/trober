@@ -14,8 +14,8 @@ func (ms *ModelSuite) Test_Shipment() {
 	}{
 		{&Shipment{}, 3},
 		{&Shipment{SerialNumber: "CANV0001"}, 2},
-		{&Shipment{SerialNumber: "CANV0001", Type: ShipmentTypeIncoming.String()}, 1},
-		{&Shipment{SerialNumber: "CANV0001", Type: ShipmentTypeIncoming.String(), Status: ShipmentStatusDelivered.String()}, 0},
+		{&Shipment{SerialNumber: "CANV0001", Type: ShipmentTypeInbound.String()}, 1},
+		{&Shipment{SerialNumber: "CANV0001", Type: ShipmentTypeInbound.String(), Status: ShipmentStatusDelivered.String()}, 0},
 		{&Shipment{Size: nulls.NewString("Invalid size")}, 4},
 	}
 	for i, test := range tests {

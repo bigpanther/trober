@@ -6,15 +6,15 @@ package models
 type ShipmentType string
 
 const (
-	// ShipmentTypeIncoming represents Incoming ShipmentType
-	ShipmentTypeIncoming ShipmentType = "Incoming"
-	// ShipmentTypeOutGoing represents OutGoing ShipmentType
-	ShipmentTypeOutGoing ShipmentType = "OutGoing"
+	// ShipmentTypeInbound represents Inbound ShipmentType
+	ShipmentTypeInbound ShipmentType = "Inbound"
+	// Outbound represents Outbound ShipmentType
+	Outbound ShipmentType = "Outbound"
 )
 
 var allowedShipmentType [2]ShipmentType = [2]ShipmentType{
-	ShipmentTypeIncoming,
-	ShipmentTypeOutGoing,
+	ShipmentTypeInbound,
+	Outbound,
 }
 
 // String returns the string representation of
@@ -25,5 +25,5 @@ func (k ShipmentType) String() string {
 // IsValidShipmentType validates if the input is a ShipmentType
 func IsValidShipmentType(s string) bool {
 	t := ShipmentType(s)
-	return ShipmentTypeIncoming == t || ShipmentTypeOutGoing == t
+	return ShipmentTypeInbound == t || Outbound == t
 }

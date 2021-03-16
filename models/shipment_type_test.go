@@ -9,7 +9,7 @@ import (
 )
 
 func TestIsValidShipmentType(t *testing.T) {
-	var validVal = "Incoming"
+	var validVal = "Inbound"
 	var inValidVal = "_someInvalidval_"
 	if !m.IsValidShipmentType(validVal) {
 		t.Fatalf("IsValidShipmentType(%q) should be true", validVal)

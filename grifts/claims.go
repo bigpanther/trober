@@ -2,6 +2,7 @@ package grifts
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/bigpanther/trober/firebase"
@@ -19,7 +20,8 @@ var _ = grift.Namespace("claims", func() {
 		}
 		for _, u := range users {
 			if err := firebase.SetClaims(c, &u); err != nil {
-				return err
+				fmt.Println(err)
+				//return err
 			}
 		}
 		return nil

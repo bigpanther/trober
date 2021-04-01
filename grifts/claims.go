@@ -18,8 +18,12 @@ var _ = grift.Namespace("claims", func() {
 		if err != nil {
 			return err
 		}
+		f, err := firebase.New()
+		if err != nil {
+			return err
+		}
 		for _, u := range users {
-			if err := firebase.SetClaims(c, &u); err != nil {
+			if err := f.SetClaims(c, &u); err != nil {
 				fmt.Println(err)
 				//return err
 			}
@@ -40,8 +44,11 @@ var _ = grift.Namespace("claims", func() {
 		if err != nil {
 			return err
 		}
-
-		u, err := firebase.GetUser(c, user.Username)
+		f, err := firebase.New()
+		if err != nil {
+			return err
+		}
+		u, err := f.GetUser(c, user.Username)
 		if err != nil {
 			return err
 		}

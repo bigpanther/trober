@@ -3,6 +3,7 @@ package actions
 import (
 	"testing"
 
+	"github.com/bigpanther/trober/firebase"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gobuffalo/suite/v3"
 )
@@ -12,9 +13,12 @@ type ActionSuite struct {
 }
 
 func Test_ActionSuite(t *testing.T) {
-	//Important! mock callback
-	sendNotifications = fakeSendNotification
-	action, err := suite.NewActionWithFixtures(App(), packr.New("Test_ActionSuite", "../fixtures"))
+	// TODO: Validate sendNotification callback by mocking the Firebase interface
+	f, err := firebase.New()
+	if err != nil {
+		t.Fatalf("error connecting to firebase: %v\n", err)
+	}
+	action, err := suite.NewActionWithFixtures(App(f), packr.New("Test_ActionSuite", "../fixtures"))
 	if err != nil {
 		t.Fatal(err)
 	}

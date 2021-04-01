@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/bigpanther/trober/actions"
+	"github.com/bigpanther/trober/firebase"
 )
 
 // main is the starting point for your Buffalo application.
@@ -13,7 +14,20 @@ import (
 // call `app.Serve()`, unless you don't want to start your
 // application that is. :)
 func main() {
-	app := actions.App()
+	isProd := actions.ENV == "production"
+	var (
+		f   firebase.Firebase
+		err error
+	)
+	if isProd {
+		f, err = firebase.New()
+	} else {
+		f, err = firebase.NewFake()
+	}
+	if err != nil {
+		log.Fatal("failed it initialize connection to firebase", err)
+	}
+	app := actions.App(f)
 	if err := app.Serve(); err != nil {
 		log.Fatal(err)
 	}

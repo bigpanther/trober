@@ -24,17 +24,17 @@ func TestTokenVerify(t *testing.T) {
 	os.Setenv("FIREBASE_SERVICE_ACCOUNT_JSON_ENCODED", encodedJSON)
 	ctx := context.Background()
 	var tokenToVerify = "..---"
-	token, err := firebase.VerifyIDToken(ctx, tokenToVerify)
+	f, err := firebase.New()
 	if err != nil {
-		t.Fatalf("error validating token: %v\n", err)
+		t.Fatalf("error connecting to firebase: %v\n", err)
 	}
-	user, err := firebase.GetUser(ctx, token.Subject)
+	user, err := f.GetUser(ctx, tokenToVerify)
 	if err != nil {
 		t.Fatalf("error getting user: %v\n", err)
 	}
 	//Print the email always
 	if user.Email != "test" {
-		t.Errorf("found user %s %s %s", user.Email, user.UID, token.Subject)
+		t.Errorf("found user %s %s", user.Email, user.UID)
 	}
 	fmt.Println(user.Email)
 }
@@ -71,7 +71,9 @@ func (as *ActionSuite) Test_CreateUserOnFirstLogin() {
 		Email:       email,
 		DisplayName: name,
 	}}, callback)
-	app.Middleware.Skip(setCurrentUser, h)
+	f, err := firebase.NewFake()
+	as.Nil(err)
+	app.Middleware.Skip(setCurrentUser(f), h)
 	app.Middleware.Skip(requireActiveUser, h)
 	app.GET("/testcreate", h)
 	req := as.JSON("/testcreate")
@@ -108,7 +110,9 @@ func (as *ActionSuite) Test_UpdateUserOnFirstLogin() {
 		Email:       email,
 		DisplayName: name,
 	}}, callback)
-	app.Middleware.Skip(setCurrentUser, h)
+	f, err := firebase.NewFake()
+	as.Nil(err)
+	app.Middleware.Skip(setCurrentUser(f), h)
 	app.Middleware.Skip(requireActiveUser, h)
 	app.GET("/testupdated", h)
 	req := as.JSON("/testupdated")

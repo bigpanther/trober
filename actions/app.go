@@ -51,8 +51,11 @@ var T *i18n.Translator
 // `ServeFiles` is a CATCH-ALL route, so it should always be
 // placed last in the route declarations, as it will prevent routes
 // declared after it to never be called.
-func App() *buffalo.App {
+func App(f firebase.Firebase) *buffalo.App {
 	if app == nil {
+		if f == nil {
+			log.Fatalln("firebase.Firebase cannot be nil")
+		}
 		app = buffalo.New(buffalo.Options{
 			Env:          ENV,
 			SessionStore: sessions.Null{},
@@ -78,18 +81,18 @@ func App() *buffalo.App {
 		//  c.Value("tx").(*pop.Connection)
 		// Remove to disable this.
 		app.Use(popmw.Transaction(models.DB))
-		app.Use(setCurrentUser, requireActiveUser)
+		app.Use(setCurrentUser(f), requireActiveUser)
 
 		app.GET("/", homeHandler)
 		app.GET("/appinfo", appInfoHandler)
-		app.Middleware.Skip(setCurrentUser, homeHandler, appInfoHandler)
+		app.Middleware.Skip(setCurrentUser(f), homeHandler, appInfoHandler)
 
 		app.Middleware.Skip(requireActiveUser, homeHandler, appInfoHandler, selfGet, selfGetTenant)
 		var selfGroup = app.Group("/self")
 		selfGroup.GET("/", selfGet)
 		selfGroup.GET("/tenant", selfGetTenant)
-		selfGroup.POST("/device-register", selfPostDeviceRegister)
-		selfGroup.POST("/device-remove", selfPostDeviceRemove)
+		selfGroup.POST("/device-register", selfPostDeviceRegister(f))
+		selfGroup.POST("/device-remove", selfPostDeviceRemove(f))
 		var tenantGroup = app.Group("/tenants")
 		tenantGroup.GET("/", requireSuperAdminUser(tenantsList))
 		tenantGroup.GET("/{tenant_id}", requireSuperAdminUser(tenantsShow))
@@ -133,7 +136,7 @@ func App() *buffalo.App {
 		orderGroup.PUT("/{order_id}", requireAtLeastBackOfficeUser(ordersUpdate))
 		orderGroup.DELETE("/{order_id}", requireAtLeastBackOfficeUser(ordersDestroy))
 
-		app.Worker.Register("sendNotifications", sendNotifications)
+		app.Worker.Register("sendNotifications", sendNotifications(f))
 		app.Worker.Register("testWorker", testWorker)
 	}
 
@@ -183,16 +186,19 @@ func restrictedScope(c buffalo.Context) pop.ScopeFunc {
 
 const currentUserKey = "current_user"
 
-func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
+func getCurrentUserFromToken(c buffalo.Context, f firebase.Firebase) (*models.User, error) {
 	userID := c.Request().Header.Get(xToken)
 	if userID == "" {
 		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("missing credentials", http.StatusText(http.StatusForbidden), nil)))
 	}
-	token, err := firebase.VerifyIDToken(c.Request().Context(), userID)
+	firebaseUser, err := f.GetUser(c.Request().Context(), userID)
 	if err != nil {
 		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("credential validation failed", http.StatusText(http.StatusForbidden), err)))
 	}
-	var username = token.Subject
+	if !firebaseUser.EmailVerified || firebaseUser.Disabled {
+		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("user disabled or email not verified", http.StatusText(http.StatusForbidden), nil)))
+	}
+	var username = firebaseUser.UID
 	u := &models.User{}
 	tx := c.Value("tx").(*pop.Connection)
 	err = tx.Where("username = ?", username).First(u)
@@ -200,30 +206,23 @@ func getCurrentUserFromToken(c buffalo.Context) (*models.User, error) {
 		return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), err)))
 	}
 	if u.ID == uuid.Nil {
-		remoteUser, err := firebase.GetUser(c.Request().Context(), username)
-		if err != nil {
-			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), errors.Wrap(err, "error fetching user details"))))
-		}
-		return createOrUpdateUserOnFirstLogin(c, remoteUser, sendMessage)
+		return createOrUpdateUserOnFirstLogin(c, firebaseUser, sendMessage)
 	}
 	return u, nil
 }
-func createOrUpdateUserOnFirstLogin(c buffalo.Context, remoteUser *auth.UserRecord, notificationCallback func(topics []string, messageTitle string, messageBody string, data map[string]string)) (*models.User, error) {
-	if !remoteUser.EmailVerified {
-		return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError("email not verified", http.StatusText(http.StatusForbidden), nil)))
-	}
+func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRecord, notificationCallback func(topics []string, messageTitle string, messageBody string, data map[string]string)) (*models.User, error) {
 	tx := c.Value("tx").(*pop.Connection)
 
 	u := &models.User{}
 	// Try to find by email
-	err := tx.Where("email = ?", remoteUser.Email).First(u)
+	err := tx.Where("email = ?", firebaseUser.Email).First(u)
 	if err != nil && errors.Cause(err) != sql.ErrNoRows {
 		log.Printf("error fetching user by email: %v\n", err)
 		return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), err)))
 	}
 	var valErrors *validate.Errors
 	if u.ID == uuid.Nil {
-		u = &models.User{Name: remoteUser.DisplayName, Role: models.UserRoleNone.String(), Username: remoteUser.UID, Email: remoteUser.Email}
+		u = &models.User{Name: firebaseUser.DisplayName, Role: models.UserRoleNone.String(), Username: firebaseUser.UID, Email: firebaseUser.Email}
 		t := &models.Tenant{}
 		err = tx.Where("type = ?", models.TenantTypeSystem).First(t)
 		if err != nil {
@@ -237,8 +236,8 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, remoteUser *auth.UserReco
 			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
 	} else {
-		u.Username = remoteUser.UID
-		u.Name = remoteUser.DisplayName
+		u.Username = firebaseUser.UID
+		u.Name = firebaseUser.DisplayName
 		valErrors, err = tx.ValidateAndUpdate(u)
 		if err != nil {
 			log.Printf("error updating user on login: %v\n", err)

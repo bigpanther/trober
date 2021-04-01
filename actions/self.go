@@ -23,28 +23,32 @@ func selfGetTenant(c buffalo.Context) error {
 	return c.Render(http.StatusOK, r.JSON(tenant))
 }
 
-func selfPostDeviceRegister(c buffalo.Context) error {
-	deviceB := deviceID{}
-	if err := c.Bind(&deviceB); err != nil {
-		return err
+func selfPostDeviceRegister(f firebase.Firebase) func(c buffalo.Context) error {
+	return func(c buffalo.Context) error {
+		deviceB := deviceID{}
+		if err := c.Bind(&deviceB); err != nil {
+			return err
+		}
+		if err := f.SubscribeToTopics(c, loggedInUser(c), deviceB.Token); err != nil {
+			return err
+		}
+		c.Response().WriteHeader(http.StatusNoContent)
+		return nil
 	}
-	if err := firebase.SubscribeToTopics(c, loggedInUser(c), deviceB.Token); err != nil {
-		return err
-	}
-	c.Response().WriteHeader(http.StatusNoContent)
-	return nil
 }
 
-func selfPostDeviceRemove(c buffalo.Context) error {
-	deviceB := deviceID{}
-	if err := c.Bind(&deviceB); err != nil {
-		return err
+func selfPostDeviceRemove(f firebase.Firebase) func(c buffalo.Context) error {
+	return func(c buffalo.Context) error {
+		deviceB := deviceID{}
+		if err := c.Bind(&deviceB); err != nil {
+			return err
+		}
+		if err := f.UnSubscribeToTopics(c, loggedInUser(c), deviceB.Token); err != nil {
+			return err
+		}
+		c.Response().WriteHeader(http.StatusNoContent)
+		return nil
 	}
-	if err := firebase.UnSubscribeToTopics(c, loggedInUser(c), deviceB.Token); err != nil {
-		return err
-	}
-	c.Response().WriteHeader(http.StatusNoContent)
-	return nil
 }
 
 type deviceID struct {

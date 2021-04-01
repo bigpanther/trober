@@ -2,7 +2,6 @@ package actions
 
 import (
 	"github.com/bigpanther/trober/models"
-	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/httptest"
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
@@ -77,8 +76,4 @@ func (as *ActionSuite) createUser(name string, role models.UserRole, email strin
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))
 	return newUser
-}
-func fakeSendNotification(args worker.Args) error {
-	//TODO: make assertable
-	return nil
 }

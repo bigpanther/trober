@@ -14,7 +14,7 @@ type ActionSuite struct {
 
 func Test_ActionSuite(t *testing.T) {
 	// TODO: Validate sendNotification callback by mocking the Firebase interface
-	f, err := firebase.New()
+	f, err := firebase.NewFake()
 	if err != nil {
 		t.Fatalf("error connecting to firebase: %v\n", err)
 	}

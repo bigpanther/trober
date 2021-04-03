@@ -39,7 +39,7 @@ func TestTokenVerify(t *testing.T) {
 	fmt.Println(user.Email)
 }
 
-func TestCreateOrUpdateUserOnFirstLoginEmailNotVerified(t *testing.T) {
+func Test_createOrUpdateUserOnFirstLoginEmailNotVerified(t *testing.T) {
 	app := buffalo.New(buffalo.NewOptions())
 	app.GET("/", testCreateOrUpdateUserOnFirstLoginHandler(&auth.UserRecord{EmailVerified: false}, nil))
 	ht := httptest.New(app)
@@ -53,6 +53,22 @@ func TestCreateOrUpdateUserOnFirstLoginEmailNotVerified(t *testing.T) {
 		t.Fatalf("expect %d, got %d", http.StatusForbidden, res.StatusCode)
 	}
 }
+
+func Test_getCurrentUserFromToken(t *testing.T) {
+	app := buffalo.New(buffalo.NewOptions())
+	app.GET("/", testCreateOrUpdateUserOnFirstLoginHandler(&auth.UserRecord{EmailVerified: false}, nil))
+	ht := httptest.New(app)
+	ts := httptest.NewServer(ht)
+	defer ts.Close()
+	res, err := http.Get(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if http.StatusForbidden != res.StatusCode {
+		t.Fatalf("expect %d, got %d", http.StatusForbidden, res.StatusCode)
+	}
+}
+
 func (as *ActionSuite) Test_CreateUserOnFirstLogin() {
 	as.LoadFixture("Tenant bootstrap")
 	var (
@@ -78,7 +94,7 @@ func (as *ActionSuite) Test_CreateUserOnFirstLogin() {
 	app.GET("/testcreate", h)
 	req := as.JSON("/testcreate")
 	res := req.Get()
-	as.Equal(http.StatusOK, res.Code, string(res.Body.Bytes()))
+	as.Equal(http.StatusOK, res.Code, res.Body.String())
 	var user = models.User{}
 	res.Bind(&user)
 	as.Equal(name, user.Name)
@@ -117,7 +133,7 @@ func (as *ActionSuite) Test_UpdateUserOnFirstLogin() {
 	app.GET("/testupdated", h)
 	req := as.JSON("/testupdated")
 	res := req.Get()
-	as.Equal(http.StatusOK, res.Code, string(res.Body.Bytes()))
+	as.Equal(http.StatusOK, res.Code, res.Body.String())
 	var user = models.User{}
 	res.Bind(&user)
 	as.Equal(name, user.Name)

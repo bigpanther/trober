@@ -80,7 +80,7 @@ func (as *ActionSuite) Test_CreateUserOnFirstLogin() {
 	)
 	message := make(chan string, 2)
 	defer close(message)
-	mockFirebase.EXPECT().SendAll(gomock.Any(), gomock.Any()).DoAndReturn(
+	mockFirebase.EXPECT().SendAll(gomock.Any(), gomock.Any()).Times(1).DoAndReturn(
 		func(c context.Context, messages []*messaging.Message) error {
 			message <- messages[0].Notification.Title
 			return nil
@@ -92,9 +92,7 @@ func (as *ActionSuite) Test_CreateUserOnFirstLogin() {
 		Email:       email,
 		DisplayName: name,
 	}})
-	f, err := firebase.NewFake()
-	as.Nil(err)
-	app.Middleware.Skip(setCurrentUser(f), h)
+	app.Middleware.Skip(setCurrentUser(mockFirebase), h)
 	app.Middleware.Skip(requireActiveUser, h)
 	app.GET("/testcreate", h)
 	req := as.JSON("/testcreate")
@@ -122,7 +120,7 @@ func (as *ActionSuite) Test_UpdateUserOnFirstLogin() {
 	var firmino = as.getLoggedInUser("firmino")
 	as.createUser("placeholder", models.UserRoleBackOffice, email, firmino.TenantID, nulls.UUID{})
 	defer close(message)
-	mockFirebase.EXPECT().SendAll(gomock.Any(), gomock.Any()).DoAndReturn(
+	mockFirebase.EXPECT().SendAll(gomock.Any(), gomock.Any()).Times(1).DoAndReturn(
 		func(c context.Context, messages []*messaging.Message) error {
 			message <- messages[0].Notification.Title
 			return nil
@@ -133,9 +131,7 @@ func (as *ActionSuite) Test_UpdateUserOnFirstLogin() {
 		Email:       email,
 		DisplayName: name,
 	}})
-	f, err := firebase.NewFake()
-	as.Nil(err)
-	app.Middleware.Skip(setCurrentUser(f), h)
+	app.Middleware.Skip(setCurrentUser(mockFirebase), h)
 	app.Middleware.Skip(requireActiveUser, h)
 	app.GET("/testupdated", h)
 	req := as.JSON("/testupdated")

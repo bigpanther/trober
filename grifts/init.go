@@ -10,9 +10,18 @@ import (
 )
 
 func init() {
-	f, err := firebase.NewFake()
+	isProd := actions.ENV == "production"
+	var (
+		f   firebase.Firebase
+		err error
+	)
+	if isProd {
+		f, err = firebase.New()
+	} else {
+		f, err = firebase.NewFake()
+	}
 	if err != nil {
-		log.Fatalln("failed to connect to fake firebase", err)
+		log.Fatal("failed it initialize connection to firebase", err)
 	}
 	buffalo.Grifts(actions.App(f))
 }

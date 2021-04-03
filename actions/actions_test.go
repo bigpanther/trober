@@ -15,7 +15,6 @@ type ActionSuite struct {
 var mockFirebase *MockFirebase
 
 func Test_ActionSuite(t *testing.T) {
-	// TODO: Validate sendNotification callback by mocking the Firebase interface
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockFirebase = NewMockFirebase(ctrl)

@@ -9,7 +9,7 @@ import (
 	"github.com/gobuffalo/buffalo/worker"
 )
 
-var sendNotifications = func(f firebase.Firebase) func(args worker.Args) error {
+func sendNotifications(f firebase.Firebase) func(args worker.Args) error {
 	return func(args worker.Args) error {
 		var tos = args["topics"].([]string)
 		msgTitle := args["message.title"].(string)

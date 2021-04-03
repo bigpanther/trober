@@ -221,6 +221,7 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRe
 		return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), err)))
 	}
 	var valErrors *validate.Errors
+	var topics = []string{firebase.GetSuperAdminTopic()}
 	if u.ID == uuid.Nil {
 		u = &models.User{Name: firebaseUser.DisplayName, Role: models.UserRoleNone.String(), Username: firebaseUser.UID, Email: firebaseUser.Email}
 		t := &models.Tenant{}
@@ -236,6 +237,7 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRe
 			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
 	} else {
+		// inivation scenario
 		u.Username = firebaseUser.UID
 		u.Name = firebaseUser.DisplayName
 		valErrors, err = tx.ValidateAndUpdate(u)
@@ -243,15 +245,13 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRe
 			log.Printf("error updating user on login: %v\n", err)
 			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
+		topics = []string{firebase.GetSuperAdminTopic(), firebase.GetAdminTopic(u)}
 	}
 	var message = "New user created"
-	var topics = []string{firebase.GetSuperAdminTopic()}
 
 	if valErrors.HasAny() {
 		log.Printf("validation error on user login: %s\n", valErrors.String())
 		message = "New user validation failed"
-		topics = []string{firebase.GetSuperAdminTopic(), firebase.GetAdminTopic(u)}
-
 	}
 	app.Worker.Perform(worker.Job{
 		Queue:   "default",

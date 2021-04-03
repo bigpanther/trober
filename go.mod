@@ -23,6 +23,7 @@ require (
 	github.com/gobuffalo/validate/v3 v3.3.0
 	github.com/gobuffalo/x v0.1.0
 	github.com/gofrs/uuid v4.0.0+incompatible
+	github.com/golang/mock v1.5.0 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect

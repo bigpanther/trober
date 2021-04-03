@@ -131,7 +131,7 @@ func usersUpdate(c buffalo.Context) error {
 			return c.Error(http.StatusBadRequest, err)
 		}
 		if err := checkEscalation(loggedInUser, newUser); err != nil {
-			return c.Error(http.StatusForbidden, err)
+			return c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
 	} else {
 		return c.Render(http.StatusOK, r.JSON(user))

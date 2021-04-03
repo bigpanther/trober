@@ -120,7 +120,7 @@ func (as *ActionSuite) Test_UpdateUserOnFirstLogin() {
 	var firmino = as.getLoggedInUser("firmino")
 	as.createUser("placeholder", models.UserRoleBackOffice, email, firmino.TenantID, nulls.UUID{})
 	defer close(message)
-	mockFirebase.EXPECT().SendAll(gomock.Any(), gomock.Any()).Times(1).DoAndReturn(
+	mockFirebase.EXPECT().SendAll(gomock.Any(), gomock.Len(1)).Times(1).DoAndReturn(
 		func(c context.Context, messages []*messaging.Message) error {
 			message <- messages[0].Notification.Title
 			return nil

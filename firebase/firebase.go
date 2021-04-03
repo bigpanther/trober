@@ -1,6 +1,6 @@
 package firebase
 
-//go:generate mockgen -destination mock_firebase_test.go -package firebase_test github.com/bigpanther/trober/firebase Firebase
+//go:generate mockgen -destination ../actions/mock_firebase_test.go -package actions github.com/bigpanther/trober/firebase Firebase
 
 import (
 	"context"

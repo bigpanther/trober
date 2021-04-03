@@ -9,11 +9,13 @@ import (
 	"time"
 
 	"firebase.google.com/go/v4/auth"
+	messaging "firebase.google.com/go/v4/messaging"
 	"github.com/bigpanther/trober/firebase"
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/httptest"
 	"github.com/gobuffalo/nulls"
+	"github.com/golang/mock/gomock"
 )
 
 func TestTokenVerify(t *testing.T) {
@@ -39,9 +41,9 @@ func TestTokenVerify(t *testing.T) {
 	fmt.Println(user.Email)
 }
 
-func Test_createOrUpdateUserOnFirstLoginEmailNotVerified(t *testing.T) {
+func Test_createOrUpdateUserOnFirstLoginInvalidEmail(t *testing.T) {
 	app := buffalo.New(buffalo.NewOptions())
-	app.GET("/", testCreateOrUpdateUserOnFirstLoginHandler(&auth.UserRecord{EmailVerified: false}, nil))
+	app.GET("/", testCreateOrUpdateUserOnFirstLoginHandler(&auth.UserRecord{UserInfo: &auth.UserInfo{Email: "doesnotexist@bigpanther.ca"}}))
 	ht := httptest.New(app)
 	ts := httptest.NewServer(ht)
 	defer ts.Close()
@@ -49,14 +51,14 @@ func Test_createOrUpdateUserOnFirstLoginEmailNotVerified(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if http.StatusForbidden != res.StatusCode {
-		t.Fatalf("expect %d, got %d", http.StatusForbidden, res.StatusCode)
+	if http.StatusInternalServerError != res.StatusCode {
+		t.Fatalf("expect %d, got %d", http.StatusInternalServerError, res.StatusCode)
 	}
 }
 
 func Test_getCurrentUserFromToken(t *testing.T) {
 	app := buffalo.New(buffalo.NewOptions())
-	app.GET("/", testCreateOrUpdateUserOnFirstLoginHandler(&auth.UserRecord{EmailVerified: false}, nil))
+	app.GET("/", testGetCurrentUserFromToken(mockFirebase))
 	ht := httptest.New(app)
 	ts := httptest.NewServer(ht)
 	defer ts.Close()
@@ -78,15 +80,18 @@ func (as *ActionSuite) Test_CreateUserOnFirstLogin() {
 	)
 	message := make(chan string, 2)
 	defer close(message)
-	callback := func(topics []string, messageTitle string, messageBody string, data map[string]string) {
-		message <- messageTitle
-	}
+	mockFirebase.EXPECT().SendAll(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(c context.Context, messages []*messaging.Message) error {
+			message <- messages[0].Notification.Title
+			return nil
+		})
+
 	app := as.App
 	h := testCreateOrUpdateUserOnFirstLoginHandler(&auth.UserRecord{EmailVerified: true, UserInfo: &auth.UserInfo{
 		UID:         uid,
 		Email:       email,
 		DisplayName: name,
-	}}, callback)
+	}})
 	f, err := firebase.NewFake()
 	as.Nil(err)
 	app.Middleware.Skip(setCurrentUser(f), h)
@@ -117,15 +122,17 @@ func (as *ActionSuite) Test_UpdateUserOnFirstLogin() {
 	var firmino = as.getLoggedInUser("firmino")
 	as.createUser("placeholder", models.UserRoleBackOffice, email, firmino.TenantID, nulls.UUID{})
 	defer close(message)
-	callback := func(topics []string, messageTitle string, messageBody string, data map[string]string) {
-		message <- messageTitle
-	}
+	mockFirebase.EXPECT().SendAll(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(c context.Context, messages []*messaging.Message) error {
+			message <- messages[0].Notification.Title
+			return nil
+		})
 	app := as.App
 	h := testCreateOrUpdateUserOnFirstLoginHandler(&auth.UserRecord{EmailVerified: true, UserInfo: &auth.UserInfo{
 		UID:         uid,
 		Email:       email,
 		DisplayName: name,
-	}}, callback)
+	}})
 	f, err := firebase.NewFake()
 	as.Nil(err)
 	app.Middleware.Skip(setCurrentUser(f), h)
@@ -147,9 +154,19 @@ func (as *ActionSuite) Test_UpdateUserOnFirstLogin() {
 	}, time.Second*3, time.Second)
 }
 
-func testCreateOrUpdateUserOnFirstLoginHandler(remoteUser *auth.UserRecord, notificationCallback func(topics []string, messageTitle string, messageBody string, data map[string]string)) buffalo.Handler {
+func testCreateOrUpdateUserOnFirstLoginHandler(remoteUser *auth.UserRecord) buffalo.Handler {
 	return func(c buffalo.Context) error {
-		u, err := createOrUpdateUserOnFirstLogin(c, remoteUser, notificationCallback)
+		u, err := createOrUpdateUserOnFirstLogin(c, remoteUser)
+		if err != nil {
+			return err
+		}
+		return c.Render(http.StatusOK, r.JSON(u))
+	}
+}
+
+func testGetCurrentUserFromToken(f firebase.Firebase) buffalo.Handler {
+	return func(c buffalo.Context) error {
+		u, err := getCurrentUserFromToken(c, f)
 		if err != nil {
 			return err
 		}

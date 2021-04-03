@@ -206,11 +206,11 @@ func getCurrentUserFromToken(c buffalo.Context, f firebase.Firebase) (*models.Us
 		return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), err)))
 	}
 	if u.ID == uuid.Nil {
-		return createOrUpdateUserOnFirstLogin(c, firebaseUser, sendMessage)
+		return createOrUpdateUserOnFirstLogin(c, firebaseUser)
 	}
 	return u, nil
 }
-func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRecord, notificationCallback func(topics []string, messageTitle string, messageBody string, data map[string]string)) (*models.User, error) {
+func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRecord) (*models.User, error) {
 	tx := c.Value("tx").(*pop.Connection)
 
 	u := &models.User{}
@@ -253,24 +253,20 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRe
 		topics = []string{firebase.GetSuperAdminTopic(), firebase.GetAdminTopic(u)}
 
 	}
-	notificationCallback(topics, message, fmt.Sprintf("Name: %s", u.Name), map[string]string{
-		"name": u.Name,
-		"id":   u.ID.String(),
-	})
-	return u, nil
-}
-
-func sendMessage(topics []string, messageTitle string, messageBody string, data map[string]string) {
 	app.Worker.Perform(worker.Job{
 		Queue:   "default",
 		Handler: "sendNotifications",
 		Args: worker.Args{
 			"topics":        topics,
-			"message.title": messageTitle,
-			"message.body":  messageBody,
-			"message.data":  data,
+			"message.title": message,
+			"message.body":  fmt.Sprintf("Name: %s", u.Name),
+			"message.data": map[string]string{
+				"name": u.Name,
+				"id":   u.ID.String(),
+			},
 		},
 	})
+	return u, nil
 }
 
 func loggedInUser(c buffalo.Context) *models.User {

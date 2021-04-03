@@ -10,7 +10,6 @@ import (
 	"github.com/bigpanther/trober/firebase"
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v5"
 	"github.com/gofrs/uuid"
@@ -251,36 +250,28 @@ func shipmentsUpdate(c buffalo.Context) error {
 	}
 	if shouldNotifyCustomer {
 		if shipment.CustomerID.Valid {
-			app.Worker.Perform(worker.Job{
-				Queue:   "default",
-				Handler: "sendNotifications",
-				Args: worker.Args{
-					"topics":        []string{firebase.GetCustomerTopic(loggedInUser.TenantID.String(), shipment.CustomerID.UUID.String())},
-					"message.title": fmt.Sprintf("Your shipment has been delivered - %s", shipment.SerialNumber),
-					"message.body":  shipment.SerialNumber,
-					"message.data": map[string]string{
-						"shipment.id":           shipment.ID.String(),
-						"shipment.serialNumber": shipment.SerialNumber,
-					},
+			sendNotificationsAsync(
+				[]string{firebase.GetCustomerTopic(loggedInUser.TenantID.String(), shipment.CustomerID.UUID.String())},
+				fmt.Sprintf("Your shipment has been delivered - %s", shipment.SerialNumber),
+				shipment.SerialNumber,
+				map[string]string{
+					"shipment.id":           shipment.ID.String(),
+					"shipment.serialNumber": shipment.SerialNumber,
 				},
-			})
+			)
 		}
 	}
 	if loggedInUser.IsDriver() {
-		app.Worker.Perform(worker.Job{
-			Queue:   "default",
-			Handler: "sendNotifications",
-			Args: worker.Args{
-				"topics":        []string{firebase.GetBackOfficeTopic(loggedInUser)},
-				"message.title": fmt.Sprintf("Shipment updated by driver - %s: %s", shipment.SerialNumber, shipment.Status),
-				"message.body":  shipment.SerialNumber,
-				"message.data": map[string]string{
-					"shipment.id":           shipment.ID.String(),
-					"shipment.serialNumber": shipment.SerialNumber,
-					"shipment.status":       shipment.Status,
-				},
+		sendNotificationsAsync(
+			[]string{firebase.GetBackOfficeTopic(loggedInUser)},
+			fmt.Sprintf("Shipment updated by driver - %s: %s", shipment.SerialNumber, shipment.Status),
+			shipment.SerialNumber,
+			map[string]string{
+				"shipment.id":           shipment.ID.String(),
+				"shipment.serialNumber": shipment.SerialNumber,
+				"shipment.status":       shipment.Status,
 			},
-		})
+		)
 	}
 	if loggedInUser.IsAtLeastBackOffice() {
 		if shipment.DriverID.Valid && (shipment.Status != models.ShipmentStatusAssigned.String() || shipment.Status != models.ShipmentStatusAccepted.String()) {
@@ -288,19 +279,15 @@ func shipmentsUpdate(c buffalo.Context) error {
 			if shipment.Status != models.ShipmentStatusAccepted.String() {
 				message = fmt.Sprintf("Your assignment has been updated - %s", shipment.SerialNumber)
 			}
-			app.Worker.Perform(worker.Job{
-				Queue:   "default",
-				Handler: "sendNotifications",
-				Args: worker.Args{
-					"topics":        []string{firebase.GetDriverTopic(loggedInUser.TenantID.String(), shipment.DriverID.UUID.String())},
-					"message.title": message,
-					"message.body":  shipment.SerialNumber,
-					"message.data": map[string]string{
-						"shipment.id":           shipment.ID.String(),
-						"shipment.serialNumber": shipment.SerialNumber,
-					},
+			sendNotificationsAsync(
+				[]string{firebase.GetDriverTopic(loggedInUser.TenantID.String(), shipment.DriverID.UUID.String())},
+				message,
+				shipment.SerialNumber,
+				map[string]string{
+					"shipment.id":           shipment.ID.String(),
+					"shipment.serialNumber": shipment.SerialNumber,
 				},
-			})
+			)
 		}
 	}
 	return c.Render(http.StatusOK, r.JSON(shipment))

@@ -10,7 +10,6 @@ import (
 	"github.com/bigpanther/trober/firebase"
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo/worker"
 	"github.com/gobuffalo/envy"
 	forcessl "github.com/gobuffalo/mw-forcessl"
 	i18n "github.com/gobuffalo/mw-i18n"
@@ -212,7 +211,6 @@ func getCurrentUserFromToken(c buffalo.Context, f firebase.Firebase) (*models.Us
 }
 func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRecord) (*models.User, error) {
 	tx := c.Value("tx").(*pop.Connection)
-
 	u := &models.User{}
 	// Try to find by email
 	err := tx.Where("email = ?", firebaseUser.Email).First(u)
@@ -253,19 +251,15 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRe
 		log.Printf("validation error on user login: %s\n", valErrors.String())
 		message = "New user validation failed"
 	}
-	app.Worker.Perform(worker.Job{
-		Queue:   "default",
-		Handler: "sendNotifications",
-		Args: worker.Args{
-			"topics":        topics,
-			"message.title": message,
-			"message.body":  fmt.Sprintf("Name: %s", u.Name),
-			"message.data": map[string]string{
-				"name": u.Name,
-				"id":   u.ID.String(),
-			},
+	sendNotificationsAsync(
+		topics,
+		message,
+		fmt.Sprintf("Name: %s", u.Name),
+		map[string]string{
+			"name": u.Name,
+			"id":   u.ID.String(),
 		},
-	})
+	)
 	return u, nil
 }
 

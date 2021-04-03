@@ -8,6 +8,7 @@ import (
 
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/nulls"
+	"github.com/golang/mock/gomock"
 )
 
 func (as *ActionSuite) Test_ShipmentsList() {
@@ -207,7 +208,6 @@ func (as *ActionSuite) Test_ShipmentsCreate() {
 
 func (as *ActionSuite) Test_ShipmentsUpdate() {
 	as.LoadFixture("Tenant bootstrap")
-	//as.App.Worker.Register("sendNotifications", fakeSendNotification)
 	var tests = []struct {
 		username     string
 		responseCode int
@@ -226,7 +226,7 @@ func (as *ActionSuite) Test_ShipmentsUpdate() {
 	efaLiv := as.getCustomer("EFA Liv")
 	order := as.createOrder("order", models.OrderStatusOpen, firmino.TenantID, firmino.ID, efaLiv.ID)
 	salah := as.getLoggedInUser("salah")
-
+	mockFirebase.EXPECT().SendAll(gomock.Any(), gomock.Any()).AnyTimes()
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			user := as.getLoggedInUser(test.username)

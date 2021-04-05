@@ -171,13 +171,12 @@ func shipmentsUpdate(c buffalo.Context) error {
 		fallthrough
 	case models.ShipmentStatusInTransit:
 		fallthrough
-	case models.ShipmentStatusRejected:
-		newShipment.DriverID = nulls.UUID{}
-		fallthrough
 	case models.ShipmentStatusArrived:
 		if !loggedInUser.IsBackOffice() {
 			return c.Error(http.StatusBadRequest, errors.New("invalid status"))
 		}
+	case models.ShipmentStatusRejected:
+		newShipment.DriverID = nulls.UUID{}
 	}
 	if loggedInUser.IsDriver() {
 		//readonly fields

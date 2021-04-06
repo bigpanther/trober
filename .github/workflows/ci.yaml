@@ -44,7 +44,7 @@ jobs:
         run: |
           export API_VERSION=0.0.1
           cd sdk;
-          wget https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/5.1.0/openapi-generator-cli-5.1.0.jar -O openapi-generator-cli.jar
+          wget --no-verbose https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/5.1.0/openapi-generator-cli-5.1.0.jar -O openapi-generator-cli.jar
           rm -rf trober_sdk; java -jar openapi-generator-cli.jar generate -i trober.yaml -c config.yaml -g dart-dio-next -o trober_sdk -p pubVersion=$API_VERSION
           cp LICENSE trober_sdk/LICENSE; echo "See https://github.com/bigpanther/trober/releases/tag/v$API_VERSION" > trober_sdk/CHANGELOG.md
           cd trober_sdk;

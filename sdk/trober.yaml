@@ -1,12 +1,11 @@
 openapi: 3.0.3
 servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/harsimranmaan/jober/0.1.5
-  - description: SwaggerHub API Auto Mocking
+  - description: The trober test API
     url: https://trober-test.herokuapp.com
+  - description: The trober production API
+    url: https://trober.herokuapp.com
 info:
-  version: "0.1.7"
+  version: "0.1.8"
   title: Trober API
   description: >-
     The trober API

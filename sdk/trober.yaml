@@ -1123,14 +1123,17 @@ components:
         id:
           type: string
           format: uuid
+          nullable: false
           readOnly: true
         created_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         updated_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         created_by:
           type: string
@@ -1138,9 +1141,11 @@ components:
           readOnly: true
         name:
           type: string
+          nullable: false
           minLength: 3
           maxLength: 50
         code:
+          nullable: false
           type: string
           minLength: 6
           maxLength: 20
@@ -1158,11 +1163,13 @@ components:
         minVersion:
           type: string
           readOnly: true
+          nullable: false
     DeviceId:
       type: object
       properties:
         token:
           type: string
+          nullable: false
       required:
         - token
     User:
@@ -1179,13 +1186,16 @@ components:
           type: string
           format: uuid
           readOnly: true
+          nullable: false
         created_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         updated_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         created_by:
           type: string
@@ -1194,6 +1204,7 @@ components:
         tenant_id:
           type: string
           format: uuid
+          nullable: false
         customer_id:
           type: string
           format: uuid
@@ -1201,15 +1212,19 @@ components:
           type: string
           minLength: 3
           maxLength: 50
+          nullable: false
         username:
           type: string
           minLength: 3
           maxLength: 50
+          nullable: false
         email:
           type: string
           minLength: 3
           maxLength: 50
+          nullable: false
         role:
+          nullable: false
           $ref: "#/components/schemas/UserRole"
       description: A user in the system
     Customers:
@@ -1227,13 +1242,16 @@ components:
           type: string
           format: uuid
           readOnly: true
+          nullable: false
         created_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         updated_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         created_by:
           type: string
@@ -1242,12 +1260,12 @@ components:
         tenant_id:
           type: string
           format: uuid
+          nullable: false
         name:
           type: string
           minLength: 3
           maxLength: 50
-        orders:
-          $ref: "#/components/schemas/Orders"
+          nullable: false
     Terminals:
       type: array
       items:
@@ -1260,13 +1278,16 @@ components:
           type: string
           format: uuid
           readOnly: true
+          nullable: false
         created_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         updated_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         created_by:
           type: string
@@ -1275,11 +1296,15 @@ components:
         tenant_id:
           type: string
           format: uuid
+          nullable: false
         name:
+          nullable: false
           type: string
           minLength: 3
           maxLength: 50
         type:
+          nullable: false
+
           $ref: "#/components/schemas/TerminalType"
       description: A terminal that used for logistics
     Carriers:
@@ -1298,22 +1323,27 @@ components:
           type: string
           format: uuid
           readOnly: true
+          nullable: false
         created_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         updated_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         created_by:
           type: string
           format: uuid
           readOnly: true
         tenant_id:
+          nullable: false
           type: string
           format: uuid
         name:
+          nullable: false
           type: string
           minLength: 3
           maxLength: 50
@@ -1322,9 +1352,8 @@ components:
           format: date-time
           readOnly: true
         type:
+          nullable: false
           $ref: "#/components/schemas/CarrierType"
-        shipments:
-          $ref: "#/components/schemas/Shipments"
       description: A carrier that ships the shipments
     Shipments:
       type: array
@@ -1335,28 +1364,30 @@ components:
       type: object
       properties:
         id:
+          nullable: false
           type: string
           format: uuid
           readOnly: true
         created_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         updated_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         created_by:
+          nullable: false
           type: string
           format: uuid
           readOnly: true
         tenant_id:
+          nullable: false
           type: string
           format: uuid
         carrier_id:
-          type: string
-          format: uuid
-        terminal_id:
           type: string
           format: uuid
         order_id:
@@ -1366,6 +1397,8 @@ components:
           type: string
           format: uuid
         serial_number:
+          nullable: false
+
           type: string
           minLength: 5
           maxLength: 11
@@ -1377,9 +1410,6 @@ components:
           type: string
           minLength: 7
           maxLength: 20
-        lfd:
-          type: string
-          format: date-time
         reservation_time:
           type: string
           format: date-time
@@ -1388,6 +1418,7 @@ components:
         type:
           $ref: "#/components/schemas/ShipmentType"
         status:
+          nullable: false
           $ref: "#/components/schemas/ShipmentStatus"
         driver_id:
           type: string
@@ -1398,8 +1429,6 @@ components:
           $ref: "#/components/schemas/Order"
         customer:
           $ref: "#/components/schemas/Customer"
-        terminal:
-          $ref: "#/components/schemas/Terminal"
         carrier:
           $ref: "#/components/schemas/Carrier"
       description: A shipment that is being shipped
@@ -1412,38 +1441,43 @@ components:
       type: object
       properties:
         id:
+          nullable: false
           type: string
           format: uuid
           readOnly: true
         created_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         updated_at:
           type: string
           format: date-time
+          nullable: false
           readOnly: true
         created_by:
           type: string
           format: uuid
           readOnly: true
         tenant_id:
+          nullable: false
           type: string
           format: uuid
         customer_id:
           type: string
           format: uuid
         serial_number:
+          nullable: false
           type: string
           minLength: 7
           maxLength: 25
         status:
+          nullable: false
           $ref: "#/components/schemas/OrderStatus"
         customer:
+          nullable: false
           $ref: "#/components/schemas/Customer"
-        shipments:
-          $ref: "#/components/schemas/Shipments"
-      description: A shipment that is being shipped
+      description: A customer order that is being processed
     TenantType:
       type: string
       enum:
@@ -1519,11 +1553,17 @@ components:
         code:
           type: integer
           format: int32
+          nullable: false
+
         message:
           type: string
+          nullable: false
+
         id:
           type: string
           format: uuid
+          nullable: false
+
   securitySchemes:
     ApiKeyAuth:
       type: apiKey

@@ -2,3 +2,5 @@ trober_sdk
 .dart_tool
 .packages
 migrations/schema.sql
+openapi-dart-generator.jar
+openapi-generator-cli*

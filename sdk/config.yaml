@@ -4,3 +4,4 @@ pubDescription: The trober SDK
 pubHomepage: https://bigpanther.ca/shipanther
 pubLibrary: trober_sdk
 pubName: trober_sdk
+nullSafe: true

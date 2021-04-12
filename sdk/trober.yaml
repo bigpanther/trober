@@ -5,7 +5,7 @@ servers:
   - description: The trober production API
     url: https://trober.herokuapp.com
 info:
-  version: "0.1.8"
+  version: "0.1.9"
   title: Trober API
   description: >-
     The trober API
@@ -1116,15 +1116,19 @@ components:
     Tenant:
       type: object
       required:
+        - id
         - name
         - code
         - type
+        - created_at
+        - updated_at
       properties:
         id:
           type: string
           format: uuid
           nullable: false
           readOnly: true
+          default: "00000000-0000-0000-0000-000000000000"
         created_at:
           type: string
           format: date-time
@@ -1159,6 +1163,8 @@ components:
       description: A list of Users
     AppInfo:
       type: object
+      required:
+        - minVersion
       properties:
         minVersion:
           type: string
@@ -1175,18 +1181,22 @@ components:
     User:
       type: object
       required:
+        - id
         - name
         - code
         - role
         - tenant_id
         - email
         - username
+        - created_at
+        - updated_at
       properties:
         id:
           type: string
           format: uuid
           readOnly: true
           nullable: false
+          default: '00000000-0000-0000-0000-000000000000'
         created_at:
           type: string
           format: date-time
@@ -1235,14 +1245,18 @@ components:
     Customer:
       type: object
       required:
+        - id
         - name
         - tenant_id
+        - created_at
+        - updated_at
       properties:
         id:
           type: string
           format: uuid
           readOnly: true
           nullable: false
+          default: '00000000-0000-0000-0000-000000000000'
         created_at:
           type: string
           format: date-time
@@ -1304,7 +1318,6 @@ components:
           maxLength: 50
         type:
           nullable: false
-
           $ref: "#/components/schemas/TerminalType"
       description: A terminal that used for logistics
     Carriers:
@@ -1315,6 +1328,7 @@ components:
     Carrier:
       type: object
       required:
+        - id
         - name
         - tenant_id
         - type
@@ -1324,6 +1338,7 @@ components:
           format: uuid
           readOnly: true
           nullable: false
+          default: '00000000-0000-0000-0000-000000000000'
         created_at:
           type: string
           format: date-time
@@ -1362,12 +1377,20 @@ components:
       description: A list of Shipments
     Shipment:
       type: object
+      required:
+        - id
+        - serial_number
+        - tenant_id
+        - type
+        - created_at
+        - updated_at
       properties:
         id:
           nullable: false
           type: string
           format: uuid
           readOnly: true
+          default: '00000000-0000-0000-0000-000000000000'
         created_at:
           type: string
           format: date-time
@@ -1398,7 +1421,6 @@ components:
           format: uuid
         serial_number:
           nullable: false
-
           type: string
           minLength: 5
           maxLength: 11
@@ -1439,12 +1461,20 @@ components:
       description: A list of Orders
     Order:
       type: object
+      required:
+        - id
+        - serial_number
+        - tenant_id
+        - status
+        - created_at
+        - updated_at
       properties:
         id:
           nullable: false
           type: string
           format: uuid
           readOnly: true
+          default: "00000000-0000-0000-0000-000000000000"
         created_at:
           type: string
           format: date-time
@@ -1554,15 +1584,14 @@ components:
           type: integer
           format: int32
           nullable: false
-
         message:
           type: string
           nullable: false
-
         id:
           type: string
           format: uuid
           nullable: false
+          default: "00000000-0000-0000-0000-000000000000"
 
   securitySchemes:
     ApiKeyAuth:

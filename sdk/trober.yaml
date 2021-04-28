@@ -1383,6 +1383,7 @@ components:
         - type
         - created_at
         - updated_at
+        - status
       properties:
         id:
           nullable: false

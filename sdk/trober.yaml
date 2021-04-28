@@ -1128,7 +1128,6 @@ components:
           format: uuid
           nullable: false
           readOnly: true
-          default: "00000000-0000-0000-0000-000000000000"
         created_at:
           type: string
           format: date-time
@@ -1474,7 +1473,6 @@ components:
           type: string
           format: uuid
           readOnly: true
-          default: "00000000-0000-0000-0000-000000000000"
         created_at:
           type: string
           format: date-time
@@ -1591,7 +1589,6 @@ components:
           type: string
           format: uuid
           nullable: false
-          default: "00000000-0000-0000-0000-000000000000"
 
   securitySchemes:
     ApiKeyAuth:

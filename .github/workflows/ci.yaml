@@ -25,7 +25,7 @@ jobs:
           tar -xzf buffalo_0.16.21_Linux_x86_64.tar.gz
           export PATH="$PATH:$(pwd)"
           make test
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v2
   test-linux:
     name: Build
     runs-on: ubuntu-latest

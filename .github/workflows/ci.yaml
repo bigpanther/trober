@@ -21,8 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
-          wget --no-verbose https://github.com/gobuffalo/buffalo/releases/download/v0.16.21/buffalo_0.16.21_Linux_x86_64.tar.gz
-          tar -xzf buffalo_0.16.21_Linux_x86_64.tar.gz
+          wget --no-verbose https://github.com/gobuffalo/cli/releases/download/v0.17.5/buffalo_0.17.5_Linux_x86_64.tar.gz
+          tar -xzf buffalo_0.17.5_Linux_x86_64.tar.gz
           export PATH="$PATH:$(pwd)"
           make test
       - uses: codecov/codecov-action@v2

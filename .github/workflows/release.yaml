@@ -56,16 +56,6 @@ jobs:
       - name: Create & Publish package
         run: |
           export TROBER_VERSION=${GITHUB_REF##*/v}
-          mkdir -p ~/.pub-cache
-          cat <<EOF > ~/.pub-cache/credentials.json
-          {
-            "accessToken":"${{ secrets.PUB_DEV_ACCESS_TOKEN }}",
-            "refreshToken":"${{ secrets.PUB_DEV_REFRESH_TOKEN }}",
-            "tokenEndpoint":"https://accounts.google.com/o/oauth2/token",
-            "scopes": [ "openid", "https://www.googleapis.com/auth/userinfo.email" ],
-            "expiration": 1604987955347
-          }
-          EOF
           cd sdk
           npm install @openapitools/openapi-generator-cli
           rm -rf trober_sdk
@@ -76,8 +66,17 @@ jobs:
           mv trober_sdk /tmp
           # publish complains about being gitignored
           cd /tmp/trober_sdk
-
           dart pub get; dart run build_runner build;
           rm -rf .dart-tool .openapi-* .packages pubspec.lock node_modules
+          mkdir -p ~/.pub-cache
+          cat <<EOF > ~/.pub-cache/credentials.json
+          {
+            "accessToken":"${{ secrets.PUB_DEV_ACCESS_TOKEN }}",
+            "refreshToken":"${{ secrets.PUB_DEV_REFRESH_TOKEN }}",
+            "tokenEndpoint":"https://accounts.google.com/o/oauth2/token",
+            "scopes": [ "openid", "https://www.googleapis.com/auth/userinfo.email" ],
+            "expiration": 1604987955347
+          }
+          EOF
           dart pub publish -f
           rm -rf ~/.pub-cache

@@ -47,11 +47,15 @@ jobs:
       - name: Gen and verify sdk
         run: |
           export API_VERSION=0.0.1
-          cd sdk;
+          cd sdk
           npm install @openapitools/openapi-generator-cli
-          rm -rf trober_sdk; npx @openapitools/openapi-generator-cli generate -i trober.yaml -c config.yaml -g dart-dio -o trober_sdk -p pubVersion=$API_VERSION
+          rm -rf trober_sdk
+          npx @openapitools/openapi-generator-cli generate -i trober.yaml -c config.yaml -g dart-dio -o trober_sdk -p pubVersion=$API_VERSION
           cp LICENSE trober_sdk/LICENSE; echo "See https://github.com/bigpanther/trober/releases/tag/v$API_VERSION" > trober_sdk/CHANGELOG.md; cp README.md trober_sdk/README.md
-          cd trober_sdk;
-          dart pub get; dart run build_runner build;
-          rm -rf .dart-tool .openapi-* .packages pubspec.lock npm_modules
+          mv trober_sdk /tmp
+          # publish complains about being gitignored
+          cd /tmp/trober_sdk
+          dart pub get
+          dart run build_runner build
+          rm -rf .dart-tool .openapi-* .packages pubspec.lock npm_modules .gitignore
           dart pub publish --dry-run

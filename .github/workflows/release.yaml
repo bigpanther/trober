@@ -66,11 +66,16 @@ jobs:
             "expiration": 1604987955347
           }
           EOF
-          cd sdk;
+          cd sdk
           npm install @openapitools/openapi-generator-cli
-          rm -rf trober_sdk; npx @openapitools/openapi-generator-cli generate -i trober.yaml -c config.yaml -g dart-dio -o trober_sdk -p pubVersion=$TROBER_VERSION
-          cp LICENSE trober_sdk/LICENSE; echo "See https://github.com/bigpanther/trober/releases/tag/v$TROBER_VERSION" > trober_sdk/CHANGELOG.md; cp README.md trober_sdk/README.md
-          cd trober_sdk;
+          rm -rf trober_sdk
+          npx @openapitools/openapi-generator-cli generate -i trober.yaml -c config.yaml -g dart-dio -o trober_sdk -p pubVersion=$TROBER_VERSION
+          cp LICENSE trober_sdk/LICENSE
+          echo "See https://github.com/bigpanther/trober/releases/tag/v$TROBER_VERSION" > trober_sdk/CHANGELOG.md
+          cp README.md trober_sdk/README.md
+          mv trober_sdk /tmp
+          # publish complains about being gitignored
+          cd /tmp/trober_sdk
 
           dart pub get; dart run build_runner build;
           rm -rf .dart-tool .openapi-* .packages pubspec.lock node_modules

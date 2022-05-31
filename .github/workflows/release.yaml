@@ -71,7 +71,7 @@ jobs:
           cd /tmp/trober_sdk
           dart pub get; dart run build_runner build;
           rm -rf .dart-tool .openapi-* .packages pubspec.lock node_modules
-          mkdir -p ~/.pub-cache
+          mkdir -p $XDG_CONFIG_HOME/dart
           cat <<EOF > $XDG_CONFIG_HOME/dart/pub-credentials.json
           {
             "accessToken":"$PUB_DEV_ACCESS_TOKEN",

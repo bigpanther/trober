@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: echo "TROBER_VERSION_TO_SET=${GITHUB_REF##*/}" >> $GITHUB_ENV
-      - run: echo "TROBER_MIN_VERSION_TO_SET=0.0.11" >> $GITHUB_ENV
+      - run: echo "TROBER_MIN_VERSION_TO_SET=0.0.14" >> $GITHUB_ENV
       - uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
@@ -54,6 +54,9 @@ jobs:
           distribution: 'zulu'
           java-version: "16"
       - name: Create & Publish package
+        env:
+          PUB_DEV_ACCESS_TOKEN: ${{ secrets.PUB_DEV_ACCESS_TOKEN }}
+          PUB_DEV_REFRESH_TOKEN: ${{ secrets.PUB_DEV_REFRESH_TOKEN }}
         run: |
           export TROBER_VERSION=${GITHUB_REF##*/v}
           cd sdk
@@ -71,8 +74,8 @@ jobs:
           mkdir -p ~/.pub-cache
           cat <<EOF > $XDG_CONFIG_HOME/dart/pub-credentials.json
           {
-            "accessToken":"${{ secrets.PUB_DEV_ACCESS_TOKEN }}",
-            "refreshToken":"${{ secrets.PUB_DEV_REFRESH_TOKEN }}",
+            "accessToken":"$PUB_DEV_ACCESS_TOKEN",
+            "refreshToken":"$PUB_DEV_REFRESH_TOKEN",
             "tokenEndpoint":"https://accounts.google.com/o/oauth2/token",
             "scopes": [ "openid", "https://www.googleapis.com/auth/userinfo.email" ],
             "expiration": 1604987955347

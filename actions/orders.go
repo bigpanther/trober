@@ -9,7 +9,7 @@ import (
 
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/pop/v6"
 )
 
 // Following naming logic is implemented in Buffalo:
@@ -97,6 +97,8 @@ func ordersCreate(c buffalo.Context) error {
 
 	// Bind order to request body
 	if err := c.Bind(order); err != nil {
+		c.Logger().Errorf("error binding order: %v\n", err)
+
 		return err
 	}
 
@@ -137,6 +139,8 @@ func ordersUpdate(c buffalo.Context) error {
 	newOrder := &models.Order{}
 	// Bind Order to request body
 	if err := c.Bind(newOrder); err != nil {
+		c.Logger().Errorf("error binding order: %v\n", err)
+
 		return err
 	}
 	if newOrder.SerialNumber != order.SerialNumber || newOrder.Status != order.Status {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/bigpanther/trober/firebase"
@@ -12,16 +13,15 @@ import (
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/envy"
 	forcessl "github.com/gobuffalo/mw-forcessl"
-	i18n "github.com/gobuffalo/mw-i18n"
+	i18n "github.com/gobuffalo/mw-i18n/v2"
 	paramlogger "github.com/gobuffalo/mw-paramlogger"
-	"github.com/gobuffalo/packr/v2"
-	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
 	"github.com/unrolled/secure"
 
-	"github.com/gobuffalo/buffalo-pop/v2/pop/popmw"
+	"github.com/gobuffalo/buffalo-pop/v3/pop/popmw"
 	contenttype "github.com/gobuffalo/mw-contenttype"
 	"github.com/gobuffalo/x/sessions"
 	"github.com/rs/cors"
@@ -148,7 +148,7 @@ func App(f firebase.Firebase) *buffalo.App {
 // for more information: https://gobuffalo.io/en/docs/localization
 func translations() buffalo.MiddlewareFunc {
 	var err error
-	if T, err = i18n.New(packr.New("app:locales", "../locales"), "en-US"); err != nil {
+	if T, err = i18n.New(os.DirFS("../locales"), "en-US"); err != nil {
 		app.Stop(err)
 	}
 	return T.Middleware()
@@ -215,7 +215,7 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRe
 	// Try to find by email
 	err := tx.Where("email = ?", firebaseUser.Email).First(u)
 	if err != nil && errors.Cause(err) != sql.ErrNoRows {
-		log.Printf("error fetching user by email: %v\n", err)
+		c.Logger().Errorf("error fetching user by email: %v\n", err)
 		return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), err)))
 	}
 	var valErrors *validate.Errors
@@ -225,13 +225,13 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRe
 		t := &models.Tenant{}
 		err = tx.Where("type = ?", models.TenantTypeSystem).First(t)
 		if err != nil {
-			log.Printf("error fetching system tenant: %v\n", err)
+			c.Logger().Errorf("error fetching system tenant: %v\n", err)
 			return nil, c.Render(http.StatusInternalServerError, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusInternalServerError), errors.Wrap(err, "failed to find user tenant"))))
 		}
 		u.TenantID = t.ID
 		valErrors, err = tx.ValidateAndCreate(u)
 		if err != nil {
-			log.Printf("error creating user on login: %v\n", err)
+			c.Logger().Errorf("error creating user on login: %v\n", err)
 			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
 	} else {
@@ -240,7 +240,7 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRe
 		u.Name = firebaseUser.DisplayName
 		valErrors, err = tx.ValidateAndUpdate(u)
 		if err != nil {
-			log.Printf("error updating user on login: %v\n", err)
+			c.Logger().Errorf("error updating user on login: %v\n", err)
 			return nil, c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
 		topics = []string{firebase.GetSuperAdminTopic(), firebase.GetAdminTopic(u)}
@@ -248,7 +248,7 @@ func createOrUpdateUserOnFirstLogin(c buffalo.Context, firebaseUser *auth.UserRe
 	var message = "New user created"
 
 	if valErrors.HasAny() {
-		log.Printf("validation error on user login: %s\n", valErrors.String())
+		c.Logger().Errorf("validation error on user login: %s\n", valErrors.String())
 		message = "New user validation failed"
 	}
 	sendNotificationsAsync(

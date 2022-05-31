@@ -1,5 +1,5 @@
-name = "trober"
-bin = "bin/trober"
+name = "coke"
+bin = "bin/coke"
 vcs = "git"
 with_pop = true
 with_sqlite = false

@@ -1,7 +1,7 @@
 ARG TROBER_VERSION=dev
 ARG TROBER_COMMIT=dev
 ARG TROBER_MIN_VERSION=0.0.1
-FROM gobuffalo/buffalo:v0.17.3 as builder
+FROM gobuffalo/buffalo:v0.18.6-slim as builder
 ARG TROBER_VERSION
 ARG TROBER_COMMIT
 ARG TROBER_MIN_VERSION
@@ -19,7 +19,7 @@ COPY go.sum go.sum
 RUN go mod download
 
 ADD . .
-RUN buffalo build -o /bin/trober --ldflags="-X github.com/bigpanther/trober/actions.version=${TROBER_VERSION} -X github.com/bigpanther/trober/actions.minimumSupportedVersion=${TROBER_MIN_VERSION} -X github.com/bigpanther/trober/actions.commit=${TROBER_COMMIT}"
+RUN buffalo build --static -o /bin/trober --ldflags="-X github.com/bigpanther/trober/actions.version=${TROBER_VERSION} -X github.com/bigpanther/trober/actions.minimumSupportedVersion=${TROBER_MIN_VERSION} -X github.com/bigpanther/trober/actions.commit=${TROBER_COMMIT}"
 
 FROM alpine
 RUN apk add --no-cache bash ca-certificates

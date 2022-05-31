@@ -8,7 +8,7 @@ import (
 
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/pop/v6"
 )
 
 // Following naming logic is implemented in Buffalo:
@@ -40,6 +40,7 @@ func carriersList(c buffalo.Context) error {
 	// Retrieve all Carriers from the DB
 	// Order by the ones that are going to arrive soon
 	if err := q.Scope(restrictedScope(c)).Order(fmt.Sprintf("GREATEST(-(now()-eta),(now()-eta)), %s", orderByCreatedAtDesc)).All(carriers); err != nil {
+		c.Logger().Errorf("error retrieving carriers: %v\n", err)
 		return err
 	}
 	return c.Render(http.StatusOK, r.JSON(carriers))
@@ -78,6 +79,7 @@ func carriersCreate(c buffalo.Context) error {
 
 	// Bind carrier to request body
 	if err := c.Bind(carrier); err != nil {
+		c.Logger().Errorf("error binding carrier: %v\n", err)
 		return err
 	}
 
@@ -116,6 +118,7 @@ func carriersUpdate(c buffalo.Context) error {
 	newCarrier := &models.Carrier{}
 	// Bind carrier to request body
 	if err := c.Bind(newCarrier); err != nil {
+		c.Logger().Errorf("error binding carrier: %v\n", err)
 		return err
 	}
 	if newCarrier.Name != carrier.Name || newCarrier.Type != carrier.Type || newCarrier.Eta != carrier.Eta {

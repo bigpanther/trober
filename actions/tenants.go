@@ -10,7 +10,7 @@ import (
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/nulls"
-	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/pop/v6"
 )
 
 // Following naming logic is implemented in Buffalo:
@@ -80,6 +80,8 @@ func tenantsCreate(c buffalo.Context) error {
 
 	// Bind tenant to request body
 	if err := c.Bind(tenant); err != nil {
+		c.Logger().Errorf("error binding tenant: %v\n", err)
+
 		return err
 	}
 	tenant.CreatedBy = nulls.NewUUID(loggedInUser(c).ID)
@@ -111,6 +113,8 @@ func tenantsUpdate(c buffalo.Context) error {
 	newTenant := &models.Tenant{}
 	// Bind Tenant to request body
 	if err := c.Bind(newTenant); err != nil {
+		c.Logger().Errorf("error binding tenant: %v\n", err)
+
 		return err
 	}
 	if newTenant.Name != tenant.Name || newTenant.Type != tenant.Type || newTenant.Code != tenant.Code {

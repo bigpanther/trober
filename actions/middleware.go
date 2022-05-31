@@ -7,7 +7,7 @@ import (
 	"github.com/bigpanther/trober/firebase"
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/pop/v6"
 )
 
 // setCurrentUser attempts to find a user based on the firebase token in the request headers

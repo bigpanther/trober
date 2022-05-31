@@ -11,7 +11,7 @@ import (
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/nulls"
-	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 )
 
@@ -46,6 +46,7 @@ func usersList(c buffalo.Context) error {
 
 	// Retrieve all Users from the DB
 	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(users); err != nil {
+		c.Logger().Errorf("error retrieving users: %v\n", err)
 		return err
 	}
 	return c.Render(http.StatusOK, r.JSON(users))
@@ -61,6 +62,7 @@ func usersShow(c buffalo.Context) error {
 	var populatedFields = []string{"Customer"}
 
 	if err := tx.Eager(populatedFields...).Scope(restrictedScope(c)).Find(user, c.Param("user_id")); err != nil {
+		c.Logger().Errorf("error retrieving user: %v\n", err)
 		return c.Error(http.StatusNotFound, err)
 	}
 	return c.Render(http.StatusOK, r.JSON(user))
@@ -74,10 +76,11 @@ func usersCreate(c buffalo.Context) error {
 	user := &models.User{}
 	// Bind user to request body
 	if err := c.Bind(user); err != nil {
+		c.Logger().Errorf("error binding user: %v\n", err)
 		return err
 	}
 	if user.IsSuperAdmin() {
-		return c.Render(http.StatusBadRequest, r.JSON(models.NewCustomError(http.StatusText(http.StatusBadRequest), fmt.Sprint(http.StatusBadRequest), errors.New("User Role value is not valid"))))
+		return c.Render(http.StatusBadRequest, r.JSON(models.NewCustomError(http.StatusText(http.StatusBadRequest), fmt.Sprint(http.StatusBadRequest), errors.New("user Role value is not valid"))))
 	}
 
 	tx := c.Value("tx").(*pop.Connection)
@@ -91,9 +94,11 @@ func usersCreate(c buffalo.Context) error {
 	user.CreatedBy = nulls.NewUUID(loggedInUser.ID)
 	verrs, err := tx.ValidateAndCreate(user)
 	if err != nil {
+		c.Logger().Errorf("user create error: %v\n", err)
 		return err
 	}
 	if verrs.HasAny() {
+		c.Logger().Errorf("user create errors: %v\n", verrs.String())
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
 	return c.Render(http.StatusCreated, r.JSON(user))
@@ -110,11 +115,13 @@ func usersUpdate(c buffalo.Context) error {
 		return c.Error(http.StatusNotFound, err)
 	}
 	if user.IsSuperAdmin() {
+		c.Logger().Errorf("superuser update attempt detected \n")
 		return c.Render(http.StatusBadRequest, r.JSON(models.NewCustomError(http.StatusText(http.StatusBadRequest), fmt.Sprint(http.StatusBadRequest), errors.New("updating superuser not allowed"))))
 	}
 	newUser := &models.User{}
 	// Bind user to request body
 	if err := c.Bind(newUser); err != nil {
+		c.Logger().Errorf("error binding user: %v\n", err)
 		return err
 	}
 	var loggedInUser = loggedInUser(c)
@@ -130,7 +137,7 @@ func usersUpdate(c buffalo.Context) error {
 		if err := checkCustomerUser(c, tx, newUser); err != nil {
 			return c.Error(http.StatusBadRequest, err)
 		}
-		if err := checkEscalation(loggedInUser, newUser); err != nil {
+		if err := checkEscalation(c, loggedInUser, newUser); err != nil {
 			return c.Render(http.StatusForbidden, r.JSON(models.NewCustomError(err.Error(), http.StatusText(http.StatusForbidden), err)))
 		}
 	} else {
@@ -139,10 +146,12 @@ func usersUpdate(c buffalo.Context) error {
 
 	verrs, err := tx.ValidateAndUpdate(user)
 	if err != nil {
+		c.Logger().Errorf("error updating user: %v\n", err)
 		return err
 	}
 
 	if verrs.HasAny() {
+		c.Logger().Errorf("user update errors: %v\n", verrs.String())
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
 
@@ -162,6 +171,7 @@ func usersDestroy(c buffalo.Context) error {
 	}
 
 	if err := tx.Destroy(user); err != nil {
+		c.Logger().Errorf("error deleting user: %v\n", err)
 		return err
 	}
 	c.Response().WriteHeader(http.StatusNoContent)
@@ -175,6 +185,7 @@ func checkCustomerUser(c buffalo.Context, tx *pop.Connection, user *models.User)
 		// User must belong to a customer in the same tenant
 		err := tx.Scope(restrictedScope(c)).Where("tenant_id = ?", user.TenantID).Find(customer, user.CustomerID)
 		if err != nil || user.TenantID != customer.TenantID {
+			c.Logger().Errorf("x-tenant access attempt detected: %v\n", err)
 			return errors.New("invalid customer association")
 		}
 	} else {
@@ -185,11 +196,14 @@ func checkCustomerUser(c buffalo.Context, tx *pop.Connection, user *models.User)
 
 var errEscalatePrivileges = errors.New("cannot escalate privileges beyond your own role")
 
-func checkEscalation(self *models.User, user *models.User) error {
+func checkEscalation(c buffalo.Context, self *models.User, user *models.User) error {
 	if self.IsBackOffice() && (user.Role == models.UserRoleAdmin.String() || user.Role == models.UserRoleSuperAdmin.String()) {
+		c.Logger().Errorf("back office escalate privileges attempt detected\n")
 		return errEscalatePrivileges
 	}
 	if self.IsAdmin() && user.Role == models.UserRoleSuperAdmin.String() {
+		c.Logger().Errorf("admin escalate privileges attempt detected\n")
+
 		return errEscalatePrivileges
 	}
 	return nil

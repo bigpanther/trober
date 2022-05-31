@@ -1,10 +1,10 @@
 package actions
 
 import (
+	"os"
 	"testing"
 
-	"github.com/gobuffalo/packr/v2"
-	"github.com/gobuffalo/suite/v3"
+	"github.com/gobuffalo/suite/v4"
 	"github.com/golang/mock/gomock"
 )
 
@@ -18,7 +18,7 @@ func Test_ActionSuite(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockFirebase = NewMockFirebase(ctrl)
-	action, err := suite.NewActionWithFixtures(App(mockFirebase), packr.New("Test_ActionSuite", "../fixtures"))
+	action, err := suite.NewActionWithFixtures(App(mockFirebase), os.DirFS("../fixtures"))
 	if err != nil {
 		t.Fatal(err)
 	}

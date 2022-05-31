@@ -9,7 +9,7 @@ import (
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/nulls"
-	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/pop/v6"
 )
 
 // Following naming logic is implemented in Buffalo:
@@ -21,7 +21,6 @@ import (
 // customersList gets all Customers. This function is mapped to the path
 // GET /customers
 func customersList(c buffalo.Context) error {
-
 	tx := c.Value("tx").(*pop.Connection)
 	customerName := strings.Trim(c.Param("name"), " '")
 
@@ -76,6 +75,7 @@ func customersCreate(c buffalo.Context) error {
 
 	// Bind customer to request body
 	if err := c.Bind(customer); err != nil {
+		c.Logger().Errorf("error binding customer: %v\n", err)
 		return err
 	}
 
@@ -86,10 +86,12 @@ func customersCreate(c buffalo.Context) error {
 
 	verrs, err := tx.ValidateAndCreate(customer)
 	if err != nil {
+		c.Logger().Errorf("error creating customer: %v\n", err)
 		return err
 	}
 
 	if verrs.HasAny() {
+		c.Logger().Errorf("customer create errors: %v\n", verrs.String())
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
 
@@ -110,6 +112,8 @@ func customersUpdate(c buffalo.Context) error {
 	newCustomer := &models.Customer{}
 	// Bind customer to request body
 	if err := c.Bind(newCustomer); err != nil {
+		c.Logger().Errorf("error binding customer: %v\n", err)
+
 		return err
 	}
 	if newCustomer.Name != customer.Name {

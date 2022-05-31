@@ -279,6 +279,7 @@ func (as *ActionSuite) Test_OrdersDestroy() {
 			} else {
 				order := models.Order{}
 				err = as.DB.Where("serial_number=?", name).First(&order)
+				as.Nil(err)
 				//Not deleted yet
 				as.Equal(name, order.SerialNumber)
 			}

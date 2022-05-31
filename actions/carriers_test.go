@@ -303,6 +303,7 @@ func (as *ActionSuite) Test_CarriersDestroy() {
 			} else {
 				carrier := models.Carrier{}
 				err = as.DB.Where("name=?", name).First(&carrier)
+				as.Nil(err)
 				//Not deleted yet
 				as.Equal(name, carrier.Name)
 			}

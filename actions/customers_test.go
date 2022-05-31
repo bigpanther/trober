@@ -252,6 +252,7 @@ func (as *ActionSuite) Test_CustomersDestroy() {
 			} else {
 				customer := models.Customer{}
 				err = as.DB.Where("name=?", name).First(&customer)
+				as.Nil(err)
 				//Not deleted yet
 				as.Equal(name, customer.Name)
 			}

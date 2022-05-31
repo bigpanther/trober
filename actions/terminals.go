@@ -8,7 +8,7 @@ import (
 
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/pop/v6"
 )
 
 // Following naming logic is implemented in Buffalo:
@@ -71,6 +71,8 @@ func terminalsCreate(c buffalo.Context) error {
 
 	// Bind terminal to request body
 	if err := c.Bind(terminal); err != nil {
+		c.Logger().Errorf("error binding terminal: %v\n", err)
+
 		return err
 	}
 
@@ -105,6 +107,8 @@ func terminalsUpdate(c buffalo.Context) error {
 	newTerminal := &models.Terminal{}
 	// Bind Terminal to request body
 	if err := c.Bind(newTerminal); err != nil {
+		c.Logger().Errorf("error binding terminal: %v\n", err)
+
 		return err
 	}
 	if newTerminal.Name != terminal.Name || newTerminal.Type != terminal.Type {

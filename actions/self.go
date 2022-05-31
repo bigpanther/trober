@@ -6,7 +6,7 @@ import (
 	"github.com/bigpanther/trober/firebase"
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/pop/v6"
 )
 
 func selfGet(c buffalo.Context) error {
@@ -27,6 +27,8 @@ func selfPostDeviceRegister(f firebase.Firebase) func(c buffalo.Context) error {
 	return func(c buffalo.Context) error {
 		deviceB := deviceID{}
 		if err := c.Bind(&deviceB); err != nil {
+			c.Logger().Errorf("error binding deviceid: %v\n", err)
+
 			return err
 		}
 		if err := f.SubscribeToTopics(c, loggedInUser(c), deviceB.Token); err != nil {
@@ -41,6 +43,8 @@ func selfPostDeviceRemove(f firebase.Firebase) func(c buffalo.Context) error {
 	return func(c buffalo.Context) error {
 		deviceB := deviceID{}
 		if err := c.Bind(&deviceB); err != nil {
+			c.Logger().Errorf("error binding deviceid: %v\n", err)
+
 			return err
 		}
 		if err := f.UnSubscribeToTopics(c, loggedInUser(c), deviceB.Token); err != nil {

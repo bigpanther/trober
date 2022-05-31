@@ -11,7 +11,7 @@ import (
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/nulls"
-	"github.com/gobuffalo/pop/v5"
+	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 )
 
@@ -111,6 +111,8 @@ func shipmentsCreate(c buffalo.Context) error {
 	shipment := &models.Shipment{}
 	// Bind shipment to request body
 	if err := c.Bind(shipment); err != nil {
+		c.Logger().Errorf("error binding shipment: %v\n", err)
+
 		return err
 	}
 	tx := c.Value("tx").(*pop.Connection)
@@ -161,6 +163,7 @@ func shipmentsUpdate(c buffalo.Context) error {
 	}
 	newShipment := &models.Shipment{}
 	if err := c.Bind(newShipment); err != nil {
+		c.Logger().Errorf("error binding shipment: %v\n", err)
 		return err
 	}
 	if loggedInUser.IsDriver() {
@@ -173,7 +176,7 @@ func shipmentsUpdate(c buffalo.Context) error {
 		fallthrough
 	case models.ShipmentStatusArrived:
 		if !loggedInUser.IsBackOffice() {
-			return c.Error(http.StatusBadRequest, errors.New("invalid status"))
+			return c.Error(http.StatusBadRequest, fmt.Errorf("invalid status: %s", newShipment.Status))
 		}
 	case models.ShipmentStatusRejected:
 		newShipment.DriverID = nulls.UUID{}

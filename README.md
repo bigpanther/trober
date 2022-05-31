@@ -5,3 +5,11 @@
 [![codecov](https://codecov.io/gh/bigpanther/trober/branch/main/graph/badge.svg)](https://codecov.io/gh/bigpanther/trober)
 
 The shipment tracking API
+
+## Local env setup
+
+```
+make seed
+docker start trober-postgres
+buffalo dev
+```

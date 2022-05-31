@@ -69,7 +69,7 @@ jobs:
           dart pub get; dart run build_runner build;
           rm -rf .dart-tool .openapi-* .packages pubspec.lock node_modules
           mkdir -p ~/.pub-cache
-          cat <<EOF > ~/.pub-cache/credentials.json
+          cat <<EOF > $XDG_CONFIG_HOME/dart/pub-credentials.json
           {
             "accessToken":"${{ secrets.PUB_DEV_ACCESS_TOKEN }}",
             "refreshToken":"${{ secrets.PUB_DEV_REFRESH_TOKEN }}",
@@ -79,4 +79,4 @@ jobs:
           }
           EOF
           dart pub publish -f
-          rm -rf ~/.pub-cache
+          rm -rf $XDG_CONFIG_HOME/dart/pub-credentials.json

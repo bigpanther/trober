@@ -1580,8 +1580,7 @@ components:
         - id
       properties:
         code:
-          type: integer
-          format: int32
+          type: string
           nullable: false
         message:
           type: string

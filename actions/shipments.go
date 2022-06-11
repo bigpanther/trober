@@ -117,7 +117,6 @@ func shipmentsCreate(c buffalo.Context) error {
 	}
 	tx := c.Value("tx").(*pop.Connection)
 	var loggedInUser = loggedInUser(c)
-	shipment.Status = models.ShipmentStatusUnassigned.String()
 	shipment.TenantID = loggedInUser.TenantID
 	shipment.CreatedBy = loggedInUser.ID
 
@@ -130,6 +129,12 @@ func shipmentsCreate(c buffalo.Context) error {
 		shipment.DriverID = nulls.NewUUID(loggedInUser.ID)
 	} else if err := checkDriverID(c, tx, loggedInUser, shipment.DriverID); err != nil {
 		return c.Error(http.StatusBadRequest, err)
+	}
+	if shipment.DriverID.Valid && shipment.Status == models.ShipmentStatusUnassigned.String() {
+		shipment.Status = models.ShipmentStatusAssigned.String()
+	}
+	if shipment.Status == "" {
+		shipment.Status = models.ShipmentStatusUnassigned.String()
 	}
 	if err := checkTerminalID(c, tx, loggedInUser, shipment.TerminalID); err != nil {
 		return c.Error(http.StatusBadRequest, err)

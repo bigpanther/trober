@@ -197,7 +197,7 @@ func (as *ActionSuite) Test_ShipmentsCreate() {
 				var shipment = models.Shipment{}
 				res.Bind(&shipment)
 				as.Equal(newShipment.SerialNumber, shipment.SerialNumber)
-				as.Equal(models.ShipmentStatusUnassigned.String(), shipment.Status)
+				as.Equal(models.ShipmentStatusDelivered.String(), shipment.Status)
 				as.Equal(models.ShipmentTypeInbound.String(), shipment.Type)
 				as.Equal(user.TenantID, shipment.TenantID)
 				as.Equal(order.ID, shipment.OrderID.UUID)

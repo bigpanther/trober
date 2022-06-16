@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/models"
@@ -26,7 +25,7 @@ import (
 func usersList(c buffalo.Context) error {
 
 	tx := c.Value("tx").(*pop.Connection)
-	userName := strings.Trim(c.Param("name"), " '")
+	userName := c.Param("name")
 	userRole := c.Param("role")
 	users := &models.Users{}
 
@@ -38,7 +37,7 @@ func usersList(c buffalo.Context) error {
 		if len(userName) < 2 {
 			return c.Render(http.StatusOK, r.JSON(users))
 		}
-		q = q.Where("name ILIKE ?", fmt.Sprintf("%s%%", userName))
+		q = q.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", userName))
 	}
 	if userRole != "" {
 		q = q.Where("role = ?", userRole)

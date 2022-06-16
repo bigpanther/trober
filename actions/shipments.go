@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/firebase"
@@ -28,7 +27,7 @@ func shipmentsList(c buffalo.Context) error {
 
 	tx := c.Value("tx").(*pop.Connection)
 
-	shipmentSerialNumber := strings.Trim(c.Param("serial_number"), " '")
+	shipmentSerialNumber := c.Param("serial_number")
 	shipmentType := c.Param("type")
 	shipmentSize := c.Param("size")
 	shipmentStatus := c.Param("status")
@@ -43,7 +42,7 @@ func shipmentsList(c buffalo.Context) error {
 		if len(shipmentSerialNumber) < 2 {
 			return c.Render(http.StatusOK, r.JSON(shipments))
 		}
-		q = q.Where("serial_number ILIKE ?", fmt.Sprintf("%s%%", shipmentSerialNumber))
+		q = q.Where("serial_number ILIKE ?", fmt.Sprintf("%%%s%%", shipmentSerialNumber))
 	}
 	if shipmentType != "" {
 		q = q.Where("type = ?", shipmentType)

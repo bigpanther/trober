@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/models"
@@ -23,7 +22,7 @@ import (
 func ordersList(c buffalo.Context) error {
 	var loggedInUser = loggedInUser(c)
 	tx := c.Value("tx").(*pop.Connection)
-	orderSerialNumber := strings.Trim(c.Param("serial_number"), " '")
+	orderSerialNumber := c.Param("serial_number")
 	orderStatus := c.Param("status")
 	orders := &models.Orders{}
 
@@ -35,7 +34,7 @@ func ordersList(c buffalo.Context) error {
 		if len(orderSerialNumber) < 2 {
 			return c.Render(http.StatusOK, r.JSON(orders))
 		}
-		q = q.Where("serial_number ILIKE ?", fmt.Sprintf("%s%%", orderSerialNumber))
+		q = q.Where("serial_number ILIKE ?", fmt.Sprintf("%%%s%%", orderSerialNumber))
 	}
 	customerID := c.Param("customer_id")
 	if loggedInUser.IsCustomer() {

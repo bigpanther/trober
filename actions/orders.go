@@ -127,16 +127,24 @@ func ordersCreate(c buffalo.Context) error {
 	if err := checkTerminalID(c, tx, loggedInUser, order.TerminalID); err != nil {
 		return c.Error(http.StatusBadRequest, err)
 	}
-	for i := range order.Shipments {
-		order.Shipments[i].TenantID = order.TenantID
-		order.Shipments[i].Type = order.Type
-		order.Shipments[i].TerminalID = order.TerminalID
-		order.Shipments[i].CarrierID = order.CarrierID
-		order.Shipments[i].Lfd = order.Lfd
-		order.Shipments[i].ReservationTime = order.Erd
-		order.Shipments[i].CustomerID = nulls.NewUUID(order.CustomerID)
-		order.Shipments[i].CreatedBy = loggedInUser.ID
+	// Need a copy here
+	var shipments = models.Shipments{}
+	for _, s := range order.Shipments {
+		shipment := models.Shipment{}
+		shipment.TenantID = order.TenantID
+		shipment.Type = order.Type
+		shipment.TerminalID = order.TerminalID
+		shipment.CarrierID = order.CarrierID
+		shipment.Lfd = order.Lfd
+		shipment.ReservationTime = order.Erd
+		shipment.CustomerID = nulls.NewUUID(order.CustomerID)
+		shipment.CreatedBy = loggedInUser.ID
+		shipment.SerialNumber = s.SerialNumber
+		shipment.Size = s.Size
+		shipment.Status = s.Status
+		shipments = append(shipments, shipment)
 	}
+	order.Shipments = shipments
 	c.Logger().Warnf("creating %d shipments with the order", len(order.Shipments))
 	verrs, err := tx.Eager("Shipments").ValidateAndCreate(order)
 	if err != nil {

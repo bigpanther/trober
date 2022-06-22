@@ -1551,7 +1551,7 @@ components:
         terminal:
           nullable: true
           $ref: "#/components/schemas/Terminal"
-        Shipments:
+        shipments:
           $ref: "#/components/schemas/Shipments"
       description: A customer order that is being processed
     TenantType:

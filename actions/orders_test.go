@@ -159,7 +159,7 @@ func (as *ActionSuite) Test_OrdersCreateWithShipments() {
 	var firmino = as.getLoggedInUser("firmino")
 	efaLiv := as.getCustomer("EFA Liv")
 	newOrder := models.Order{SerialNumber: "orderWithShipments", Status: models.OrderStatusAccepted.String(), TenantID: firmino.TenantID, CustomerID: efaLiv.ID}
-	newOrder.Shipments = []models.Shipment{
+	newOrder.Shipments = models.Shipments{
 		{
 			SerialNumber: "123",
 			TenantID:     firmino.TenantID,

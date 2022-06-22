@@ -124,6 +124,9 @@ func ordersCreate(c buffalo.Context) error {
 	if err := checkCarrierID(c, tx, loggedInUser, order.CarrierID); err != nil {
 		return c.Error(http.StatusBadRequest, err)
 	}
+	if err := checkTerminalID(c, tx, loggedInUser, order.TerminalID); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
 	for i := range order.Shipments {
 		order.Shipments[i].TenantID = order.TenantID
 		order.Shipments[i].Type = order.Type
@@ -135,7 +138,7 @@ func ordersCreate(c buffalo.Context) error {
 		order.Shipments[i].CreatedBy = loggedInUser.ID
 	}
 	c.Logger().Warnf("creating %d shipments with the order", len(order.Shipments))
-	verrs, err := tx.Eager().ValidateAndCreate(order)
+	verrs, err := tx.Eager("Shipments").ValidateAndCreate(order)
 	if err != nil {
 		return err
 	}

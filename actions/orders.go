@@ -8,6 +8,7 @@ import (
 
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 )
@@ -126,8 +127,14 @@ func ordersCreate(c buffalo.Context) error {
 	for i := range order.Shipments {
 		order.Shipments[i].TenantID = order.TenantID
 		order.Shipments[i].Type = order.Type
+		order.Shipments[i].TerminalID = order.TerminalID
+		order.Shipments[i].CarrierID = order.CarrierID
+		order.Shipments[i].Lfd = order.Lfd
+		order.Shipments[i].ReservationTime = order.Erd
+		order.Shipments[i].CustomerID = nulls.NewUUID(order.CustomerID)
 		order.Shipments[i].CreatedBy = loggedInUser.ID
 	}
+	c.Logger().Warnf("creating %d shipments with the order", len(order.Shipments))
 	verrs, err := tx.Eager().ValidateAndCreate(order)
 	if err != nil {
 		return err

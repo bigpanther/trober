@@ -1,6 +1,8 @@
 package actions
 
 import (
+	"time"
+
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/httptest"
 	"github.com/gobuffalo/nulls"
@@ -64,6 +66,19 @@ func (as *ActionSuite) createCustomer(name string, tenantID uuid.UUID, createdBy
 }
 func (as *ActionSuite) createOrder(serialNumber string, orderStatus models.OrderStatus, tenantID uuid.UUID, createdBy uuid.UUID, customerID uuid.UUID) *models.Order {
 	newOrder := &models.Order{SerialNumber: serialNumber, Status: orderStatus.String(), TenantID: tenantID, CreatedBy: createdBy, CustomerID: customerID}
+	newOrder.ContainterStatus = nulls.NewString("Custom Status")
+	newOrder.Docco = nulls.NewTime(time.Now().Add(time.Duration(time.Hour * time.Duration(1))))
+	newOrder.Eta = nulls.NewTime(time.Now().Add(time.Duration(time.Hour * time.Duration(3))))
+	newOrder.Erd = nulls.NewTime(time.Now().Add(time.Duration(time.Hour * time.Duration(4))))
+	newOrder.Shipline = nulls.NewString("Costco")
+	newOrder.ShipmentCount = 2 //readonly, not persisted
+	newOrder.PickupCharges = nulls.NewInt(0)
+	newOrder.DropoffCharges = nulls.NewInt(1)
+	newOrder.PickupCost = nulls.NewInt(1000)
+	newOrder.DropoffCost = nulls.NewInt(10000)
+	newOrder.SoNumber = nulls.NewString("SO123")
+	newOrder.Rld = nulls.NewString("RLD")
+	newOrder.Type = models.ShipmentTypeInbound.String()
 	v, err := as.DB.ValidateAndCreate(newOrder)
 	as.Nil(err)
 	as.Equal(0, len(v.Errors))

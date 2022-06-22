@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 13.1 (Debian 13.1-1.pgdg100+1)
--- Dumped by pg_dump version 13.1
+-- Dumped by pg_dump version 13.7
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -66,7 +66,22 @@ CREATE TABLE public.orders (
     serial_number character varying(255) NOT NULL,
     status character varying(255) NOT NULL,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    carrier_id uuid,
+    terminal_id uuid,
+    eta timestamp without time zone,
+    so_number character varying(255),
+    shipline character varying(255),
+    pickup_charges integer,
+    pickup_cost integer,
+    dropoff_charges integer,
+    dropoff_cost integer,
+    rld character varying(255),
+    erd timestamp without time zone,
+    docco timestamp without time zone,
+    lfd timestamp without time zone,
+    container_status character varying(255),
+    type character varying(255)
 );
 
 

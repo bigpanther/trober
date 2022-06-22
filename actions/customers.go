@@ -3,7 +3,6 @@ package actions
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/models"
@@ -22,7 +21,7 @@ import (
 // GET /customers
 func customersList(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
-	customerName := strings.Trim(c.Param("name"), " '")
+	customerName := c.Param("name")
 
 	customers := &models.Customers{}
 
@@ -33,7 +32,7 @@ func customersList(c buffalo.Context) error {
 		if len(customerName) < 2 {
 			return c.Render(http.StatusOK, r.JSON(customers))
 		}
-		q = q.Where("name ILIKE ?", fmt.Sprintf("%s%%", customerName))
+		q = q.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", customerName))
 	}
 	// Retrieve all Customers from the DB
 	if err := q.Scope(restrictedScope(c)).Order(orderByCreatedAtDesc).All(customers); err != nil {

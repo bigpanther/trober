@@ -3,7 +3,6 @@ package actions
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/models"
@@ -22,7 +21,7 @@ import (
 func terminalsList(c buffalo.Context) error {
 
 	tx := c.Value("tx").(*pop.Connection)
-	terminalName := strings.Trim(c.Param("name"), " '")
+	terminalName := c.Param("name")
 	terminalType := c.Param("type")
 	terminals := &models.Terminals{}
 
@@ -34,7 +33,7 @@ func terminalsList(c buffalo.Context) error {
 		if len(terminalName) < 2 {
 			return c.Render(http.StatusOK, r.JSON(terminals))
 		}
-		q = q.Where("name ILIKE ?", fmt.Sprintf("%s%%", terminalName))
+		q = q.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", terminalName))
 	}
 	if terminalType != "" {
 		q = q.Where("type = ?", terminalType)

@@ -10,10 +10,11 @@ func (ms *ModelSuite) TestOrder() {
 		order                    *Order
 		expectedValidationErrors int
 	}{
-		{&Order{}, 2},
-		{&Order{Status: "invalid"}, 2},
-		{&Order{SerialNumber: "ORD0001"}, 1},
-		{&Order{SerialNumber: "ORD0001", Status: OrderStatusAccepted.String()}, 0},
+		{&Order{}, 3},
+		{&Order{Status: "invalid"}, 3},
+		{&Order{SerialNumber: "ORD0001"}, 2},
+		{&Order{SerialNumber: "ORD0001", Status: OrderStatusAccepted.String()}, 1},
+		{&Order{SerialNumber: "ORD0001", Status: OrderStatusAccepted.String(), Type: ShipmentTypeInbound.String()}, 0},
 	}
 	for i, test := range tests {
 		ms.T().Run(fmt.Sprint(i), func(t *testing.T) {

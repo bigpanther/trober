@@ -1495,17 +1495,64 @@ components:
         customer_id:
           type: string
           format: uuid
+        carrier_id:
+          type: string
+          format: uuid
+        terminal_id:
+          type: string
+          format: uuid
         serial_number:
           nullable: false
           type: string
           minLength: 7
           maxLength: 25
+        eta:
+          type: string
+          format: date-time
+        so_number:
+          type: string
+        shipline:
+          type: string
+        pickup_charges:
+          type: int
+        pickup_cost:
+          type: int
+        dropoff_charges:
+          type: int
+        dropoff_cost:
+          type: int
+        rld:
+          type: string
+        erd:
+          type: string
+          format: date-time
+        docco:
+          type: string
+          format: date-time
+        lfd:
+          type: string
+          format: date-time
+        container_status:
+          type: string
+        shipment_count:
+          type: int
+          readOnly: true
         status:
           nullable: false
           $ref: "#/components/schemas/OrderStatus"
+        type:
+          $ref: "#/components/schemas/ShipmentType"
         customer:
           nullable: false
           $ref: "#/components/schemas/Customer"
+        carrier:
+          nullable: true
+          $ref: "#/components/schemas/Carrier"
+        terminal:
+          nullable: true
+          $ref: "#/components/schemas/Terminal"
+        Shipments:
+          $ref: "#/components/schemas/Shipments"
       description: A customer order that is being processed
     TenantType:
       type: string

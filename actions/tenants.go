@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/bigpanther/trober/models"
@@ -29,7 +28,7 @@ var errNotFound = errors.New(http.StatusText(http.StatusNotFound))
 // GET /tenants
 func tenantsList(c buffalo.Context) error {
 	tx := c.Value("tx").(*pop.Connection)
-	tenantName := strings.Trim(c.Param("name"), " '")
+	tenantName := c.Param("name")
 	tenantType := c.Param("type")
 	tenants := &models.Tenants{}
 
@@ -40,7 +39,7 @@ func tenantsList(c buffalo.Context) error {
 		if len(tenantName) < 2 {
 			return c.Render(http.StatusOK, r.JSON(tenants))
 		}
-		q = q.Where("name ILIKE ?", fmt.Sprintf("%s%%", tenantName))
+		q = q.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", tenantName))
 	}
 	if tenantType != "" {
 		q = q.Where("type = ?", tenantType)

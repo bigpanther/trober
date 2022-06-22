@@ -45,6 +45,10 @@ func (as *ActionSuite) Test_OrdersList() {
 				as.Equal(test.orderCount, len(orders))
 				if test.orderCount > 0 {
 					as.Equal(newOrder.SerialNumber, orders[0].SerialNumber)
+					as.Equal("SO123", orders[0].SoNumber.String)
+					as.Equal(newOrder.Erd.Time.UTC(), orders[0].Erd.Time.UTC())
+					as.Equal(0, orders[0].ShipmentCount)
+					as.Equal(10000, orders[0].DropoffCost.Int)
 				}
 			}
 		})
@@ -149,7 +153,26 @@ func (as *ActionSuite) Test_OrdersShow() {
 		})
 	}
 }
-
+func (as *ActionSuite) Test_OrdersCreateWithShipments() {
+	as.LoadFixture("Tenant bootstrap")
+	var firmino = as.getLoggedInUser("firmino")
+	efaLiv := as.getCustomer("EFA Liv")
+	newOrder := models.Order{SerialNumber: "orderWithShipments", Status: models.OrderStatusAccepted.String(), TenantID: firmino.TenantID, CustomerID: efaLiv.ID}
+	newOrder.Shipments = []models.Shipment{
+		{
+			SerialNumber: "123",
+			TenantID:     firmino.TenantID,
+			Status:       string(models.ShipmentStatusUnassigned),
+			Type:         string(models.ShipmentTypeInbound),
+		},
+	}
+	req := as.setupRequest(firmino, "/orders")
+	res := req.Post(newOrder)
+	as.Equal(http.StatusCreated, res.Code)
+	var order = models.Order{}
+	res.Bind(&order)
+	as.Equal(1, order.ShipmentCount)
+}
 func (as *ActionSuite) Test_OrdersCreate() {
 	as.LoadFixture("Tenant bootstrap")
 	var tests = []struct {
@@ -262,7 +285,7 @@ func (as *ActionSuite) Test_OrdersDestroy() {
 	for _, test := range tests {
 		as.T().Run(test.username, func(t *testing.T) {
 			var name = fmt.Sprintf("order%s", test.username)
-			neworder := &models.Order{SerialNumber: name, Status: models.OrderStatusOpen.String(), TenantID: firmino.TenantID, CustomerID: customer.ID, CreatedBy: firmino.ID}
+			neworder := &models.Order{SerialNumber: name, Status: models.OrderStatusOpen.String(), TenantID: firmino.TenantID, CustomerID: customer.ID, CreatedBy: firmino.ID, Type: string(models.ShipmentTypeInbound)}
 			v, err := as.DB.ValidateAndCreate(neworder)
 			as.Nil(err)
 			as.Equal(0, len(v.Errors))

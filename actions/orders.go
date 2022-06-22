@@ -9,6 +9,7 @@ import (
 	"github.com/bigpanther/trober/models"
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 )
 
 // Following naming logic is implemented in Buffalo:
@@ -83,6 +84,11 @@ func ordersShow(c buffalo.Context) error {
 		return c.Error(http.StatusNotFound, err)
 	}
 
+	shipmentsCount, err := shipmentsCount(c, tx, order.ID)
+	if err != nil {
+		return err
+	}
+	order.ShipmentCount = shipmentsCount
 	return c.Render(http.StatusOK, r.JSON(order))
 
 }
@@ -104,6 +110,9 @@ func ordersCreate(c buffalo.Context) error {
 	order.Status = models.OrderStatusOpen.String()
 	order.TenantID = loggedInUser.TenantID
 	order.CreatedBy = loggedInUser.ID
+	if order.Type == "" {
+		order.Type = models.ShipmentTypeInbound.String()
+	}
 
 	tx := c.Value("tx").(*pop.Connection)
 	if loggedInUser.IsCustomer() {
@@ -111,8 +120,15 @@ func ordersCreate(c buffalo.Context) error {
 	} else if err := checkCustomerID(c, tx, loggedInUser, order); err != nil {
 		return c.Error(http.StatusBadRequest, err)
 	}
-
-	verrs, err := tx.ValidateAndCreate(order)
+	if err := checkCarrierID(c, tx, loggedInUser, order.CarrierID); err != nil {
+		return c.Error(http.StatusBadRequest, err)
+	}
+	for i := range order.Shipments {
+		order.Shipments[i].TenantID = order.TenantID
+		order.Shipments[i].Type = order.Type
+		order.Shipments[i].CreatedBy = loggedInUser.ID
+	}
+	verrs, err := tx.Eager().ValidateAndCreate(order)
 	if err != nil {
 		return err
 	}
@@ -120,7 +136,11 @@ func ordersCreate(c buffalo.Context) error {
 	if verrs.HasAny() {
 		return c.Render(http.StatusUnprocessableEntity, r.JSON(verrs))
 	}
-
+	shipmentsCount, err := shipmentsCount(c, tx, order.ID)
+	if err != nil {
+		return err
+	}
+	order.ShipmentCount = shipmentsCount
 	return c.Render(http.StatusCreated, r.JSON(order))
 
 }
@@ -142,8 +162,22 @@ func ordersUpdate(c buffalo.Context) error {
 
 		return err
 	}
-	if newOrder.SerialNumber != order.SerialNumber || newOrder.Status != order.Status {
+	if newOrder.SerialNumber != order.SerialNumber || newOrder.Status != order.Status || newOrder.Eta != order.Eta || order.Docco != newOrder.Docco || order.ContainterStatus != newOrder.ContainterStatus || order.CarrierID != newOrder.CarrierID || order.TerminalID != newOrder.TerminalID || order.DropoffCharges != newOrder.DropoffCharges || order.DropoffCost != newOrder.DropoffCost || order.PickupCharges != newOrder.PickupCharges || order.PickupCost != newOrder.PickupCost || order.Rld != newOrder.Rld || order.Shipline != newOrder.Shipline || order.Erd != newOrder.Erd || order.Lfd != newOrder.Lfd || order.SoNumber != newOrder.SoNumber {
 		order.UpdatedAt = time.Now().UTC()
+		order.Eta = newOrder.Eta
+		order.Docco = newOrder.Docco
+		order.ContainterStatus = newOrder.ContainterStatus
+		order.CarrierID = newOrder.CarrierID
+		order.TerminalID = newOrder.TerminalID
+		order.DropoffCharges = newOrder.DropoffCharges
+		order.DropoffCost = newOrder.DropoffCost
+		order.PickupCharges = newOrder.PickupCharges
+		order.PickupCost = newOrder.PickupCost
+		order.Rld = newOrder.Rld
+		order.Shipline = newOrder.Shipline
+		order.Erd = newOrder.Erd
+		order.Lfd = newOrder.Lfd
+		order.SoNumber = newOrder.SoNumber
 		order.SerialNumber = newOrder.SerialNumber
 		order.Status = newOrder.Status
 	} else {
@@ -187,4 +221,12 @@ func checkCustomerID(c buffalo.Context, tx *pop.Connection, loggedInUser *models
 		return errors.New("invalid customer association")
 	}
 	return nil
+}
+func shipmentsCount(c buffalo.Context, tx *pop.Connection, orderID uuid.UUID) (int, error) {
+	shipmentsCount, err := tx.Scope(restrictedScope(c)).Where("order_id = ?", orderID).Count(&models.Shipments{})
+	if err != nil {
+		c.Logger().Errorf("error retrieving shipment count for order: %v\n", err)
+		return 0, err
+	}
+	return shipmentsCount, err
 }
